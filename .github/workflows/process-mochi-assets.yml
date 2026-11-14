@@ -1,0 +1,52 @@
+name: Process Mochi Animation Assets
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "public/assets/aistudio/mochi_*.zip"
+      - "scripts/process_mochi_assets.py"
+      - ".github/workflows/process-mochi-assets.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mochi-asset-processing
+  cancel-in-progress: false
+
+jobs:
+  process-mochi:
+    name: Validate and generate Mochi assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install image processor
+        run: python -m pip install --upgrade Pillow
+
+      - name: Validate source ZIPs and generate 64x48 frames
+        run: python scripts/process_mochi_assets.py
+
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/assets/mochi
+          if git diff --cached --quiet; then
+            echo "Generated Mochi assets are already up to date."
+          else
+            git commit -m "chore: generate optimized Mochi animation assets"
+            git push
+          fi
