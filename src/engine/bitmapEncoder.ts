@@ -9,6 +9,15 @@ import {
 } from '../types/glyph';
 import { renderGlyphToCanvas } from './glyphRenderer';
 import { getStyleMeta } from './glyphStyles';
+import {
+  CustomUiPixelMap,
+  UI_ASSET_IDS,
+  UiAssetId,
+  UiRenderOptions,
+  UiStyleId,
+} from '../types/uiAsset';
+import { renderUiAssetToCanvas } from './uiAssetRenderer';
+import { getUiAssetMeta, getUiStyleMeta } from './uiAssetStyles';
 
 export type BitmapFormatId =
   | 'image2cpp'
@@ -569,4 +578,299 @@ export function buildImage2CppCode(
 
   return lines.join('\n');
 }
+
+// ============================================================================
+// UI ASSET BITMAP & image2cpp ENCODERS (Variable Dimensions per UI Asset)
+// ============================================================================
+
+export function encodeCanvasToImage2CppBytes(
+  canvas: HTMLCanvasElement,
+  cfg: Image2CppOptions
+): number[] {
+  const width = canvas.width;
+  const height = canvas.height;
+  const img = canvas
+    .getContext('2d', { willReadFrequently: true })!
+    .getImageData(0, 0, width, height).data;
+
+  const isPixelOn = (x: number, y: number): boolean => {
+    if (x < 0 || x >= width || y < 0 || y >= height) return false;
+    const lum = img[(y * width + x) * 4];
+    const lit = lum >= cfg.threshold;
+    return cfg.invertColors ? !lit : lit;
+  };
+
+  const bytes: number[] = [];
+
+  if (cfg.drawMode === 'horizontal-msb' || cfg.drawMode === 'horizontal-lsb') {
+    const bytesPerRow = Math.ceil(width / 8);
+    const lsb = cfg.drawMode === 'horizontal-lsb';
+    for (let y = 0; y < height; y++) {
+      for (let b = 0; b < bytesPerRow; b++) {
+        let byteVal = 0;
+        for (let bit = 0; bit < 8; bit++) {
+          const x = b * 8 + bit;
+          if (isPixelOn(x, y)) {
+            byteVal |= lsb ? 1 << bit : 0x80 >> bit;
+          }
+        }
+        bytes.push(byteVal);
+      }
+    }
+    return bytes;
+  }
+
+  const pages = Math.ceil(height / 8);
+  const lsb = cfg.drawMode === 'vertical-lsb';
+  for (let page = 0; page < pages; page++) {
+    for (let x = 0; x < width; x++) {
+      let byteVal = 0;
+      for (let bit = 0; bit < 8; bit++) {
+        const y = page * 8 + bit;
+        if (isPixelOn(x, y)) {
+          byteVal |= lsb ? 1 << bit : 0x80 >> bit;
+        }
+      }
+      bytes.push(byteVal);
+    }
+  }
+  return bytes;
+}
+
+export function buildUiImage2CppCode(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap,
+  cfg: Image2CppOptions,
+  targetAssetIds: readonly UiAssetId[] = UI_ASSET_IDS
+): string {
+  const styleMeta = getUiStyleMeta(styleId);
+  const safePrefix =
+    cfg.prefix.replace(/[^a-zA-Z0-9_]/g, '_').replace(/^(\d)/, '_$1') ||
+    'ui_bitmap';
+
+  const modeLabel: Record<Image2CppDrawMode, string> = {
+    'horizontal-msb': 'Horizontal - 1 bit per pixel (MSB first / Adafruit GFX)',
+    'horizontal-lsb': 'Horizontal - 1 bit per pixel (LSB first / U8g2 XBM)',
+    'vertical-lsb': 'Vertical - 1 bit per pixel (LSB top / SSD1306 Page)',
+    'vertical-msb': 'Vertical - 1 bit per pixel (MSB top)',
+  };
+
+  const lines: string[] = [];
+
+  if (cfg.outputStyle === 'micropython') {
+    lines.push(`# ChronoGlyph Studio — UI Asset image2cpp MicroPython Pack`);
+    lines.push(`# UI Style: ${styleMeta.name} (${styleMeta.categoryLabel})`);
+    lines.push(`# Mode: ${modeLabel[cfg.drawMode]}`);
+    lines.push(``);
+    lines.push(`${safePrefix}_ui = {`);
+  } else if (cfg.outputStyle !== 'plain-bytes') {
+    lines.push(`// ChronoGlyph Studio — Smartwatch UI Asset image2cpp Bitmap Code`);
+    lines.push(`// UI Style: ${styleMeta.name} (${styleMeta.categoryLabel})`);
+    lines.push(`// Draw mode: ${modeLabel[cfg.drawMode]}`);
+    lines.push(`// Invert: ${cfg.invertColors ? 'Yes (Black=1, White=0)' : 'No (White=1, Black=0)'}`);
+    lines.push(``);
+  }
+
+  const varNames: string[] = [];
+  const bytesPerLine = 16;
+  let totalBytes = 0;
+
+  targetAssetIds.forEach((assetId, idx) => {
+    const assetMeta = getUiAssetMeta(assetId);
+    const safeAsset = assetId.replace(/[^a-zA-Z0-9]/g, '_');
+    const varName = `${safePrefix}_${safeAsset}`;
+    varNames.push(varName);
+
+    const custom = customMap[styleId]?.[assetId] ?? null;
+    const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+    const bytes = encodeCanvasToImage2CppBytes(canvas, cfg);
+    totalBytes += bytes.length;
+
+    const hexList = bytes.map(
+      (b) => `0x${b.toString(16).padStart(2, '0').toLowerCase()}`
+    );
+
+    const formattedRows: string[] = [];
+    for (let i = 0; i < hexList.length; i += bytesPerLine) {
+      const slice = hexList.slice(i, i + bytesPerLine).join(', ');
+      formattedRows.push(`  ${slice}${i + bytesPerLine < hexList.length ? ',' : ''}`);
+    }
+
+    if (cfg.outputStyle === 'arduino-progmem') {
+      lines.push(`// '${assetId}' (${assetMeta.name}), ${assetMeta.width}x${assetMeta.height}px (${bytes.length} bytes)`);
+      lines.push(`const unsigned char ${varName} [] PROGMEM = {`);
+      lines.push(...formattedRows);
+      lines.push(`};`);
+      lines.push(``);
+    } else if (cfg.outputStyle === 'uint8-std') {
+      lines.push(`// '${assetId}' (${assetMeta.name}), ${assetMeta.width}x${assetMeta.height}px (${bytes.length} bytes)`);
+      lines.push(`static const uint8_t ${varName}[${bytes.length}] = {`);
+      lines.push(...formattedRows);
+      lines.push(`};`);
+      lines.push(``);
+    } else if (cfg.outputStyle === 'plain-bytes') {
+      lines.push(`// '${assetId}' (${assetMeta.width}x${assetMeta.height}px, ${bytes.length} bytes)`);
+      lines.push(...formattedRows.map((r) => r.trimStart()));
+      if (idx < targetAssetIds.length - 1) lines.push(``);
+    } else if (cfg.outputStyle === 'micropython') {
+      lines.push(`    "${assetId}": {"w": ${assetMeta.width}, "h": ${assetMeta.height}, "data": bytes([`);
+      for (let i = 0; i < hexList.length; i += bytesPerLine) {
+        const slice = hexList.slice(i, i + bytesPerLine).join(', ');
+        lines.push(`        ${slice}${i + bytesPerLine < hexList.length ? ',' : ''}`);
+      }
+      lines.push(`    ])}${idx < targetAssetIds.length - 1 ? ',' : ''}`);
+    }
+  });
+
+  if (cfg.outputStyle === 'micropython') {
+    lines.push(`}`);
+  } else if (cfg.includeAllArray && cfg.outputStyle !== 'plain-bytes') {
+    if (cfg.outputStyle === 'arduino-progmem') {
+      lines.push(`// Array of all UI bitmaps. (Total PROGMEM bytes = ${totalBytes})`);
+      lines.push(`const int ${safePrefix}_allArray_LEN = ${varNames.length};`);
+      lines.push(`const unsigned char* ${safePrefix}_allArray[${varNames.length}] = {`);
+      lines.push(`  ${varNames.join(',\n  ')}`);
+      lines.push(`};`);
+    } else {
+      lines.push(`static const uint8_t* const ${safePrefix}_allArray[${varNames.length}] = {`);
+      lines.push(`  ${varNames.join(',\n  ')}`);
+      lines.push(`};`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+export function buildUiCL8Header(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+): string {
+  const styleMeta = getUiStyleMeta(styleId);
+  const safeId = styleId.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+  const lines: string[] = [
+    `/*`,
+    ` * ChronoGlyph Studio — Smartwatch UI Asset Firmware Header (8-bit L8 OLED)`,
+    ` * UI Style: ${styleMeta.name} (${styleMeta.categoryLabel})`,
+    ` * Assets: ${UI_ASSET_IDS.length} UI icons & widgets (#FFFFFF on #000000)`,
+    ` */`,
+    `#ifndef CHRONOGLYPH_UI_${safeId}_L8_H`,
+    `#define CHRONOGLYPH_UI_${safeId}_L8_H`,
+    ``,
+    `#include <stdint.h>`,
+    ``,
+  ];
+
+  UI_ASSET_IDS.forEach((assetId) => {
+    const assetMeta = getUiAssetMeta(assetId);
+    const safeAsset = assetId.replace(/[^a-zA-Z0-9]/g, '_');
+    const custom = customMap[styleId]?.[assetId] ?? null;
+    const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+    const img = canvas.getContext('2d', { willReadFrequently: true })!.getImageData(
+      0,
+      0,
+      assetMeta.width,
+      assetMeta.height
+    ).data;
+
+    lines.push(`/* ${assetMeta.name}: ${assetMeta.width}x${assetMeta.height} px */`);
+    lines.push(`static const uint8_t ui_${safeAsset}[${assetMeta.width * assetMeta.height}] = {`);
+    for (let y = 0; y < assetMeta.height; y++) {
+      const rowHex: string[] = [];
+      for (let x = 0; x < assetMeta.width; x++) {
+        const val = img[(y * assetMeta.width + x) * 4];
+        rowHex.push(`0x${val.toString(16).padStart(2, '0').toUpperCase()}`);
+      }
+      lines.push(`  ${rowHex.join(', ')}${y < assetMeta.height - 1 ? ',' : ''}`);
+    }
+    lines.push(`};`);
+    lines.push(``);
+  });
+
+  lines.push(`#endif /* CHRONOGLYPH_UI_${safeId}_L8_H */`);
+  return lines.join('\n');
+}
+
+export function buildUiCRgb565Header(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+): string {
+  const styleMeta = getUiStyleMeta(styleId);
+  const safeId = styleId.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+  const lines: string[] = [
+    `/*`,
+    ` * ChronoGlyph Studio — Smartwatch UI Asset RGB565 Header`,
+    ` * UI Style: ${styleMeta.name} (${styleMeta.categoryLabel})`,
+    ` */`,
+    `#ifndef CHRONOGLYPH_UI_${safeId}_RGB565_H`,
+    `#define CHRONOGLYPH_UI_${safeId}_RGB565_H`,
+    ``,
+    `#include <stdint.h>`,
+    ``,
+  ];
+
+  UI_ASSET_IDS.forEach((assetId) => {
+    const assetMeta = getUiAssetMeta(assetId);
+    const safeAsset = assetId.replace(/[^a-zA-Z0-9]/g, '_');
+    const custom = customMap[styleId]?.[assetId] ?? null;
+    const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+    const img = canvas.getContext('2d', { willReadFrequently: true })!.getImageData(
+      0,
+      0,
+      assetMeta.width,
+      assetMeta.height
+    ).data;
+
+    lines.push(`/* ${assetMeta.name}: ${assetMeta.width}x${assetMeta.height} px */`);
+    lines.push(`static const uint16_t ui_rgb565_${safeAsset}[${assetMeta.width * assetMeta.height}] = {`);
+    for (let y = 0; y < assetMeta.height; y++) {
+      const rowWords: string[] = [];
+      for (let x = 0; x < assetMeta.width; x++) {
+        const lum = img[(y * assetMeta.width + x) * 4];
+        const r5 = (lum >> 3) & 0x1f;
+        const g6 = (lum >> 2) & 0x3f;
+        const b5 = (lum >> 3) & 0x1f;
+        const rgb565 = (r5 << 11) | (g6 << 5) | b5;
+        rowWords.push(`0x${rgb565.toString(16).padStart(4, '0').toUpperCase()}`);
+      }
+      lines.push(`  ${rowWords.join(', ')}${y < assetMeta.height - 1 ? ',' : ''}`);
+    }
+    lines.push(`};`);
+    lines.push(``);
+  });
+
+  lines.push(`#endif /* CHRONOGLYPH_UI_${safeId}_RGB565_H */`);
+  return lines.join('\n');
+}
+
+export function buildUiAsciiBitPreview(
+  assetId: UiAssetId,
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+): string {
+  const assetMeta = getUiAssetMeta(assetId);
+  const custom = customMap[styleId]?.[assetId] ?? null;
+  const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+  const img = canvas.getContext('2d', { willReadFrequently: true })!.getImageData(
+    0,
+    0,
+    assetMeta.width,
+    assetMeta.height
+  ).data;
+
+  const rows: string[] = [];
+  for (let y = 0; y < assetMeta.height; y++) {
+    let row = '';
+    for (let x = 0; x < assetMeta.width; x++) {
+      const lum = img[(y * assetMeta.width + x) * 4];
+      row += lum >= options.threshold ? '█' : '·';
+    }
+    rows.push(`${y.toString().padStart(2, '0')} ${row}`);
+  }
+  return rows.join('\n');
+}
+
 

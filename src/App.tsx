@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileArchive } from 'lucide-react';
+import { FileArchive, Hash, LayoutGrid } from 'lucide-react';
 import {
   CustomPixelMap,
   GlyphChar,
@@ -7,15 +7,28 @@ import {
   StyleCategory,
   StyleId,
 } from './types/glyph';
+import {
+  CustomUiPixelMap,
+  UiAssetId,
+  UiRenderOptions,
+  UiStyleCategory,
+  UiStyleId,
+} from './types/uiAsset';
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
-import { getStyleMeta } from './engine/glyphStyles';
+import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
+import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
+import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
 import {
   downloadCHeader,
   downloadSingleGlyphPng,
+  downloadSingleUiAssetPng,
   downloadSpriteSheetPng,
+  downloadUiSpriteSheetPng,
   exportAllStylesZip,
+  exportAllUiStylesZip,
   exportCategoryZip,
   exportStyleZip,
+  exportUiStyleZip,
 } from './engine/exportEngine';
 import { StyleSidebar } from './components/StyleSidebar';
 import { TuningControls } from './components/TuningControls';
@@ -24,8 +37,20 @@ import { WatchPreview } from './components/WatchPreview';
 import { PixelInspector } from './components/PixelInspector';
 import { BitmapGeneratorPanel } from './components/BitmapGeneratorPanel';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
+import { UiStyleSidebar } from './components/UiStyleSidebar';
+import { UiTuningControls } from './components/UiTuningControls';
+import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
+import { UiWatchPreview } from './components/UiWatchPreview';
+import { UiPixelInspector } from './components/UiPixelInspector';
+import { UiBitmapGeneratorPanel } from './components/UiBitmapGeneratorPanel';
+import { UiComparisonMatrix } from './components/UiComparisonMatrix';
+
+type GeneratorMode = 'numerals' | 'ui-assets';
 
 export default function App() {
+  const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
+
+  // === Numeral Generator State ===
   const [selectedCategory, setSelectedCategory] = useState<StyleCategory>('all');
   const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('ronin-katana-split');
   const [selectedChar, setSelectedChar] = useState<GlyphChar>('8');
@@ -35,8 +60,19 @@ export default function App() {
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
 
-  const activeStyleMeta = getStyleMeta(selectedStyleId);
+  // === UI Asset Generator State ===
+  const [selectedUiCategory, setSelectedUiCategory] = useState<UiStyleCategory>('all');
+  const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
+  const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
+  const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
+  const [customUiMap, setCustomUiMap] = useState<CustomUiPixelMap>({});
+  const [isExportingUi, setIsExportingUi] = useState(false);
+  const [isExportingAllUi, setIsExportingAllUi] = useState(false);
 
+  const activeStyleMeta = getStyleMeta(selectedStyleId);
+  const activeUiStyleMeta = getUiStyleMeta(selectedUiStyleId);
+
+  // === Numeral Handlers ===
   const handleSelectStyle = (id: StyleId) => {
     setSelectedStyleId(id);
     const meta = getStyleMeta(id);
@@ -94,6 +130,58 @@ export default function App() {
     }
   };
 
+  // === UI Asset Handlers ===
+  const handleSelectUiStyle = (id: UiStyleId) => {
+    setSelectedUiStyleId(id);
+    const meta = getUiStyleMeta(id);
+    setUiOptions((prev) => ({
+      ...prev,
+      pixelSnap: meta.recommendedMode === 'pixel-snap',
+    }));
+  };
+
+  const handleUpdateCustomUiPixels = (
+    assetId: UiAssetId,
+    pixels: Uint8ClampedArray
+  ) => {
+    setCustomUiMap((prev) => ({
+      ...prev,
+      [selectedUiStyleId]: {
+        ...(prev[selectedUiStyleId] ?? {}),
+        [assetId]: pixels,
+      },
+    }));
+  };
+
+  const handleResetCustomUiPixels = (assetId: UiAssetId) => {
+    setCustomUiMap((prev) => {
+      const styleMap = { ...(prev[selectedUiStyleId] ?? {}) };
+      delete styleMap[assetId];
+      return {
+        ...prev,
+        [selectedUiStyleId]: styleMap,
+      };
+    });
+  };
+
+  const handleDownloadUiStyleZip = async () => {
+    setIsExportingUi(true);
+    try {
+      await exportUiStyleZip(selectedUiStyleId, uiOptions, customUiMap);
+    } finally {
+      setIsExportingUi(false);
+    }
+  };
+
+  const handleDownloadAllUiZip = async () => {
+    setIsExportingAllUi(true);
+    try {
+      await exportAllUiStylesZip(uiOptions, customUiMap);
+    } finally {
+      setIsExportingAllUi(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#090A0D] text-[#F2F4F8]">
       {/* Strict 3-Zone Top Bar */}
@@ -110,7 +198,7 @@ export default function App() {
             href="#aset-grid"
             className="hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
-            Aset 25×50
+            {generatorMode === 'numerals' ? 'Aset 25×50' : 'Aset UI'}
           </a>
           <a
             href="#simulasi"
@@ -139,160 +227,367 @@ export default function App() {
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            disabled={isExporting}
-            onClick={handleDownloadStyleZip}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
-          >
-            <FileArchive className="w-3.5 h-3.5" />
-            {isExporting ? 'Mengemas...' : 'Unduh ZIP (25×50)'}
-          </button>
+          {generatorMode === 'numerals' ? (
+            <button
+              type="button"
+              disabled={isExporting}
+              onClick={handleDownloadStyleZip}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <FileArchive className="w-3.5 h-3.5" />
+              {isExporting ? 'Mengemas...' : 'Unduh ZIP (25×50)'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={isExportingUi}
+              onClick={handleDownloadUiStyleZip}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <FileArchive className="w-3.5 h-3.5" />
+              {isExportingUi ? 'Mengemas...' : 'Unduh ZIP (Aset UI)'}
+            </button>
+          )}
         </div>
       </header>
 
+      {/* Dedicated Generator Mode Switcher Bar (Separated: Generating Angka vs Generating Asset UI) */}
+      <div className="bg-[#0B0D12] border-b border-white/[0.08] px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+            Pilihan Generating:
+          </span>
+          <div
+            role="tablist"
+            aria-label="Pilihan Mode Generator Aset Smartwatch"
+            className="inline-flex items-center gap-1 p-1 rounded-md bg-black border border-white/[0.08]"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'numerals'}
+              onClick={() => setGeneratorMode('numerals')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'numerals'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <Hash className="w-3.5 h-3.5" />
+              Generator Angka ({GLYPH_STYLES.length} Gaya)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'ui-assets'}
+              onClick={() => setGeneratorMode('ui-assets')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'ui-assets'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Generator Asset UI ({UI_STYLES.length} Gaya)
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-slate-400 font-mono-tabular">
+          {generatorMode === 'numerals' ? (
+            <>
+              <span>Set: 0–9 &amp; : (11 glif)</span>
+              <span aria-hidden="true">·</span>
+              <span>Kanvas: 25×50 px</span>
+            </>
+          ) : (
+            <>
+              <span>Set: {UI_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
+              <span aria-hidden="true">·</span>
+              <span>Palet: #FFFFFF / #000000</span>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Main Studio Shell */}
-      <div id="top" className="flex-1 flex flex-col lg:flex-row">
-        <StyleSidebar
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          selectedStyleId={selectedStyleId}
-          onSelectStyle={handleSelectStyle}
-          options={options}
-        />
-
-        <main className="flex-1 min-w-0 flex flex-col">
-          {/* Active Style Header */}
-          <section className="px-6 py-5 border-b border-white/[0.08] bg-[#0B0D12]">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="max-w-3xl">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-1.5">
-                  <span className="text-sky-400 font-medium">
-                    {activeStyleMeta.categoryLabel}
-                  </span>
-                  <span aria-hidden="true">·</span>
-                  <span>{activeStyleMeta.targetWatches}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="font-mono-tabular">25 × 50 px</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="font-mono-tabular">#FFFFFF / #000000</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                  {activeStyleMeta.name}
-                </h1>
-                <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
-                  {activeStyleMeta.architectureNote}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-white/[0.06]">
-                <div>
-                  <div className="text-[11px] text-slate-400">Karakter</div>
-                  <div className="text-base font-mono-tabular font-semibold text-white">
-                    0–9 &amp; : (11)
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[11px] text-slate-400">Dimensi</div>
-                  <div className="text-base font-mono-tabular font-semibold text-white">
-                    25 × 50 px
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[11px] text-slate-400">Rasio</div>
-                  <div className="text-base font-mono-tabular font-semibold text-white">
-                    1 : 2
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Calibration Toolbar */}
-          <TuningControls
+      {generatorMode === 'numerals' ? (
+        <div id="top" className="flex-1 flex flex-col lg:flex-row">
+          <StyleSidebar
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            selectedStyleId={selectedStyleId}
+            onSelectStyle={handleSelectStyle}
             options={options}
-            onChange={setOptions}
-            onReset={() => setOptions(DEFAULT_RENDER_OPTIONS)}
           />
 
-          {/* Main Workbench Content */}
-          <div className="p-5 sm:p-6 space-y-6">
-            <div id="aset-grid">
-              <AssetSheetGrid
+          <main className="flex-1 min-w-0 flex flex-col">
+            {/* Active Numeral Style Header */}
+            <section className="px-6 py-5 border-b border-white/[0.08] bg-[#0B0D12]">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <span className="text-sky-400 font-medium">
+                      {activeStyleMeta.categoryLabel}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{activeStyleMeta.targetWatches}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">25 × 50 px</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">#FFFFFF / #000000</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    {activeStyleMeta.name}
+                  </h1>
+                  <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
+                    {activeStyleMeta.architectureNote}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-white/[0.06]">
+                  <div>
+                    <div className="text-[11px] text-slate-400">Karakter</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      0–9 &amp; : (11)
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Dimensi</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      25 × 50 px
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Rasio</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      1 : 2
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Calibration Toolbar */}
+            <TuningControls
+              options={options}
+              onChange={setOptions}
+              onReset={() => setOptions(DEFAULT_RENDER_OPTIONS)}
+            />
+
+            {/* Main Numeral Workbench Content */}
+            <div className="p-5 sm:p-6 space-y-6">
+              <div id="aset-grid">
+                <AssetSheetGrid
+                  styleId={selectedStyleId}
+                  options={options}
+                  customMap={customMap}
+                  selectedChar={selectedChar}
+                  onSelectChar={setSelectedChar}
+                  onDownloadGlyph={(ch) =>
+                    downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
+                  }
+                  onDownloadSpriteSheet={() =>
+                    downloadSpriteSheetPng(selectedStyleId, options, customMap)
+                  }
+                  onDownloadCHeader={() =>
+                    downloadCHeader(selectedStyleId, options, customMap)
+                  }
+                  onDownloadStyleZip={handleDownloadStyleZip}
+                  isExporting={isExporting}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                <div id="simulasi" className="xl:col-span-5 flex flex-col">
+                  <WatchPreview
+                    styleId={selectedStyleId}
+                    options={options}
+                    customMap={customMap}
+                  />
+                </div>
+
+                <div id="inspektor" className="xl:col-span-7 flex flex-col">
+                  <PixelInspector
+                    char={selectedChar}
+                    styleId={selectedStyleId}
+                    options={options}
+                    customPixels={customMap[selectedStyleId]?.[selectedChar] ?? null}
+                    onUpdateCustomPixels={handleUpdateCustomPixels}
+                    onResetCustomPixels={handleResetCustomPixels}
+                    onDownloadGlyph={(ch) =>
+                      downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
+                    }
+                  />
+                </div>
+              </div>
+
+              <BitmapGeneratorPanel
                 styleId={selectedStyleId}
                 options={options}
                 customMap={customMap}
                 selectedChar={selectedChar}
                 onSelectChar={setSelectedChar}
-                onDownloadGlyph={(ch) =>
-                  downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
-                }
-                onDownloadSpriteSheet={() =>
-                  downloadSpriteSheetPng(selectedStyleId, options, customMap)
-                }
-                onDownloadCHeader={() =>
-                  downloadCHeader(selectedStyleId, options, customMap)
-                }
                 onDownloadStyleZip={handleDownloadStyleZip}
                 isExporting={isExporting}
               />
+
+              <ComparisonMatrix
+                selectedStyleId={selectedStyleId}
+                onSelectStyle={handleSelectStyle}
+                options={options}
+                onDownloadCyberpunkZip={handleDownloadCyberpunkZip}
+                isExportingCyberpunk={isExportingCyberpunk}
+                onDownloadAllZip={handleDownloadAllZip}
+                isExportingAll={isExportingAll}
+              />
             </div>
+          </main>
+        </div>
+      ) : (
+        <div id="top" className="flex-1 flex flex-col lg:flex-row">
+          <UiStyleSidebar
+            selectedCategory={selectedUiCategory}
+            onSelectCategory={setSelectedUiCategory}
+            selectedStyleId={selectedUiStyleId}
+            onSelectStyle={handleSelectUiStyle}
+            options={uiOptions}
+          />
 
-            {/* 2-Column Watchface Preview & Pixel Inspector */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
-              <div id="simulasi" className="xl:col-span-5 flex flex-col">
-                <WatchPreview
-                  styleId={selectedStyleId}
-                  options={options}
-                  customMap={customMap}
-                />
+          <main className="flex-1 min-w-0 flex flex-col">
+            {/* Active UI Asset Style Header */}
+            <section className="px-6 py-5 border-b border-white/[0.08] bg-[#0B0D12]">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <span className="text-sky-400 font-medium">
+                      {activeUiStyleMeta.categoryLabel}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{activeUiStyleMeta.targetWatches}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">12 Aset UI</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">#FFFFFF / #000000</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    {activeUiStyleMeta.name}
+                  </h1>
+                  <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
+                    {activeUiStyleMeta.architectureNote}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-white/[0.06]">
+                  <div>
+                    <div className="text-[11px] text-slate-400">Koleksi UI</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      {UI_STYLES.length} Gaya
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Elemen / Gaya</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      {UI_ASSET_CATALOG.length} Aset
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Format</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      PNG / BMP / .H
+                    </div>
+                  </div>
+                </div>
               </div>
+            </section>
 
-              <div id="inspektor" className="xl:col-span-7 flex flex-col">
-                <PixelInspector
-                  char={selectedChar}
-                  styleId={selectedStyleId}
-                  options={options}
-                  customPixels={customMap[selectedStyleId]?.[selectedChar] ?? null}
-                  onUpdateCustomPixels={handleUpdateCustomPixels}
-                  onResetCustomPixels={handleResetCustomPixels}
-                  onDownloadGlyph={(ch) =>
-                    downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
+            {/* UI Calibration Toolbar */}
+            <UiTuningControls
+              options={uiOptions}
+              onChange={setUiOptions}
+              onReset={() => setUiOptions(DEFAULT_UI_RENDER_OPTIONS)}
+            />
+
+            {/* Main UI Asset Workbench Content */}
+            <div className="p-5 sm:p-6 space-y-6">
+              <div id="aset-grid">
+                <UiAssetSheetGrid
+                  styleId={selectedUiStyleId}
+                  options={uiOptions}
+                  customMap={customUiMap}
+                  selectedAssetId={selectedUiAssetId}
+                  onSelectAsset={setSelectedUiAssetId}
+                  onDownloadAsset={(id) =>
+                    downloadSingleUiAssetPng(id, selectedUiStyleId, uiOptions, customUiMap)
                   }
+                  onDownloadSpriteSheet={() =>
+                    downloadUiSpriteSheetPng(selectedUiStyleId, uiOptions, customUiMap)
+                  }
+                  onDownloadStyleZip={handleDownloadUiStyleZip}
+                  isExporting={isExportingUi}
                 />
               </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                <div id="simulasi" className="xl:col-span-5 flex flex-col">
+                  <UiWatchPreview
+                    styleId={selectedUiStyleId}
+                    options={uiOptions}
+                    customMap={customUiMap}
+                  />
+                </div>
+
+                <div id="inspektor" className="xl:col-span-7 flex flex-col">
+                  <UiPixelInspector
+                    assetId={selectedUiAssetId}
+                    styleId={selectedUiStyleId}
+                    options={uiOptions}
+                    customPixels={
+                      customUiMap[selectedUiStyleId]?.[selectedUiAssetId] ?? null
+                    }
+                    onUpdateCustomPixels={handleUpdateCustomUiPixels}
+                    onResetCustomPixels={handleResetCustomUiPixels}
+                    onDownloadAsset={(id) =>
+                      downloadSingleUiAssetPng(
+                        id,
+                        selectedUiStyleId,
+                        uiOptions,
+                        customUiMap
+                      )
+                    }
+                  />
+                </div>
+              </div>
+
+              <UiBitmapGeneratorPanel
+                styleId={selectedUiStyleId}
+                options={uiOptions}
+                customMap={customUiMap}
+                selectedAssetId={selectedUiAssetId}
+                onSelectAsset={setSelectedUiAssetId}
+                onDownloadStyleZip={handleDownloadUiStyleZip}
+                isExporting={isExportingUi}
+              />
+
+              <UiComparisonMatrix
+                selectedStyleId={selectedUiStyleId}
+                onSelectStyle={handleSelectUiStyle}
+                options={uiOptions}
+                onDownloadAllUiZip={handleDownloadAllUiZip}
+                isExportingAllUi={isExportingAllUi}
+              />
             </div>
-
-            {/* Bitmap & Firmware Generator for Active Style Package */}
-            <BitmapGeneratorPanel
-              styleId={selectedStyleId}
-              options={options}
-              customMap={customMap}
-              selectedChar={selectedChar}
-              onSelectChar={setSelectedChar}
-              onDownloadStyleZip={handleDownloadStyleZip}
-              isExporting={isExporting}
-            />
-
-            {/* All 27 Styles Comparison & Batch Export */}
-            <ComparisonMatrix
-              selectedStyleId={selectedStyleId}
-              onSelectStyle={handleSelectStyle}
-              options={options}
-              onDownloadCyberpunkZip={handleDownloadCyberpunkZip}
-              isExportingCyberpunk={isExportingCyberpunk}
-              onDownloadAllZip={handleDownloadAllZip}
-              isExportingAll={isExportingAll}
-            />
-          </div>
-        </main>
-      </div>
+          </main>
+        </div>
+      )}
 
       {/* Quiet Studio Footer */}
       <footer className="border-t border-white/[0.08] bg-[#090A0D] px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
-        <span>ChronoGlyph Studio — Generator Aset Angka Smartwatch 25×50px</span>
+        <span>
+          ChronoGlyph Studio — Generator Aset Angka (25×50px) &amp; Aset UI Smartwatch
+        </span>
         <span className="font-mono-tabular">
-          Format Ekspor: PNG · BMP 1b/24b · C Header (.h) · .FNT · .BIN · ZIP
+          Format Ekspor: PNG · BMP 1b/24b · C Header (.h) · image2cpp · ZIP
         </span>
       </footer>
     </div>

@@ -18,6 +18,20 @@ import {
 } from './bitmapEncoder';
 import { renderGlyphToCanvas } from './glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './glyphStyles';
+import {
+  CustomUiPixelMap,
+  UI_ASSET_IDS,
+  UiAssetId,
+  UiRenderOptions,
+  UiStyleId,
+} from '../types/uiAsset';
+import {
+  buildUiCL8Header,
+  buildUiCRgb565Header,
+  buildUiImage2CppCode,
+} from './bitmapEncoder';
+import { renderUiAssetToCanvas } from './uiAssetRenderer';
+import { UI_ASSET_CATALOG, UI_STYLES, getUiAssetMeta, getUiStyleMeta } from './uiAssetStyles';
 
 export function glyphFileName(char: GlyphChar, ext: 'png' | 'bmp' = 'png'): string {
   return char === ':' ? `colon.${ext}` : `${char}.${ext}`;
@@ -342,3 +356,204 @@ export async function exportAllStylesZip(
     `chronoglyph_all_${GLYPH_STYLES.length}_styles_25x50.zip`
   );
 }
+
+// ============================================================================
+// UI ASSET EXPORTERS (PNG / BMP / image2cpp / ZIP)
+// ============================================================================
+
+export async function downloadSingleUiAssetPng(
+  assetId: UiAssetId,
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+) {
+  const meta = getUiAssetMeta(assetId);
+  const custom = customMap[styleId]?.[assetId] ?? null;
+  const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+  const blob = await canvasToPngBlob(canvas);
+  triggerBlobDownload(blob, `${styleId}_${assetId}_${meta.width}x${meta.height}.png`);
+}
+
+export function downloadSingleUiAssetBmp(
+  assetId: UiAssetId,
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap,
+  bitsPerPixel: 1 | 24
+) {
+  const meta = getUiAssetMeta(assetId);
+  const custom = customMap[styleId]?.[assetId] ?? null;
+  const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+  const blob = canvasToBmpBlob(canvas, bitsPerPixel, options.threshold);
+  triggerBlobDownload(
+    blob,
+    `${styleId}_${bitsPerPixel}bit_${assetId}_${meta.width}x${meta.height}.bmp`
+  );
+}
+
+export function buildUiSpriteSheetCanvas(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+): HTMLCanvasElement {
+  const gap = 4;
+  const totalW =
+    UI_ASSET_CATALOG.reduce((acc, a) => acc + a.width, 0) +
+    gap * (UI_ASSET_CATALOG.length - 1);
+  const maxH = Math.max(...UI_ASSET_CATALOG.map((a) => a.height));
+
+  const sheet = document.createElement('canvas');
+  sheet.width = totalW;
+  sheet.height = maxH;
+  const ctx = sheet.getContext('2d')!;
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, totalW, maxH);
+
+  let cursorX = 0;
+  for (const item of UI_ASSET_CATALOG) {
+    const custom = customMap[styleId]?.[item.id] ?? null;
+    const assetCanvas = renderUiAssetToCanvas(item.id, styleId, options, custom);
+    const offsetY = Math.floor((maxH - item.height) / 2);
+    ctx.drawImage(assetCanvas, cursorX, offsetY);
+    cursorX += item.width + gap;
+  }
+
+  return sheet;
+}
+
+export async function downloadUiSpriteSheetPng(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+) {
+  const sheet = buildUiSpriteSheetCanvas(styleId, options, customMap);
+  const blob = await canvasToPngBlob(sheet);
+  triggerBlobDownload(blob, `${styleId}_ui_atlas_${sheet.width}x${sheet.height}.png`);
+}
+
+export function downloadUiSpriteSheetBmp(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap,
+  bitsPerPixel: 1 | 24
+) {
+  const sheet = buildUiSpriteSheetCanvas(styleId, options, customMap);
+  const blob = canvasToBmpBlob(sheet, bitsPerPixel, options.threshold);
+  triggerBlobDownload(
+    blob,
+    `${styleId}_ui_atlas_${sheet.width}x${sheet.height}_${bitsPerPixel}bit.bmp`
+  );
+}
+
+async function populateUiStyleFolder(
+  folder: JSZip,
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+) {
+  const meta = getUiStyleMeta(styleId);
+  const pngFolder = folder.folder('png_assets')!;
+  const bmp24Folder = folder.folder('bmp_24bit')!;
+  const bmp1Folder = folder.folder('bmp_1bit')!;
+  const fwFolder = folder.folder('firmware')!;
+
+  for (const assetId of UI_ASSET_IDS) {
+    const assetMeta = getUiAssetMeta(assetId);
+    const custom = customMap[styleId]?.[assetId] ?? null;
+    const canvas = renderUiAssetToCanvas(assetId, styleId, options, custom);
+    const baseName = `${assetId}_${assetMeta.width}x${assetMeta.height}`;
+
+    pngFolder.file(`${baseName}.png`, await canvasToPngBlob(canvas));
+    bmp24Folder.file(`${baseName}.bmp`, canvasToBmpBlob(canvas, 24, options.threshold));
+    bmp1Folder.file(`${baseName}.bmp`, canvasToBmpBlob(canvas, 1, options.threshold));
+  }
+
+  const sheet = buildUiSpriteSheetCanvas(styleId, options, customMap);
+  pngFolder.file(`ui_atlas_${sheet.width}x${sheet.height}.png`, await canvasToPngBlob(sheet));
+  bmp24Folder.file(
+    `ui_atlas_${sheet.width}x${sheet.height}.bmp`,
+    canvasToBmpBlob(sheet, 24, options.threshold)
+  );
+  bmp1Folder.file(
+    `ui_atlas_${sheet.width}x${sheet.height}_1bit.bmp`,
+    canvasToBmpBlob(sheet, 1, options.threshold)
+  );
+
+  fwFolder.file(
+    'ui_image2cpp_arduino_progmem.h',
+    buildUiImage2CppCode(styleId, options, customMap, {
+      drawMode: 'horizontal-msb',
+      outputStyle: 'arduino-progmem',
+      invertColors: false,
+      prefix: 'ui_bitmap',
+      includeAllArray: true,
+      threshold: options.threshold,
+    })
+  );
+  fwFolder.file(
+    'ui_image2cpp_ssd1306_vertical.h',
+    buildUiImage2CppCode(styleId, options, customMap, {
+      drawMode: 'vertical-lsb',
+      outputStyle: 'arduino-progmem',
+      invertColors: false,
+      prefix: 'ui_oled',
+      includeAllArray: true,
+      threshold: options.threshold,
+    })
+  );
+  fwFolder.file('ui_assets_l8.h', buildUiCL8Header(styleId, options, customMap));
+  fwFolder.file('ui_assets_rgb565.h', buildUiCRgb565Header(styleId, options, customMap));
+
+  folder.file(
+    'manifest.json',
+    JSON.stringify(
+      {
+        uiStyleId: styleId,
+        name: meta.name,
+        category: meta.categoryLabel,
+        colors: { foreground: '#FFFFFF', background: '#000000' },
+        assets: UI_ASSET_CATALOG.map((a) => ({
+          id: a.id,
+          name: a.name,
+          width: a.width,
+          height: a.height,
+          png: `${a.id}_${a.width}x${a.height}.png`,
+          bmp: `${a.id}_${a.width}x${a.height}.bmp`,
+        })),
+        renderOptions: options,
+      },
+      null,
+      2
+    )
+  );
+}
+
+export async function exportUiStyleZip(
+  styleId: UiStyleId,
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+) {
+  const zip = new JSZip();
+  const folder = zip.folder(`${styleId}_ui_pack`)!;
+  await populateUiStyleFolder(folder, styleId, options, customMap);
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  triggerBlobDownload(zipBlob, `chronoglyph_ui_${styleId}_paket_lengkap.zip`);
+}
+
+export async function exportAllUiStylesZip(
+  options: UiRenderOptions,
+  customMap: CustomUiPixelMap
+) {
+  const zip = new JSZip();
+  for (const style of UI_STYLES) {
+    const folder = zip.folder(`${style.category}/${style.id}_ui_pack`)!;
+    await populateUiStyleFolder(folder, style.id, options, customMap);
+  }
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  triggerBlobDownload(
+    zipBlob,
+    `chronoglyph_all_${UI_STYLES.length}_ui_styles_pack.zip`
+  );
+}
+
