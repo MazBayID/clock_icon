@@ -1,0 +1,254 @@
+import { GlyphStyleMeta, StyleCategory } from '../types/glyph';
+
+export const STYLE_CATEGORIES: { id: StyleCategory; label: string }[] = [
+  { id: 'all', label: 'Semua Gaya' },
+  { id: 'modern', label: 'Modern' },
+  { id: 'elegan', label: 'Elegan' },
+  { id: 'teknologi', label: 'Berteknologi' },
+  { id: 'cyberpunk', label: 'Cyberpunk' },
+];
+
+export const GLYPH_STYLES: GlyphStyleMeta[] = [
+  // ================= MODERN (4) =================
+  {
+    id: 'aether-grotesque',
+    name: 'Aether Neo-Grotesque',
+    category: 'modern',
+    categoryLabel: 'Modern',
+    tagline: 'Proporsi Swiss presisi dengan apertur terbuka & jebakan optik',
+    architectureNote:
+      'Geometri super-elips vertikal 1:2 dengan ketebalan batang konstan, terminal horizontal rata, dan keseimbangan piksel optimal pada OLED berkerapatan tinggi.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Flagship AMOLED Minimalis',
+  },
+  {
+    id: 'luminar-fluid',
+    name: 'Luminar Fluid Curve',
+    category: 'modern',
+    categoryLabel: 'Modern',
+    tagline: 'Kurva G2 kontinu yang halus untuk keterbacaan instan saat bergerak',
+    architectureNote:
+      'Ujung sapuan membulat sempurna dengan lengkungan terbuka yang lapang pada angka 3, 5, 6, dan 9 agar cepat terbaca dalam sekilas pandang.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Sport & Wellness Titanium',
+  },
+  {
+    id: 'bauhaus-geo',
+    name: 'Bauhaus Disk Geometry',
+    category: 'modern',
+    categoryLabel: 'Modern',
+    tagline: 'Minimalisme geometris murni terinspirasi desain industri Dieter Rams',
+    architectureNote:
+      'Membangun setiap angka dari kombinasi busur lingkaran murni dan potongan garis tegak lurus tanpa ornamen berlebih untuk estetika modernis ikonik.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Minimalist Design Watch',
+  },
+  {
+    id: 'hyper-kinetic',
+    name: 'Hyper-Kinetic Sport',
+    category: 'modern',
+    categoryLabel: 'Modern',
+    tagline: 'Siluet atletik bertenaga dengan sudut dinamis untuk jam olahraga pro',
+    architectureNote:
+      'Batang tebal berenergi tinggi dengan kemiringan aerodinamis ringan dan ruang dalam lebar agar tetap tajam terbaca saat lari atau bersepeda.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Endurance & Multisport GPS',
+  },
+
+  // ================= ELEGAN (4) =================
+  {
+    id: 'chronos-horology',
+    name: 'Chronos Haute Horology',
+    category: 'elegan',
+    categoryLabel: 'Elegan',
+    tagline: 'Kontras tinggi terinspirasi mekanika horologi Swiss mewah',
+    architectureNote:
+      'Memadukan batang vertikal tegas dengan garis silang tipis elegan, terminal tirus halus, serta penanda titik dua berfaset berlian.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Luxury Dress Smartwatch',
+  },
+  {
+    id: 'monolith-slab',
+    name: 'Monolith Arsitektural',
+    category: 'elegan',
+    categoryLabel: 'Elegan',
+    tagline: 'Siluet blok tinggi berkarakter tegas dengan celah batin mikro',
+    architectureNote:
+      'Mengoptimalkan lebar 25px dengan blok padat berwibawa dan ruang negatif 3px di tengah untuk kesan arsitektural yang kokoh dan abadi.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Ceramic & Sapphire Edition',
+  },
+  {
+    id: 'atelier-stencil',
+    name: 'Atelier Luxury Stencil',
+    category: 'elegan',
+    categoryLabel: 'Elegan',
+    tagline: 'Stensil adibusana horologi dengan jembatan celah presisi tinggi',
+    architectureNote:
+      'Menggabungkan lekuk elegan berstandar butik jam mewah dengan potongan celah stensil diagonal dan horizontal yang memberi ruang bernapas artistik.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Haute Couture & Titanium Gold',
+  },
+  {
+    id: 'obsidian-inline',
+    name: 'Obsidian Double-Line',
+    category: 'elegan',
+    categoryLabel: 'Elegan',
+    tagline: 'Ukiran garis ganda (inline) terinspirasi grafir logam jam klasik',
+    architectureNote:
+      'Setiap batang angka diukir dengan garis rambut hitam 1px di bagian inti, menciptakan efek kilau relief perhiasan mewah di atas layar OLED hitam.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Collector Bespoke Edition',
+  },
+
+  // ================= BERTEKNOLOGI (4) =================
+  {
+    id: 'vektor-hud',
+    name: 'Vektor Aerospace HUD',
+    category: 'teknologi',
+    categoryLabel: 'Berteknologi',
+    tagline: 'Sudut chamfer 45° dengan celah mikro presisi ala kokpit aviasi',
+    architectureNote:
+      'Potongan sudut oktagonal simetris dipadu pemisah struktural 1.2px untuk menciptakan nuansa instrumen penerbangan canggih tanpa mengorbankan legibilitas.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Titanium Tactical & Aviation',
+  },
+  {
+    id: 'kinetik-matrix',
+    name: 'Kinetik Segmented Pro',
+    category: 'teknologi',
+    categoryLabel: 'Berteknologi',
+    tagline: 'Segmen berfaset modern dengan sambungan diagonal berpresisi tinggi',
+    architectureNote:
+      'Evolusi tampilan multi-segmen kelas atas: setiap bilah segmen memiliki ujung meruncing 45° dan celah isolasi hitam pekat untuk efisiensi daya OLED.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Pro Chrono & Hybrid OLED',
+  },
+  {
+    id: 'quantum-dot',
+    name: 'Quantum Micro-Matrix',
+    category: 'teknologi',
+    categoryLabel: 'Berteknologi',
+    tagline: 'Susunan matriks titik micro-LED 5×9 berjarak presisi tinggi',
+    architectureNote:
+      'Merender angka menggunakan kisi 5 kolom × 9 baris nodus micro-LED bulat sempurna di dalam kanvas 25×50px untuk tampilan instrumen teknis ultra-modern.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Industrial Minimal & Telemetry',
+  },
+  {
+    id: 'orbital-dual',
+    name: 'Orbital Dual-Track',
+    category: 'teknologi',
+    categoryLabel: 'Berteknologi',
+    tagline: 'Jalur rel ganda paralel futuristik bergaya instrumen antariksa',
+    architectureNote:
+      'Konstruksi dua garis paralel berjarak seragam dengan kanal tengah gelap, menghadirkan estetika navigasi orbital dan rekayasa kedirgantaraan.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Spacecraft & Tech Flagship',
+  },
+
+  // ================= CYBERPUNK (6) =================
+  {
+    id: 'mecha-katana',
+    name: 'Mecha-Katana Slant',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Kemiringan kinetik 10° dengan ujung tebasan bilah diagonal tajam',
+    architectureNote:
+      'Garis potong miring 35° pada terminal, lekukan takik mekanis pada batang utama, serta titik dua berbentuk bilah kembar agresif.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Cybernetic Streetwear OLED',
+  },
+  {
+    id: 'glitch-2099',
+    name: 'Glitch-Sector 2099',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Pergeseran kanal scanline terkendali dengan takik sinyal distopia',
+    architectureNote:
+      'Lapisan horizontal terbelah celah scanline 1px dengan pergeseran mikro ±1.2px yang dikalibrasi ketat agar seluruh angka 0–9 tetap terbaca tajam di 25×50px.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Neo-Tokyo Cyber Mod Watch',
+  },
+  {
+    id: 'circuit-rail',
+    name: 'Circuit-Rail PCB',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Jalur sirkuit 90°/45° dengan simpul sudut dan nodus terminal',
+    architectureNote:
+      'Dibangun dari rute konduktor PCB sudut 45° lengkap dengan rongga nodus terminal dan titik dua heksagonal untuk estetika perangkat keras futuristik.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Hacker & Hardware Enthusiast',
+  },
+  {
+    id: 'neo-kanji-tech',
+    name: 'Neo-Shibuya Cyber',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Geometri jalanan Neo-Tokyo dengan palang atas berat & kait tajam',
+    architectureNote:
+      'Kontras palang horizontal tebal dengan sudut kait menyiku ala tipografi futuristik Shibuya, memberi bobot visual kuat pada layar OLED gelap.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Urban Cyber & Gaming Watch',
+  },
+  {
+    id: 'holo-scanline',
+    name: 'Holo-CRT Scanline',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Proyeksi hologram bergaris raster CRT dengan bingkai kontur tegas',
+    architectureNote:
+      'Mengiris isi angka secara horizontal menggunakan celah raster 1px berirama seperti proyektor hologram 2088 namun tetap menjaga batas luar tetap utuh.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Retro-Futuristic Cyber OLED',
+  },
+  {
+    id: 'exo-frame-bracket',
+    name: 'Exo-Frame Armored',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Blok zirah eksoskeleton dengan takik sudut diagonal & paku baut',
+    architectureNote:
+      'Struktur berat berbingkai braket mekanis dengan potongan sudut 45° asimetris dan celah ventilasi mikro untuk kesan perangkat tempur cyber.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Rugged Armor Cyber Watch',
+  },
+  {
+    id: 'kurogane-heavy',
+    name: 'Kurogane Cyber Brush',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Kaligrafi mecha tebal berkarakter artistik dengan taji diagonal tajam',
+    architectureNote:
+      'Batang super-tebal terinspirasi poster mecha Neo-Tokyo: menggabungkan lengkungan dalam organik, potongan diagonal tajam pada terminal, dan taji asimetris yang ekspresif.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Artistic Cyber Flagship OLED',
+  },
+  {
+    id: 'synth-blade-bold',
+    name: 'Synth-Blade Sculpted',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Siluet blok tebal yang dibelah retakan bilah diagonal 30° artistik',
+    architectureNote:
+      'Massa geometris tebal dengan pahatan sudut terpangkas dan celah belahan miring 1.4px yang menciptakan dinamika kecepatan tinggi khas desain sampul synth-cyber.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Cyber-Artistic Collector Watch',
+  },
+  {
+    id: 'oni-chrome-brutal',
+    name: 'Oni-Chrome Brutalist',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Brutalisme cyber-deco berat dengan taring sudut & pahatan bertingkat',
+    architectureNote:
+      'Pilar vertikal masif 6px dipadu serif taring tajam dan celah relief bertingkat pada tiap lengkungan untuk kehadiran visual maksimal pada layar smartwatch hitam.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Heavy Statement Cyber Watch',
+  },
+];
+
+export function getStyleMeta(id: string): GlyphStyleMeta {
+  return GLYPH_STYLES.find((s) => s.id === id) ?? GLYPH_STYLES[0];
+}
