@@ -71,9 +71,16 @@ function drawColon(
             styleId === 'chrome-shard-v2' ||
             styleId === 'cyber-stencil-2077' ||
             styleId === 'binary-barcode-cyber' ||
-            styleId === 'vortex-razor-italic'
+            styleId === 'vortex-razor-italic' ||
+            styleId === 'ronin-katana-split' ||
+            styleId === 'subzero-visor' ||
+            styleId === 'tachyon-chevron' ||
+            styleId === 'signal-jammer'
           ? 'slit'
-          : 'round';
+          : styleId === 'volt-arc-surge' ||
+              styleId === 'cyber-gothic-2100'
+            ? 'diamond'
+            : 'round';
 
   const r = Math.max(1.5, 2.2 * options.strokeScale);
   const yTop = box.y0 + box.h * 0.34;
@@ -3231,6 +3238,521 @@ function drawVortexRazorItalic(
 }
 
 // ============================================================================
+// 28. HEX-HIVE CYBORG (Micro-Perforated Honeycomb Armor Texture)
+// ============================================================================
+function drawCyberHexHive(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    const r = Math.max(2.6, 3.2 * options.strokeScale);
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        const px = box.cx + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(box.cx - 0.8, y - 0.8, 1.6, 1.6);
+      ctx.fillStyle = '#FFFFFF';
+    }
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, {
+    ...options,
+    strokeScale: Math.max(options.strokeScale, 1.05),
+  });
+
+  // Carve staggered honeycomb micro-perforations inside interior pixels
+  const img = ctx.getImageData(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT);
+  const d = img.data;
+  const isLit = (x: number, y: number) => {
+    if (x < 0 || x >= GLYPH_WIDTH || y < 0 || y >= GLYPH_HEIGHT) return false;
+    return d[(y * GLYPH_WIDTH + x) * 4] >= 128;
+  };
+  for (let y = 1; y < GLYPH_HEIGHT - 1; y++) {
+    for (let x = 1; x < GLYPH_WIDTH - 1; x++) {
+      // Only perforate interior pixels (keep outer 1px border solid)
+      if (isLit(x - 1, y) && isLit(x + 1, y) && isLit(x, y - 1) && isLit(x, y + 1)) {
+        const isHexHole = (y % 4 === 0 && x % 4 === 2) || (y % 4 === 2 && x % 4 === 0);
+        if (isHexHole) {
+          const idx = (y * GLYPH_WIDTH + x) * 4;
+          d[idx] = 0;
+          d[idx + 1] = 0;
+          d[idx + 2] = 0;
+        }
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// ============================================================================
+// 29. RONIN DUAL-SPLIT (Horizontal Equator Katana Recoil Shift)
+// ============================================================================
+function drawRoninKatanaSplit(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'ronin-katana-split', box, options);
+    return;
+  }
+
+  const tmp = document.createElement('canvas');
+  tmp.width = GLYPH_WIDTH;
+  tmp.height = GLYPH_HEIGHT;
+  const tctx = tmp.getContext('2d')!;
+  tctx.fillStyle = '#000000';
+  tctx.fillRect(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT);
+
+  drawKuroganeHeavy(tctx, char, { ...box, x0: box.x0 + 1, x1: box.x1 - 1, w: box.w - 2 }, options);
+
+  const splitY = Math.round(box.cy);
+  // Top half shifted +1px right, bottom half shifted -1px left with 1.5px black slash gap
+  ctx.drawImage(tmp, 0, 0, GLYPH_WIDTH, splitY - 1, 1, 0, GLYPH_WIDTH, splitY - 1);
+  ctx.drawImage(
+    tmp,
+    0,
+    splitY + 1,
+    GLYPH_WIDTH,
+    GLYPH_HEIGHT - splitY - 1,
+    -1,
+    splitY + 1,
+    GLYPH_WIDTH,
+    GLYPH_HEIGHT - splitY - 1
+  );
+
+  // Clean black equatorial slash line
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, splitY - 1, GLYPH_WIDTH, 2);
+}
+
+// ============================================================================
+// 30. DATASTREAM MATRIX (Vertical Data Rain Columns & Falling Pixels)
+// ============================================================================
+function drawDatastreamRain(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.fillRect(box.cx - 2, y - 3, 4, 3);
+      ctx.fillRect(box.cx - 1, y + 1.5, 2, 2);
+    }
+    return;
+  }
+
+  drawNeoKanjiTech(ctx, char, box, options);
+
+  // Carve rhythmic 1px vertical matrix data dropouts
+  ctx.fillStyle = '#000000';
+  for (let x = Math.round(box.x0) + 3; x < Math.round(box.x1) - 2; x += 4) {
+    ctx.fillRect(x, Math.round(box.y0) + 3, 1, 6);
+    ctx.fillRect(x + 2, Math.round(box.cy) - 4, 1, 8);
+    ctx.fillRect(x, Math.round(box.y1) - 9, 1, 6);
+  }
+  // Falling data trail dots near top/bottom
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(Math.round(box.x0) + 2, Math.round(box.y0) - 2, 1, 1);
+  ctx.fillRect(Math.round(box.x1) - 3, Math.round(box.y1) + 1, 1, 1);
+}
+
+// ============================================================================
+// 31. SUBZERO CYBER VISOR (Heavy Armored Helm with Central Visor Slit)
+// ============================================================================
+function drawSubzeroVisor(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'subzero-visor', box, options);
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, options);
+
+  // Carve futuristic horizontal visor channel across central band
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, Math.round(box.cy) - 1, GLYPH_WIDTH, 1.8);
+
+  // Add visor armored side cheeks
+  ctx.fillStyle = '#FFFFFF';
+  if (char === '0' || char === '8') {
+    ctx.fillRect(Math.round(box.cx) - 2, Math.round(box.cy) - 2, 4, 4);
+  }
+}
+
+// ============================================================================
+// 32. TACHYON CHEVRON (Arrowhead Angled Cyber Flanks)
+// ============================================================================
+function drawTachyonChevron(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'tachyon-chevron', box, options);
+    return;
+  }
+
+  const sw = Math.max(2.2, Math.min(4.8, 3.2 * options.strokeScale));
+  const hw = sw / 2;
+  const l = box.x0 + hw;
+  const r = box.x1 - hw;
+  const t = box.y0 + hw;
+  const b = box.y1 - hw;
+  const cx = box.cx;
+  const cy = box.cy;
+  const arrow = 3.2;
+
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = sw;
+  ctx.lineCap = 'butt';
+  ctx.lineJoin = 'miter';
+
+  switch (char) {
+    case '0':
+      ctx.beginPath();
+      ctx.moveTo(l + 2, t);
+      ctx.lineTo(r - 2, t);
+      ctx.lineTo(r + 1, cy);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(l + 2, b);
+      ctx.lineTo(l - 1, cy);
+      ctx.closePath();
+      ctx.stroke();
+      break;
+    case '1':
+      ctx.beginPath();
+      ctx.moveTo(l + 1, t + 6);
+      ctx.lineTo(cx + 1.5, t);
+      ctx.lineTo(cx + 3, cy);
+      ctx.lineTo(cx + 1.5, b + hw);
+      ctx.moveTo(l + 1, b);
+      ctx.lineTo(r - 1, b);
+      ctx.stroke();
+      break;
+    case '2':
+      ctx.beginPath();
+      ctx.moveTo(l, t + 4);
+      ctx.lineTo(l + arrow, t);
+      ctx.lineTo(r - arrow, t);
+      ctx.lineTo(r, cy - 4);
+      ctx.lineTo(l, cy + 5);
+      ctx.lineTo(l, b);
+      ctx.lineTo(r + hw, b);
+      ctx.stroke();
+      break;
+    case '3':
+      ctx.beginPath();
+      ctx.moveTo(l, t);
+      ctx.lineTo(r - 2, t);
+      ctx.lineTo(r, cy - 3);
+      ctx.lineTo(cx - 2, cy);
+      ctx.lineTo(r, cy + 3);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(l, b);
+      ctx.stroke();
+      break;
+    case '4':
+      ctx.beginPath();
+      ctx.moveTo(r - 2.5, b + hw);
+      ctx.lineTo(r - 1.5, cy);
+      ctx.lineTo(r - 2.5, t);
+      ctx.lineTo(l, cy + 4);
+      ctx.lineTo(r + hw, cy + 4);
+      ctx.stroke();
+      break;
+    case '5':
+      ctx.beginPath();
+      ctx.moveTo(r + hw, t);
+      ctx.lineTo(l + 1, t);
+      ctx.lineTo(l, cy - 1);
+      ctx.lineTo(r - 2, cy - 1);
+      ctx.lineTo(r, cy + 4);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(l, b);
+      ctx.stroke();
+      break;
+    case '6':
+      ctx.beginPath();
+      ctx.moveTo(r - 1, t);
+      ctx.lineTo(l + 2, t);
+      ctx.lineTo(l - 1, cy);
+      ctx.lineTo(l + 2, b);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(r, cy + 3);
+      ctx.lineTo(r - 2, cy - 1.5);
+      ctx.lineTo(l - 0.5, cy - 1.5);
+      ctx.stroke();
+      break;
+    case '7':
+      ctx.beginPath();
+      ctx.moveTo(l - hw, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(cx - 1.5, b + hw);
+      ctx.stroke();
+      break;
+    case '8':
+      ctx.beginPath();
+      ctx.moveTo(l + 2, t);
+      ctx.lineTo(r - 2, t);
+      ctx.lineTo(r, cy - 3);
+      ctx.lineTo(r - 2.5, cy);
+      ctx.lineTo(r, cy + 3);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(l + 2, b);
+      ctx.lineTo(l, cy + 3);
+      ctx.lineTo(l + 2.5, cy);
+      ctx.lineTo(l, cy - 3);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(l + 2.5, cy);
+      ctx.lineTo(r - 2.5, cy);
+      ctx.stroke();
+      break;
+    case '9':
+      ctx.beginPath();
+      ctx.moveTo(l + 1, b);
+      ctx.lineTo(r - 2, b);
+      ctx.lineTo(r + 1, cy);
+      ctx.lineTo(r - 2, t);
+      ctx.lineTo(l + 2, t);
+      ctx.lineTo(l, cy - 3);
+      ctx.lineTo(l + 2, cy + 1.5);
+      ctx.lineTo(r + 0.5, cy + 1.5);
+      ctx.stroke();
+      break;
+  }
+}
+
+// ============================================================================
+// 33. VOLT-ARC SURGE (High-Voltage Lightning Zags & Spark Nodes)
+// ============================================================================
+function drawVoltArcSurge(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'volt-arc-surge', box, options);
+    return;
+  }
+
+  drawVektorHud(ctx, char, box, options);
+
+  // Add electric lightning zig-zag surge notches on vertical flanks
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.moveTo(box.x0, box.cy - 6);
+  ctx.lineTo(box.x0 + 4.5, box.cy - 4);
+  ctx.lineTo(box.x0 + 2.5, box.cy - 2);
+  ctx.lineTo(box.x0 + 5.5, box.cy);
+  ctx.lineTo(box.x0, box.cy + 1.5);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(box.cx - 0.8, box.y0 - 1, 1.6, 2);
+  ctx.fillRect(box.cx - 0.8, box.y1 - 1, 1.6, 2);
+}
+
+// ============================================================================
+// 34. MECHA-RIVET TITAN (Heavy Armored Mech Plate with Corner Rivets)
+// ============================================================================
+function drawMechaRivetPlate(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    const r = Math.max(2.6, 3.2 * options.strokeScale);
+    for (const y of [yTop, yBot]) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(box.cx - r, y - r, r * 2, r * 2);
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(box.cx, y, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, options);
+
+  // Punch crisp mechanical rivet holes at the 4 corners inside white strokes
+  const rivets: [number, number][] = [
+    [box.x0 + 2.5, box.y0 + 2.2],
+    [box.x1 - 2.5, box.y0 + 2.2],
+    [box.x0 + 2.5, box.y1 - 2.2],
+    [box.x1 - 2.5, box.y1 - 2.2],
+  ];
+  const img = ctx.getImageData(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT);
+  const d = img.data;
+  for (const [rx, ry] of rivets) {
+    const px = Math.round(rx);
+    const py = Math.round(ry);
+    if (px >= 0 && px < GLYPH_WIDTH && py >= 0 && py < GLYPH_HEIGHT) {
+      if (d[(py * GLYPH_WIDTH + px) * 4] >= 128) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(px - 0.7, py - 0.7, 1.4, 1.4);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// 35. CYBER-GOTHIC 2100 (Dark Neo-Blackletter Spires & Heavy Pillars)
+// ============================================================================
+function drawCyberGothic2100(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.67;
+    const w = Math.max(2.4, 3.0 * options.strokeScale);
+    const h = w * 1.45;
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.beginPath();
+      ctx.moveTo(box.cx, y - h);
+      ctx.lineTo(box.cx + w, y);
+      ctx.lineTo(box.cx, y + h);
+      ctx.lineTo(box.cx - w, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    return;
+  }
+
+  drawKuroganeHeavy(ctx, char, box, options);
+
+  // Add sharp Gothic spire tips on top-left & bottom-right corners
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(box.x0, box.y0 + 3);
+  ctx.lineTo(box.x0 + 2, box.y0 - 2);
+  ctx.lineTo(box.x0 + 4.5, box.y0 + 2);
+  ctx.closePath();
+  ctx.fill();
+
+  if (char !== '7') {
+    ctx.beginPath();
+    ctx.moveTo(box.x1 - 4.5, box.y1 - 2);
+    ctx.lineTo(box.x1 - 2, box.y1 + 2);
+    ctx.lineTo(box.x1, box.y1 - 3);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// ============================================================================
+// 36. DITHER-PUNK BAYER (Retro-Cyber 2×2 Pixel Dither Shading)
+// ============================================================================
+function drawPixelDitherPunk(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.fillRect(box.cx - 3, y - 3, 6, 4);
+      ctx.fillRect(box.cx - 3, y + 1, 2, 2);
+      ctx.fillRect(box.cx + 1, y + 1, 2, 2);
+    }
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, options);
+
+  // Apply 2x2 Bayer checkerboard dither on the lower/right half of the glyph
+  const img = ctx.getImageData(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT);
+  const d = img.data;
+  for (let y = 0; y < GLYPH_HEIGHT; y++) {
+    for (let x = 0; x < GLYPH_WIDTH; x++) {
+      const idx = (y * GLYPH_WIDTH + x) * 4;
+      if (d[idx] >= 128) {
+        // Keep left/top outer edge solid for crisp readability; dither lower-right body
+        const inDitherZone = y > box.cy - 2 || x > box.cx + 2;
+        if (inDitherZone && (x + y) % 2 === 1) {
+          // Leave 1px top/bottom outline intact
+          const isBottomEdge = y >= Math.round(box.y1) - 1;
+          const isTopEdge = y <= Math.round(box.y0);
+          if (!isBottomEdge && !isTopEdge) {
+            d[idx] = 0;
+            d[idx + 1] = 0;
+            d[idx + 2] = 0;
+          }
+        }
+      }
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+// ============================================================================
+// 37. SIGNAL-JAMMER NOISE (Electronic Warfare Spectrum Teeth & Interference)
+// ============================================================================
+function drawSignalJammer(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'signal-jammer', box, options);
+    return;
+  }
+
+  drawGlitch2099(ctx, char, box, options);
+
+  // Add sharp 1px electronic-warfare spectrum bars at top-right & bottom-left
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(box.x1 - 5, box.y0 - 2, 1, 2);
+  ctx.fillRect(box.x1 - 3, box.y0 - 1, 1, 1);
+  ctx.fillRect(box.x0 + 2, box.y1, 1, 2);
+  ctx.fillRect(box.x0 + 4, box.y1, 1, 1);
+
+  // Extra crisp horizontal jammer interference notch
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, Math.round(box.cy), GLYPH_WIDTH, 1);
+}
+
+// ============================================================================
 // MASTER RENDERER: Strictly 25×50px Pure White on Pure Black
 // ============================================================================
 export function renderGlyphToCanvas(
@@ -3349,6 +3871,36 @@ export function renderGlyphToCanvas(
       break;
     case 'vortex-razor-italic':
       drawVortexRazorItalic(ctx, char, box, options);
+      break;
+    case 'cyber-hex-hive':
+      drawCyberHexHive(ctx, char, box, options);
+      break;
+    case 'ronin-katana-split':
+      drawRoninKatanaSplit(ctx, char, box, options);
+      break;
+    case 'datastream-rain':
+      drawDatastreamRain(ctx, char, box, options);
+      break;
+    case 'subzero-visor':
+      drawSubzeroVisor(ctx, char, box, options);
+      break;
+    case 'tachyon-chevron':
+      drawTachyonChevron(ctx, char, box, options);
+      break;
+    case 'volt-arc-surge':
+      drawVoltArcSurge(ctx, char, box, options);
+      break;
+    case 'mecha-rivet-plate':
+      drawMechaRivetPlate(ctx, char, box, options);
+      break;
+    case 'cyber-gothic-2100':
+      drawCyberGothic2100(ctx, char, box, options);
+      break;
+    case 'pixel-dither-punk':
+      drawPixelDitherPunk(ctx, char, box, options);
+      break;
+    case 'signal-jammer':
+      drawSignalJammer(ctx, char, box, options);
       break;
   }
 

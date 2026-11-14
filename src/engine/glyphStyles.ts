@@ -313,6 +313,116 @@ export const GLYPH_STYLES: GlyphStyleMeta[] = [
     recommendedMode: 'antialiased',
     targetWatches: 'Cyber-Racing & Hyper-Speed OLED',
   },
+  {
+    id: 'cyber-hex-hive',
+    name: 'Hex-Hive Cyborg',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Anyaman zirah cyborg berperforasi mikro ala struktur sarang lebah',
+    architectureNote:
+      'Blok tebal dengan lubang perforasi teratur berpola kisi mikro di dalam batang utama untuk efisiensi OLED dan tekstur zirah sibernetik.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Cyborg Armor OLED Watch',
+  },
+  {
+    id: 'ronin-katana-split',
+    name: 'Ronin Dual-Split',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Siluet terbelah horisontal di ekuator dengan pergeseran katana',
+    architectureNote:
+      'Membelah setiap angka tepat di garis tengah y=25 dengan pergeseran ±1.5px berlawanan arah, menciptakan efek tebasan energi berkecepatan tinggi.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Neo-Ronin Streetwear Watch',
+  },
+  {
+    id: 'datastream-rain',
+    name: 'Datastream Matrix',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Jejak hujan data vertikal dengan piksel jatuh di ujung terminal',
+    architectureNote:
+      'Mengukir celah kolom vertikal tipis 1px dengan titik piksel jatuh berirama ala aliran kode matriks cyberspace.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Matrix Terminal Smartwatch',
+  },
+  {
+    id: 'subzero-visor',
+    name: 'Subzero Cyber Visor',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Siluet helm visor futuristik dengan celah pandang tengah yang tajam',
+    architectureNote:
+      'Bibir atas dan bawah ekstra kokoh membingkai celah visor horizontal di tengah serta garis inti vertikal yang tajam.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Tactical Visor Helmet Watch',
+  },
+  {
+    id: 'tachyon-chevron',
+    name: 'Tachyon Chevron',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Dinding samping meruncing berbentuk mata panah kecepatan cyber',
+    architectureNote:
+      'Mengganti sisi vertikal lurus dengan sudut chevron simetris yang menunjuk ke depan untuk kesan aerodinamis fiksi ilmiah.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Hyper-Velocity Sci-Fi Watch',
+  },
+  {
+    id: 'volt-arc-surge',
+    name: 'Volt-Arc Surge',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Loncatan busur listrik zig-zag dengan nodus percikan energi',
+    architectureNote:
+      'Menyisipkan patahan sudut petir bertegangan tinggi pada batang vertikal serta titik dua berbentuk percikan berlian tajam.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'High-Voltage Cyber Watch',
+  },
+  {
+    id: 'mecha-rivet-plate',
+    name: 'Mecha-Rivet Titan',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Pelat baja mecha berat lengkap dengan lubang paku keling sudut',
+    architectureNote:
+      'Terinspirasi penanda lambung robot tempur raksasa: pelat tebal berlubang rivet presisi di tiap simpul sudut.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Heavy Mecha Titan Watch',
+  },
+  {
+    id: 'cyber-gothic-2100',
+    name: 'Cyber-Gothic 2100',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Fusi artistik blackletter gotik gelap dan tipografi cyber masa depan',
+    architectureNote:
+      'Memadukan pilar vertikal berat dengan puncak jarum gotik runcing dan penanda titik dua berlian runcing khas subkultur cyber-goth.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Dark Cyber-Artistic Edition',
+  },
+  {
+    id: 'pixel-dither-punk',
+    name: 'Dither-Punk Bayer',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Tekstur bayangan dither 2×2 retro-cyberpunk berpresisi piksel',
+    architectureNote:
+      'Tepi kiri-atas solid yang bergradasi ke pola papan catur 1-bit Bayer dither pada sisi kanan-bawah, tampil autentik di mode 1-bit dan image2cpp.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Retro-Cyber Terminal & MIP',
+  },
+  {
+    id: 'signal-jammer',
+    name: 'Signal-Jammer Noise',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Interferensi gelombang frekuensi dengan takik spektrum asimetris',
+    architectureNote:
+      'Menampilkan gerigi spektrum sinyal 1px pada sisi atas-bawah serta garis pemotong interferensi ganda yang terukur tanpa merusak keterbacaan.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Electronic Warfare HUD Watch',
+  },
 ];
 
 export function getStyleMeta(id: string): GlyphStyleMeta {

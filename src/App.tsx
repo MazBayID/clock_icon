@@ -27,7 +27,7 @@ import { ComparisonMatrix } from './components/ComparisonMatrix';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<StyleCategory>('all');
-  const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('chrome-shard-v2');
+  const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('ronin-katana-split');
   const [selectedChar, setSelectedChar] = useState<GlyphChar>('8');
   const [options, setOptions] = useState<GlyphRenderOptions>(DEFAULT_RENDER_OPTIONS);
   const [customMap, setCustomMap] = useState<CustomPixelMap>({});

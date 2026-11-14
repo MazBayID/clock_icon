@@ -33,7 +33,17 @@ export type StyleId =
   | 'cyber-stencil-2077'
   | 'plasma-tube-cyber'
   | 'binary-barcode-cyber'
-  | 'vortex-razor-italic';
+  | 'vortex-razor-italic'
+  | 'cyber-hex-hive'
+  | 'ronin-katana-split'
+  | 'datastream-rain'
+  | 'subzero-visor'
+  | 'tachyon-chevron'
+  | 'volt-arc-surge'
+  | 'mecha-rivet-plate'
+  | 'cyber-gothic-2100'
+  | 'pixel-dither-punk'
+  | 'signal-jammer';
 
 export interface GlyphStyleMeta {
   id: StyleId;
