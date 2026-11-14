@@ -24,7 +24,7 @@ export const StyleSidebar: React.FC<StyleSidebarProps> = ({
       : GLYPH_STYLES.filter((s) => s.category === selectedCategory);
 
   return (
-    <aside className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/[0.08] bg-[#0C0E13] flex flex-col">
+    <aside className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/[0.08] bg-[#0C0E13] flex flex-col lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)]">
       <div className="p-4 border-b border-white/[0.08]">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-white tracking-tight">
@@ -39,12 +39,16 @@ export const StyleSidebar: React.FC<StyleSidebarProps> = ({
         <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap lg:grid lg:grid-cols-2">
           {STYLE_CATEGORIES.map((cat) => {
             const active = selectedCategory === cat.id;
+            const count =
+              cat.id === 'all'
+                ? GLYPH_STYLES.length
+                : GLYPH_STYLES.filter((s) => s.category === cat.id).length;
             return (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => onSelectCategory(cat.id)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md text-left transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-md text-left transition-colors whitespace-nowrap shrink-0 cursor-pointer flex items-center justify-between gap-1.5 ${
                   cat.id === 'all' ? 'col-span-2' : ''
                 } ${
                   active
@@ -52,7 +56,10 @@ export const StyleSidebar: React.FC<StyleSidebarProps> = ({
                     : 'bg-white/[0.03] text-slate-400 border border-white/[0.06] hover:text-white hover:bg-white/[0.06]'
                 }`}
               >
-                {cat.label}
+                <span>{cat.label}</span>
+                <span className="font-mono-tabular text-[11px] opacity-75">
+                  {count}
+                </span>
               </button>
             );
           })}

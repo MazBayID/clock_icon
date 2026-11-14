@@ -305,6 +305,26 @@ export async function exportStyleZip(
   triggerBlobDownload(zipBlob, `chronoglyph_${styleId}_paket_lengkap_25x50.zip`);
 }
 
+export async function exportCategoryZip(
+  category: Exclude<import('../types/glyph').StyleCategory, 'all'>,
+  options: GlyphRenderOptions,
+  customMap: CustomPixelMap
+) {
+  const zip = new JSZip();
+  const styles = GLYPH_STYLES.filter((s) => s.category === category);
+
+  for (const style of styles) {
+    const folder = zip.folder(`${style.id}_25x50`)!;
+    await populateStyleFolder(folder, style.id, options, customMap);
+  }
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  triggerBlobDownload(
+    zipBlob,
+    `chronoglyph_${category}_${styles.length}_styles_25x50.zip`
+  );
+}
+
 export async function exportAllStylesZip(
   options: GlyphRenderOptions,
   customMap: CustomPixelMap

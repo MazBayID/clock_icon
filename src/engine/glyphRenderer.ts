@@ -67,7 +67,11 @@ function drawColon(
             styleId === 'exo-frame-bracket' ||
             styleId === 'kurogane-heavy' ||
             styleId === 'synth-blade-bold' ||
-            styleId === 'oni-chrome-brutal'
+            styleId === 'oni-chrome-brutal' ||
+            styleId === 'chrome-shard-v2' ||
+            styleId === 'cyber-stencil-2077' ||
+            styleId === 'binary-barcode-cyber' ||
+            styleId === 'vortex-razor-italic'
           ? 'slit'
           : 'round';
 
@@ -2854,6 +2858,379 @@ function drawOniChromeBrutal(
 }
 
 // ============================================================================
+// 22. CHROME-SHARD FRACTURE (Polygonal Crystal Shards & Lightning Fissure)
+// ============================================================================
+function drawChromeShard(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.67;
+    const r = Math.max(2.4, 3.1 * options.strokeScale);
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.beginPath();
+      ctx.moveTo(box.cx - r, y - r * 0.9);
+      ctx.lineTo(box.cx + r, y - r * 0.2);
+      ctx.lineTo(box.cx - r * 0.3, y + r);
+      ctx.closePath();
+      ctx.fill();
+    }
+    return;
+  }
+
+  // Heavy angular shard base
+  drawKuroganeHeavy(ctx, char, box, options);
+
+  // Carve jagged crystal lightning fissure diagonally across the glyph
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.moveTo(box.x0 - 1, box.cy + 3);
+  ctx.lineTo(box.cx - 1, box.cy - 2);
+  ctx.lineTo(box.cx + 1.5, box.cy + 1);
+  ctx.lineTo(box.x1 + 1, box.cy - 5);
+  ctx.lineTo(box.x1 + 1, box.cy - 3.3);
+  ctx.lineTo(box.cx + 1.2, box.cy + 2.7);
+  ctx.lineTo(box.cx - 1.2, box.cy - 0.3);
+  ctx.lineTo(box.x0 - 1, box.cy + 4.7);
+  ctx.closePath();
+  ctx.fill();
+
+  // Sharp crystal tip slice on top-right
+  ctx.beginPath();
+  ctx.moveTo(box.x1 - 5, box.y0 - 1);
+  ctx.lineTo(box.x1 + 1, box.y0 - 1);
+  ctx.lineTo(box.x1 + 1, box.y0 + 5);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ============================================================================
+// 23. WIREFRAME NETRUNNER (Hollow CAD Perimeter Contour)
+// ============================================================================
+function drawWireframeVoid(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    const r = Math.max(2.2, 2.7 * options.strokeScale);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.2;
+    for (const y of [yTop, yBot]) {
+      ctx.strokeRect(box.cx - r, y - r, r * 2, r * 2);
+    }
+    return;
+  }
+
+  // Render crisp geometric silhouette first, then hollow out the interior leaving a 1.3px CAD perimeter!
+  const tmp = document.createElement('canvas');
+  tmp.width = GLYPH_WIDTH;
+  tmp.height = GLYPH_HEIGHT;
+  const tctx = tmp.getContext('2d')!;
+  tctx.fillStyle = '#000000';
+  tctx.fillRect(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT);
+
+  drawMonolithSlab(tctx, char, box, { ...options, strokeScale: 0.95 });
+
+  // Detect perimeter edges by checking 4-neighborhood in tmp canvas
+  const src = tctx.getImageData(0, 0, GLYPH_WIDTH, GLYPH_HEIGHT).data;
+  const out = ctx.createImageData(GLYPH_WIDTH, GLYPH_HEIGHT);
+  const dst = out.data;
+
+  const isOn = (x: number, y: number) => {
+    if (x < 0 || x >= GLYPH_WIDTH || y < 0 || y >= GLYPH_HEIGHT) return false;
+    return src[(y * GLYPH_WIDTH + x) * 4] >= 128;
+  };
+
+  for (let y = 0; y < GLYPH_HEIGHT; y++) {
+    for (let x = 0; x < GLYPH_WIDTH; x++) {
+      const idx = (y * GLYPH_WIDTH + x) * 4;
+      const cur = isOn(x, y);
+      const isEdge =
+        cur &&
+        (!isOn(x - 1, y) ||
+          !isOn(x + 1, y) ||
+          !isOn(x, y - 1) ||
+          !isOn(x, y + 1));
+      const val = isEdge ? 255 : 0;
+      dst[idx] = val;
+      dst[idx + 1] = val;
+      dst[idx + 2] = val;
+      dst[idx + 3] = 255;
+    }
+  }
+  ctx.putImageData(out, 0, 0);
+
+  // Add subtle Netrunner corner reticle ticks
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(box.x0, box.y0, 2, 1);
+  ctx.fillRect(box.x1 - 2, box.y1 - 1, 2, 1);
+}
+
+// ============================================================================
+// 24. NIGHT-SECTOR STENCIL (Military Corporate Dystopian 45° Stencil)
+// ============================================================================
+function drawCyberStencil2077(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    drawColon(ctx, 'cyber-stencil-2077', box, options);
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, options);
+
+  // Carve consistent 45-degree corporate-military stencil bridges
+  ctx.fillStyle = '#000000';
+  const cutDiagonal = (x1: number, y1: number, x2: number, y2: number, w = 1.8) => {
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  };
+
+  cutDiagonal(box.cx - 4, box.y0 - 1, box.cx + 2, box.y0 + 7, 1.9);
+  cutDiagonal(box.cx - 2, box.y1 - 7, box.cx + 4, box.y1 + 1, 1.9);
+  if (char === '4' || char === '6' || char === '8' || char === '9') {
+    cutDiagonal(box.x0 - 1, box.cy - 3, box.x0 + 6, box.cy + 4, 1.7);
+  }
+}
+
+// ============================================================================
+// 25. PLASMA-TUBE NEON (Dual-Wall Neon Tube with Glowing Corner Nodes)
+// ============================================================================
+function drawPlasmaTubeCyber(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    const r = Math.max(2.3, 2.9 * options.strokeScale);
+    for (const y of [yTop, yBot]) {
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(box.cx, y, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(box.cx, y, 0.9, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return;
+  }
+
+  // Use orbital dual-track geometry with crisp cyber bevels & bright endpoint nodes
+  drawOrbitalDual(ctx, char, box, {
+    ...options,
+    strokeScale: Math.max(0.9, options.strokeScale),
+  });
+
+  // Add subtle corner plasma glow nodes at key anchors
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(box.cx - 0.8, box.y0 + 1, 1.6, 1.6);
+  ctx.fillRect(box.cx - 0.8, box.y1 - 2.6, 1.6, 1.6);
+}
+
+// ============================================================================
+// 26. BARCODE-NET 88 (Bold Cyber Blocks with Vertical Data-Barcode Slits)
+// ============================================================================
+function drawBinaryBarcodeCyber(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    ctx.fillStyle = '#FFFFFF';
+    for (const y of [yTop, yBot]) {
+      ctx.fillRect(box.cx - 3, y - 2.5, 2, 5);
+      ctx.fillRect(box.cx + 0.5, y - 2.5, 1, 5);
+      ctx.fillRect(box.cx + 2.5, y - 2.5, 1.5, 5);
+    }
+    return;
+  }
+
+  drawMonolithSlab(ctx, char, box, options);
+
+  // Carve rhythmic vertical barcode data slits into upper & lower horizontal crowns
+  ctx.fillStyle = '#000000';
+  const topY = Math.round(box.y0);
+  const botY = Math.round(box.y1) - 4;
+  for (let x = Math.round(box.x0) + 4; x < Math.round(box.x1) - 3; x += 3) {
+    ctx.fillRect(x, topY, 1, 4);
+    if (char !== '1' && char !== '4' && char !== '7') {
+      ctx.fillRect(x + 1, botY, 1, 4);
+    }
+  }
+}
+
+// ============================================================================
+// 27. VORTEX RAZOR 16° (Extreme 16° Forward Slant + Speed Whiskers)
+// ============================================================================
+function drawVortexRazorItalic(
+  ctx: CanvasRenderingContext2D,
+  char: GlyphChar,
+  box: Box,
+  options: GlyphRenderOptions
+) {
+  if (char === ':') {
+    const yTop = box.y0 + box.h * 0.34;
+    const yBot = box.y0 + box.h * 0.68;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = Math.max(1.8, 2.2 * options.strokeScale);
+    for (const y of [yTop, yBot]) {
+      ctx.beginPath();
+      ctx.moveTo(box.cx - 3, y - 2.8);
+      ctx.lineTo(box.cx + 2.5, y);
+      ctx.lineTo(box.cx - 3, y + 2.8);
+      ctx.stroke();
+    }
+    return;
+  }
+
+  ctx.save();
+  ctx.translate(box.cx, box.cy);
+  ctx.transform(1, 0, -0.24, 1, 0, 0);
+  ctx.translate(-box.cx, -box.cy);
+
+  const sw = Math.max(2.0, Math.min(4.4, 3.1 * options.strokeScale));
+  const hw = sw / 2;
+  const l = box.x0 + hw + 3.2;
+  const r = box.x1 - hw - 3.2;
+  const t = box.y0 + hw;
+  const b = box.y1 - hw;
+  const cx = box.cx;
+  const cy = box.cy;
+
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth = sw;
+  ctx.lineCap = 'butt';
+  ctx.lineJoin = 'miter';
+
+  switch (char) {
+    case '0':
+      ctx.beginPath();
+      ctx.moveTo(l + 3, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(r, b - 3);
+      ctx.lineTo(r - 3, b);
+      ctx.lineTo(l, b);
+      ctx.lineTo(l, t + 3);
+      ctx.closePath();
+      ctx.stroke();
+      break;
+    case '1':
+      ctx.beginPath();
+      ctx.moveTo(l, t + 5);
+      ctx.lineTo(cx + 1.5, t);
+      ctx.lineTo(cx + 1.5, b + hw);
+      ctx.moveTo(l, b);
+      ctx.lineTo(r, b);
+      ctx.stroke();
+      break;
+    case '2':
+      ctx.beginPath();
+      ctx.moveTo(l, t + 3);
+      ctx.lineTo(l + 2, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(r, cy - 2);
+      ctx.lineTo(l, cy + 4);
+      ctx.lineTo(l, b);
+      ctx.lineTo(r + 1, b);
+      ctx.stroke();
+      break;
+    case '3':
+      ctx.beginPath();
+      ctx.moveTo(l, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(r, cy - 2);
+      ctx.lineTo(cx - 1.5, cy);
+      ctx.lineTo(r, cy + 2);
+      ctx.lineTo(r, b);
+      ctx.lineTo(l, b);
+      ctx.stroke();
+      break;
+    case '4':
+      ctx.beginPath();
+      ctx.moveTo(r - 1.5, b + hw);
+      ctx.lineTo(r - 1.5, t);
+      ctx.lineTo(l, cy + 4);
+      ctx.lineTo(r + 1, cy + 4);
+      ctx.stroke();
+      break;
+    case '5':
+      ctx.beginPath();
+      ctx.moveTo(r + 0.5, t);
+      ctx.lineTo(l, t);
+      ctx.lineTo(l, cy - 1);
+      ctx.lineTo(r, cy - 1);
+      ctx.lineTo(r, b);
+      ctx.lineTo(l, b);
+      ctx.stroke();
+      break;
+    case '6':
+      ctx.beginPath();
+      ctx.moveTo(r, t);
+      ctx.lineTo(l, t);
+      ctx.lineTo(l, b);
+      ctx.lineTo(r, b);
+      ctx.lineTo(r, cy);
+      ctx.lineTo(l, cy);
+      ctx.stroke();
+      break;
+    case '7':
+      ctx.beginPath();
+      ctx.moveTo(l - 0.5, t);
+      ctx.lineTo(r, t);
+      ctx.lineTo(cx - 1.5, b + hw);
+      ctx.stroke();
+      break;
+    case '8':
+      ctx.strokeRect(l, t, r - l, b - t);
+      ctx.beginPath();
+      ctx.moveTo(l, cy);
+      ctx.lineTo(r, cy);
+      ctx.stroke();
+      break;
+    case '9':
+      ctx.beginPath();
+      ctx.moveTo(l, b);
+      ctx.lineTo(r, b);
+      ctx.lineTo(r, t);
+      ctx.lineTo(l, t);
+      ctx.lineTo(l, cy);
+      ctx.lineTo(r, cy);
+      ctx.stroke();
+      break;
+  }
+  ctx.restore();
+
+  // Horizontal speed-trail whiskers on top-left & bottom-right
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(box.x0, box.y0 + 1, 4.5, 1.2);
+  ctx.fillRect(box.x0 + 1, box.y0 + 4, 3, 1);
+  ctx.fillRect(box.x1 - 4.5, box.y1 - 2.2, 4.5, 1.2);
+}
+
+// ============================================================================
 // MASTER RENDERER: Strictly 25×50px Pure White on Pure Black
 // ============================================================================
 export function renderGlyphToCanvas(
@@ -2954,6 +3331,24 @@ export function renderGlyphToCanvas(
       break;
     case 'oni-chrome-brutal':
       drawOniChromeBrutal(ctx, char, box, options);
+      break;
+    case 'chrome-shard-v2':
+      drawChromeShard(ctx, char, box, options);
+      break;
+    case 'wireframe-void':
+      drawWireframeVoid(ctx, char, box, options);
+      break;
+    case 'cyber-stencil-2077':
+      drawCyberStencil2077(ctx, char, box, options);
+      break;
+    case 'plasma-tube-cyber':
+      drawPlasmaTubeCyber(ctx, char, box, options);
+      break;
+    case 'binary-barcode-cyber':
+      drawBinaryBarcodeCyber(ctx, char, box, options);
+      break;
+    case 'vortex-razor-italic':
+      drawVortexRazorItalic(ctx, char, box, options);
       break;
   }
 

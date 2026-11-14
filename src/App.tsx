@@ -14,6 +14,7 @@ import {
   downloadSingleGlyphPng,
   downloadSpriteSheetPng,
   exportAllStylesZip,
+  exportCategoryZip,
   exportStyleZip,
 } from './engine/exportEngine';
 import { StyleSidebar } from './components/StyleSidebar';
@@ -26,11 +27,12 @@ import { ComparisonMatrix } from './components/ComparisonMatrix';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<StyleCategory>('all');
-  const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('kurogane-heavy');
+  const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('chrome-shard-v2');
   const [selectedChar, setSelectedChar] = useState<GlyphChar>('8');
   const [options, setOptions] = useState<GlyphRenderOptions>(DEFAULT_RENDER_OPTIONS);
   const [customMap, setCustomMap] = useState<CustomPixelMap>({});
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
 
   const activeStyleMeta = getStyleMeta(selectedStyleId);
@@ -71,6 +73,15 @@ export default function App() {
       await exportStyleZip(selectedStyleId, options, customMap);
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleDownloadCyberpunkZip = async () => {
+    setIsExportingCyberpunk(true);
+    try {
+      await exportCategoryZip('cyberpunk', options, customMap);
+    } finally {
+      setIsExportingCyberpunk(false);
     }
   };
 
@@ -263,11 +274,13 @@ export default function App() {
               isExporting={isExporting}
             />
 
-            {/* All 18 Styles Comparison & Batch Export */}
+            {/* All 27 Styles Comparison & Batch Export */}
             <ComparisonMatrix
               selectedStyleId={selectedStyleId}
               onSelectStyle={handleSelectStyle}
               options={options}
+              onDownloadCyberpunkZip={handleDownloadCyberpunkZip}
+              isExportingCyberpunk={isExportingCyberpunk}
               onDownloadAllZip={handleDownloadAllZip}
               isExportingAll={isExportingAll}
             />

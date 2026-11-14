@@ -8,6 +8,8 @@ interface ComparisonMatrixProps {
   selectedStyleId: StyleId;
   onSelectStyle: (id: StyleId) => void;
   options: GlyphRenderOptions;
+  onDownloadCyberpunkZip: () => void;
+  isExportingCyberpunk: boolean;
   onDownloadAllZip: () => void;
   isExportingAll: boolean;
 }
@@ -18,11 +20,17 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
   selectedStyleId,
   onSelectStyle,
   options,
+  onDownloadCyberpunkZip,
+  isExportingCyberpunk,
   onDownloadAllZip,
   isExportingAll,
 }) => {
   const [sample, setSample] = useState('10:48');
   const [filterCat, setFilterCat] = useState<StyleCategory>('all');
+
+  const cyberpunkCount = GLYPH_STYLES.filter(
+    (s) => s.category === 'cyberpunk'
+  ).length;
 
   const visibleStyles =
     filterCat === 'all'
@@ -40,11 +48,11 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
             Perbandingan Lintas Gaya ({GLYPH_STYLES.length} Model Smartwatch)
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Evaluasi karakter tipografi antara gaya Modern, Elegan, Berteknologi, dan Cyberpunk secara berdampingan.
+            Evaluasi karakter tipografi antara gaya Modern, Elegan, Berteknologi, dan {cyberpunkCount} varian Cyberpunk secara berdampingan.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1 p-0.5 rounded-md bg-black border border-white/[0.08]">
             {SAMPLE_PRESETS.map((preset) => (
               <button
@@ -64,6 +72,18 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
 
           <button
             type="button"
+            disabled={isExportingCyberpunk}
+            onClick={onDownloadCyberpunkZip}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+          >
+            <FileArchive className="w-3.5 h-3.5" />
+            {isExportingCyberpunk
+              ? `Mengemas ${cyberpunkCount} Cyberpunk...`
+              : `Paket ${cyberpunkCount} Gaya Cyberpunk (ZIP)`}
+          </button>
+
+          <button
+            type="button"
             disabled={isExportingAll}
             onClick={onDownloadAllZip}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.12] rounded-md transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
@@ -80,6 +100,10 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
       <div className="mt-4 flex flex-wrap items-center gap-1.5">
         {STYLE_CATEGORIES.map((cat) => {
           const active = filterCat === cat.id;
+          const count =
+            cat.id === 'all'
+              ? GLYPH_STYLES.length
+              : GLYPH_STYLES.filter((s) => s.category === cat.id).length;
           return (
             <button
               key={cat.id}
@@ -91,7 +115,7 @@ export const ComparisonMatrix: React.FC<ComparisonMatrixProps> = ({
                   : 'bg-white/[0.03] text-slate-400 border border-white/[0.06] hover:text-white'
               }`}
             >
-              {cat.label}
+              {cat.label} ({count})
             </button>
           );
         })}

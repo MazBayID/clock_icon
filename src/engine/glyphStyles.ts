@@ -247,6 +247,72 @@ export const GLYPH_STYLES: GlyphStyleMeta[] = [
     recommendedMode: 'pixel-snap',
     targetWatches: 'Heavy Statement Cyber Watch',
   },
+  {
+    id: 'chrome-shard-v2',
+    name: 'Chrome-Shard Fracture',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Pecahan kristal poligonal tajam dengan retakan petir diagonal',
+    architectureNote:
+      'Siluet bersudut tajam yang dipecah oleh rekahan kilat diagonal zig-zag dan penanda titik dua berbentuk serpihan segitiga presisi.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Cyber-Fragment AMOLED Watch',
+  },
+  {
+    id: 'wireframe-void',
+    name: 'Wireframe Netrunner',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Kontur CAD wireframe berongga ala antarmuka peretas Netrunner',
+    architectureNote:
+      'Garis tepi luar tipis 1.2px yang membungkus ruang hitam berongga dengan simpul sudut teknikal, menghasilkan tampilan cetak biru cyberspace yang sangat ringan di OLED.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Netrunner & CAD HUD Watch',
+  },
+  {
+    id: 'cyber-stencil-2077',
+    name: 'Night-Sector Stencil',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Stensil militer korporat distopia dengan jembatan belahan 45°',
+    architectureNote:
+      'Blok industri berat yang dipotong oleh celah stensil miring 45° konsisten pada setiap angka untuk karakter taktis Night-Sector.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Tactical Corpo-Cyber Watch',
+  },
+  {
+    id: 'plasma-tube-cyber',
+    name: 'Plasma-Tube Neon',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Estetika tabung neon ganda bercahaya dengan sambungan simpul sudut',
+    architectureNote:
+      'Mengkonstruksi angka menggunakan tabung neon kontur ganda dengan efek rongga dalam dan ujung konektor terisolasi untuk nuansa distrik neon.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Neon District OLED Watch',
+  },
+  {
+    id: 'binary-barcode-cyber',
+    name: 'Barcode-Net 88',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Angka blok berat beraksen irisan kode batang data vertikal',
+    architectureNote:
+      'Memadukan keterbacaan blok cyber tegas dengan irisan vertikal kode batang (barcode) berirama di bagian mahkota dan dasar angka.',
+    recommendedMode: 'pixel-snap',
+    targetWatches: 'Cyber-Identity & Data Watch',
+  },
+  {
+    id: 'vortex-razor-italic',
+    name: 'Vortex Razor 16°',
+    category: 'cyberpunk',
+    categoryLabel: 'Cyberpunk',
+    tagline: 'Kemiringan kecepatan ekstrem 16° lengkap dengan ekor garis kecepatan',
+    architectureNote:
+      'Sudut miring agresif 16° dengan kumis garis kecepatan horizontal di terminal atas dan bawah serta titik dua chevron ganda.',
+    recommendedMode: 'antialiased',
+    targetWatches: 'Cyber-Racing & Hyper-Speed OLED',
+  },
 ];
 
 export function getStyleMeta(id: string): GlyphStyleMeta {

@@ -27,7 +27,13 @@ export type StyleId =
   | 'exo-frame-bracket'
   | 'kurogane-heavy'
   | 'synth-blade-bold'
-  | 'oni-chrome-brutal';
+  | 'oni-chrome-brutal'
+  | 'chrome-shard-v2'
+  | 'wireframe-void'
+  | 'cyber-stencil-2077'
+  | 'plasma-tube-cyber'
+  | 'binary-barcode-cyber'
+  | 'vortex-razor-italic';
 
 export interface GlyphStyleMeta {
   id: StyleId;
