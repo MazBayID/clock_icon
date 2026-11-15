@@ -113,7 +113,7 @@ export const UiStyleSidebar: React.FC<UiStyleSidebarProps> = ({
                 aria-hidden="true"
               >
                 <UiAssetCanvas
-                  assetId="heart"
+                  assetId="heart-static"
                   styleId={style.id}
                   options={options}
                   scale={0.85}
