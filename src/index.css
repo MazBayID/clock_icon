@@ -115,7 +115,7 @@
     background:
       linear-gradient(180deg, rgba(5, 9, 20, .10) 0%, rgba(5, 9, 20, .18) 52%, rgba(5, 9, 20, .34) 100%),
       linear-gradient(105deg, rgba(5, 17, 35, .08), rgba(30, 10, 44, .07) 55%, rgba(5, 17, 35, .10)),
-      url("https://mazbayid.github.io/background_earth.jpg") center 42% / cover no-repeat;
+      url("/clock_icon/background_clock.jpg") center 42% / cover no-repeat;
     transform: scale(1.015);
   }
 
