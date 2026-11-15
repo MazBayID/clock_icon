@@ -26,6 +26,10 @@ import {
   downloadUiSpriteSheetPng,
   exportAllStylesZip,
   exportAllUiStylesZip,
+  exportSingleStaticUiAssetZip,
+  exportSingleDynamicUiAssetZip,
+  exportAllStaticUiAssetsZip,
+  exportAllDynamicUiAssetsZip,
   exportCategoryZip,
   exportStyleZip,
   exportUiStyleZip,
@@ -95,6 +99,7 @@ export default function App() {
   const customUiMap = EMPTY_CUSTOM_UI_MAP;
   const [isExportingUi, setIsExportingUi] = useState(false);
   const [isExportingAllUi, setIsExportingAllUi] = useState(false);
+  const [isExportingUiAction, setIsExportingUiAction] = useState(false);
 
   const activeStyleMeta = getStyleMeta(selectedStyleId);
   const activeUiStyleMeta = getUiStyleMeta(selectedUiStyleId);
