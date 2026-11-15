@@ -97,7 +97,7 @@ export default function App() {
   const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
   const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
   const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
-  const customUiMap = EMPTY_CUSTOM_UI_MAP;
+  const [customUiMap, setCustomUiMap] = useState<CustomUiPixelMap>(EMPTY_CUSTOM_UI_MAP);
   const [isExportingUi, setIsExportingUi] = useState(false);
   const [isExportingAllUi, setIsExportingAllUi] = useState(false);
   const [isExportingUiAction, setIsExportingUiAction] = useState(false);
@@ -622,6 +622,14 @@ export default function App() {
                     assetId={selectedUiAssetId}
                     styleId={selectedUiStyleId}
                     options={uiOptions}
+                    customPixels={customUiMap[selectedUiStyleId]?.[selectedUiAssetId] ?? null}
+                    onChangeCustomPixels={(pixels) => setCustomUiMap((prev) => ({
+                      ...prev,
+                      [selectedUiStyleId]: {
+                        ...prev[selectedUiStyleId],
+                        [selectedUiAssetId]: pixels,
+                      },
+                    }))}
                     onDownloadAsset={(id) =>
                       downloadSingleUiAssetPng(
                         id,
