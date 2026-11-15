@@ -20,7 +20,6 @@ import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
 import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
 import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
 import {
-  downloadCHeader,
   downloadSingleGlyphPng,
   downloadSingleUiAssetPng,
   downloadSpriteSheetPng,
@@ -36,14 +35,12 @@ import { TuningControls } from './components/TuningControls';
 import { AssetSheetGrid } from './components/AssetSheetGrid';
 import { WatchPreview } from './components/WatchPreview';
 import { PixelInspector } from './components/PixelInspector';
-import { BitmapGeneratorPanel } from './components/BitmapGeneratorPanel';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { UiStyleSidebar } from './components/UiStyleSidebar';
 import { UiTuningControls } from './components/UiTuningControls';
 import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
 import { UiWatchPreview } from './components/UiWatchPreview';
 import { UiPixelInspector } from './components/UiPixelInspector';
-import { UiBitmapGeneratorPanel } from './components/UiBitmapGeneratorPanel';
 import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 import { AnimationStudio } from './components/AnimationStudio';
 
@@ -198,12 +195,6 @@ export default function App() {
             Inspektor Piksel
           </a>
           <a
-            href="#bitmap"
-            className="hover:text-white transition-colors whitespace-nowrap shrink-0"
-          >
-            Generator Bitmap
-          </a>
-          <a
             href="#komparasi"
             className="hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
@@ -285,7 +276,6 @@ export default function App() {
             { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
             { href: '#simulasi', label: 'Simulasi Jam' },
             { href: '#inspektor', label: 'Inspektor Piksel' },
-            { href: '#bitmap', label: 'Generator Bitmap' },
             { href: '#komparasi', label: 'Komparasi Gaya' },
           ].map((item) => (
             <a
@@ -459,9 +449,6 @@ export default function App() {
                   onDownloadSpriteSheet={() =>
                     downloadSpriteSheetPng(selectedStyleId, options, customMap)
                   }
-                  onDownloadCHeader={() =>
-                    downloadCHeader(selectedStyleId, options, customMap)
-                  }
                   onDownloadStyleZip={handleDownloadStyleZip}
                   isExporting={isExporting}
                 />
@@ -487,16 +474,6 @@ export default function App() {
                   />
                 </div>
               </div>
-
-              <BitmapGeneratorPanel
-                styleId={selectedStyleId}
-                options={options}
-                customMap={customMap}
-                selectedChar={selectedChar}
-                onSelectChar={setSelectedChar}
-                onDownloadStyleZip={handleDownloadStyleZip}
-                isExporting={isExporting}
-              />
 
               <ComparisonMatrix
                 selectedStyleId={selectedStyleId}
@@ -560,7 +537,7 @@ export default function App() {
                   <div>
                     <div className="text-[11px] text-slate-400">Format</div>
                     <div className="text-base font-mono-tabular font-semibold text-white">
-                      PNG / BMP / .H
+                      PNG
                     </div>
                   </div>
                 </div>
@@ -620,16 +597,6 @@ export default function App() {
                 </div>
               </div>
 
-              <UiBitmapGeneratorPanel
-                styleId={selectedUiStyleId}
-                options={uiOptions}
-                customMap={customUiMap}
-                selectedAssetId={selectedUiAssetId}
-                onSelectAsset={setSelectedUiAssetId}
-                onDownloadStyleZip={handleDownloadUiStyleZip}
-                isExporting={isExportingUi}
-              />
-
               <UiComparisonMatrix
                 selectedStyleId={selectedUiStyleId}
                 onSelectStyle={handleSelectUiStyle}
@@ -650,7 +617,7 @@ export default function App() {
           Neo Clock — Generator Aset, UI Smartwatch &amp; Animation Studio
         </span>
         <span className="font-mono-tabular">
-          Format Ekspor: PNG · BMP 1b/24b · C Header (.h) · image2cpp · ZIP
+          Format Ekspor: PNG · ZIP
         </span>
       </footer>
     </div>
