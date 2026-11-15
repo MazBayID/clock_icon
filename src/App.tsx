@@ -160,6 +160,15 @@ export default function App() {
     }
   };
 
+  const runUiExport = async (task: () => Promise<void>) => {
+    setIsExportingUiAction(true);
+    try { await task(); } finally { setIsExportingUiAction(false); }
+  };
+  const handleExportStaticOne = (id: UiAssetId) => runUiExport(() => exportSingleStaticUiAssetZip(id, selectedUiStyleId, uiOptions, customUiMap));
+  const handleExportDynamicOne = (id: UiAssetId) => runUiExport(() => exportSingleDynamicUiAssetZip(id, selectedUiStyleId, uiOptions, customUiMap));
+  const handleExportAllStatic = () => runUiExport(() => exportAllStaticUiAssetsZip(selectedUiStyleId, uiOptions, customUiMap));
+  const handleExportAllDynamic = () => runUiExport(() => exportAllDynamicUiAssetsZip(selectedUiStyleId, uiOptions, customUiMap));
+
   const handleDownloadAllUiZip = async () => {
     setIsExportingAllUi(true);
     try {
