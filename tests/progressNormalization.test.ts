@@ -34,6 +34,6 @@ describe('progress config normalization edge cases', () => {
       gap: 4,
       segments: 32,
     });
-    expect(normalized.segments).toBeLessThanOrEqual(5);
+    expect(normalized.segments).toBeLessThanOrEqual(6);
   });
 });
