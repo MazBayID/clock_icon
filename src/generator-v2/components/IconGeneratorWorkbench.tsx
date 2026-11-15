@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { Download, Package, RotateCcw } from 'lucide-react';
-import { UiRenderOptions, UiStyleId } from '../../types/uiAsset';
-import { ICON_ASSET_CATALOG, IconAssetId } from '../model/icons';
-import { DEFAULT_UI_RENDER_OPTIONS, renderUiAssetToCanvas } from '../../engine/uiAssetRenderer';
+import { UiStyleId } from '../../types/uiAsset';
+import { DEFAULT_ICON_RENDER_OPTIONS, ICON_ASSET_CATALOG, IconAssetId, IconRenderOptions, normalizeIconRenderOptions } from '../model/icons';
+import { renderIconAsset } from '../renderers/iconRenderer';
 import { UI_STYLES } from '../../engine/uiAssetStyles';
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -24,14 +24,14 @@ function downloadBlob(blob: Blob, filename: string) {
 export const IconGeneratorWorkbench: React.FC = () => {
   const [assetId, setAssetId] = useState<IconAssetId>('heart');
   const [styleId, setStyleId] = useState<UiStyleId>('swiss-precision-ui');
-  const [options, setOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
+  const [options, setOptions] = useState<IconRenderOptions>(DEFAULT_ICON_RENDER_OPTIONS);
   const [packaging, setPackaging] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const activeAsset = useMemo(() => ICON_ASSET_CATALOG.find((asset) => asset.id === assetId) ?? ICON_ASSET_CATALOG[0], [assetId]);
   const activeStyle = UI_STYLES.find((style) => style.id === styleId) ?? UI_STYLES[0];
 
   useEffect(() => {
-    if (canvasRef.current) renderUiAssetToCanvas(assetId, styleId, options, null, canvasRef.current);
+    if (canvasRef.current) renderIconAsset(assetId, styleId, normalizeIconRenderOptions(options), canvasRef.current);
   }, [assetId, styleId, options]);
 
   const selectStyle = (next: UiStyleId) => {
@@ -51,7 +51,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
       const zip = new JSZip();
       const manifest: { id: string; filename: string; width: number; height: number }[] = [];
       for (const asset of ICON_ASSET_CATALOG) {
-        const canvas = renderUiAssetToCanvas(asset.id, styleId, options);
+        const canvas = renderIconAsset(asset.id, styleId, normalizeIconRenderOptions(options));
         zip.file(`icons/${asset.id}.png`, await canvasBlob(canvas));
         manifest.push({ id: asset.id, filename: `${asset.id}.png`, width: asset.width, height: asset.height });
       }
@@ -91,7 +91,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
         </section>
 
         <aside className="rounded-lg border border-white/[0.08] bg-[#0C0E13] p-4 h-fit">
-          <div className="flex items-center justify-between mb-4"><h2 className="text-sm font-semibold text-white">Icon Controls</h2><button type="button" onClick={() => setOptions(DEFAULT_UI_RENDER_OPTIONS)} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"><RotateCcw className="w-3 h-3" /> Reset</button></div>
+          <div className="flex items-center justify-between mb-4"><h2 className="text-sm font-semibold text-white">Icon Controls</h2><button type="button" onClick={() => setOptions(DEFAULT_ICON_RENDER_OPTIONS)} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"><RotateCcw className="w-3 h-3" /> Reset</button></div>
           <div className="space-y-4">
             <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Visual Style</span><select value={styleId} onChange={(e) => selectStyle(e.target.value as UiStyleId)} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white">{UI_STYLES.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}</select></label>
             <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Stroke Weight</span><strong className="text-white">{options.strokeScale.toFixed(2)}×</strong></span><input type="range" min="0.75" max="1.3" step="0.05" value={options.strokeScale} onChange={(e) => setOptions((current) => ({ ...current, strokeScale: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>
