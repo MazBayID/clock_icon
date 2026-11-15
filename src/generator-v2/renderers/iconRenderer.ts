@@ -1,13 +1,6 @@
 import { IconAssetId, IconRenderOptions } from '../model/icons';
 import { UiStyleId } from '../model/styles';
 
-type RendererAssetId = IconAssetId | 'battery' | 'signal' | 'progress-arc';
-type RendererOptions = IconRenderOptions & {
-  batteryLevel: number;
-  signalBars: number;
-  progressPercent: number;
-};
-
 interface UiBox {
   w: number;
   h: number;
@@ -132,10 +125,10 @@ function drawCornerBrackets(
  */
 function renderAssetCore(
   ctx: CanvasRenderingContext2D,
-  assetId: RendererAssetId,
+  assetId: IconAssetId,
   styleId: UiStyleId,
   box: UiBox,
-  options: RendererOptions
+  options: IconRenderOptions
 ) {
   const isSolid =
     styleId === 'neo-solid-pill' ||
@@ -193,141 +186,6 @@ function renderAssetCore(
   };
 
   switch (assetId) {
-    case 'battery': {
-      const capW = 2.6;
-      const shellW = bw - capW - 1.2;
-      const shellH = Math.min(bh, 14);
-      const sy = cy - shellH / 2;
-      const corner = isChamfer ? 2.8 : styleId === 'swiss-precision-ui' ? 3 : 1.5;
-
-      // Positive terminal tip
-      const capH = Math.max(4, shellH * 0.45);
-      ctx.fillStyle = '#FFFFFF';
-      if (isKatana) {
-        drawPolygon(ctx, [
-          [l + shellW + 1, cy - capH / 2],
-          [l + shellW + capW + 1.5, cy - capH / 2],
-          [l + shellW + capW + 0.5, cy + capH / 2],
-          [l + shellW + 1, cy + capH / 2],
-        ]);
-        ctx.fill();
-      } else {
-        ctx.fillRect(l + shellW + 1, cy - capH / 2, capW, capH);
-      }
-
-      if (isSolid) {
-        if (isChamfer) {
-          drawChamferRectPath(ctx, l, sy, shellW, shellH, corner);
-        } else {
-          ctx.beginPath();
-          ctx.roundRect(l, sy, shellW, shellH, corner);
-        }
-        ctx.fill();
-        // Carve hollow interior frame, leaving bars based on batteryLevel
-        const pad = 2.0;
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(l + pad, sy + pad, shellW - pad * 2, shellH - pad * 2);
-
-        const maxBars = 4;
-        const activeBars = Math.max(1, Math.round((options.batteryLevel / 100) * maxBars));
-        const innerW = shellW - pad * 2 - 2;
-        const barW = (innerW - (maxBars - 1) * 1.4) / maxBars;
-        ctx.fillStyle = '#FFFFFF';
-        for (let i = 0; i < activeBars; i++) {
-          const bx = l + pad + 1 + i * (barW + 1.4);
-          if (isKatana) {
-            drawPolygon(ctx, [
-              [bx + 1, sy + pad + 1],
-              [bx + barW + 1, sy + pad + 1],
-              [bx + barW - 0.5, sy + shellH - pad - 1],
-              [bx - 0.5, sy + shellH - pad - 1],
-            ]);
-            ctx.fill();
-          } else {
-            ctx.fillRect(bx, sy + pad + 1, barW, shellH - pad * 2 - 2);
-          }
-        }
-      } else {
-        applyDoubleTrackIfEnabled(() => {
-          if (isChamfer) {
-            drawChamferRectPath(ctx, l + sw / 2, sy + sw / 2, shellW - sw, shellH - sw, corner);
-          } else {
-            ctx.beginPath();
-            ctx.roundRect(l + sw / 2, sy + sw / 2, shellW - sw, shellH - sw, corner);
-          }
-        });
-
-        const fillRatio = Math.max(0.1, Math.min(1, options.batteryLevel / 100));
-        const innerX = l + sw + 1.4;
-        const innerY = sy + sw + 1.4;
-        const innerW = Math.max(4, shellW - sw * 2 - 2.8);
-        const innerH = Math.max(3, shellH - sw * 2 - 2.8);
-
-        ctx.fillStyle = '#FFFFFF';
-        if (isHorology) {
-          // Segmented diamond/bar cells inside horology shell
-          const segs = 4;
-          const activeSegs = Math.max(1, Math.round(fillRatio * segs));
-          const segW = (innerW - (segs - 1) * 1.5) / segs;
-          for (let i = 0; i < activeSegs; i++) {
-            ctx.fillRect(innerX + i * (segW + 1.5), innerY, segW, innerH);
-          }
-        } else {
-          ctx.fillRect(innerX, innerY, innerW * fillRatio, innerH);
-        }
-
-        if (isPcb) {
-          drawSolderVia(ctx, l + 1, cy, 1.5);
-        }
-      }
-      break;
-    }
-
-    case 'signal': {
-      const bars = 4;
-      const gap = 2.0;
-      const barW = (bw - gap * (bars - 1)) / bars;
-      const active = Math.max(1, Math.min(4, Math.round(options.signalBars)));
-
-      for (let i = 0; i < bars; i++) {
-        const hRatio = (i + 1) / bars;
-        const barH = Math.max(4, bh * (0.28 + 0.72 * hRatio));
-        const bx = l + i * (barW + gap);
-        const by = b - barH;
-        const lit = i < active;
-
-        if (lit) {
-          ctx.fillStyle = '#FFFFFF';
-          if (isChamfer) {
-            drawPolygon(ctx, [
-              [bx + 1.2, by],
-              [bx + barW, by],
-              [bx + barW, b],
-              [bx, b],
-              [bx, by + 1.2],
-            ]);
-            ctx.fill();
-          } else {
-            ctx.beginPath();
-            ctx.roundRect(bx, by, barW, barH, styleId === 'swiss-precision-ui' ? 1.2 : 0.4);
-            ctx.fill();
-          }
-          if (isDoubleTrack && barW >= 3) {
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(bx + 1, by + 1.5, Math.max(0.8, barW - 2), Math.max(1, barH - 3));
-          }
-          if (isPcb) {
-            drawSolderVia(ctx, bx + barW / 2, by + 1.2, 1.3);
-          }
-        } else {
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 1.0;
-          ctx.strokeRect(bx + 0.5, by + 0.5, barW - 1, barH - 1);
-        }
-      }
-      break;
-    }
-
     case 'bluetooth': {
       const mx = cx - 0.5;
       const spanX = bw * 0.36;
@@ -688,91 +546,6 @@ function renderAssetCore(
       break;
     }
 
-    case 'progress-arc': {
-      const rad = Math.min(bw, bh) * 0.43;
-      const startAngle = -Math.PI / 2;
-      const pct = Math.max(0.1, Math.min(1, options.progressPercent / 100));
-      const endAngle = startAngle + Math.PI * 2 * pct;
-
-      // Subtle background track (dotted / hairline depending on style)
-      if (isChamfer) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
-        ctx.lineWidth = 1.1;
-        drawChamferRectPath(ctx, cx - rad, cy - rad, rad * 2, rad * 2, rad * 0.42);
-        ctx.stroke();
-      } else {
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([2, 3]);
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      // Active arc / segmented gauge
-      if (isHorology) {
-        // 12 precision watch ticks around perimeter + active inner ring
-        for (let i = 0; i < 12; i++) {
-          const a = -Math.PI / 2 + (i / 12) * Math.PI * 2;
-          const isLit = i / 12 <= pct;
-          ctx.strokeStyle = isLit ? '#FFFFFF' : 'rgba(255,255,255,0.3)';
-          ctx.lineWidth = i % 3 === 0 ? 1.8 : 1.1;
-          ctx.beginPath();
-          ctx.moveTo(cx + Math.cos(a) * (rad - 3.5), cy + Math.sin(a) * (rad - 3.5));
-          ctx.lineTo(cx + Math.cos(a) * (rad + 1.5), cy + Math.sin(a) * (rad + 1.5));
-          ctx.stroke();
-        }
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad - 6.5, startAngle, endAngle);
-        ctx.stroke();
-      } else if (isBrutal || isChamfer) {
-        const segs = 12;
-        const litSegs = Math.max(1, Math.round(pct * segs));
-        for (let i = 0; i < litSegs; i++) {
-          const a0 = -Math.PI / 2 + (i / segs) * Math.PI * 2 + 0.06;
-          const a1 = -Math.PI / 2 + ((i + 1) / segs) * Math.PI * 2 - 0.06;
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = isBrutal ? 4.4 : 3.4;
-          ctx.beginPath();
-          ctx.arc(cx, cy, rad - 1.5, a0, a1);
-          ctx.stroke();
-        }
-      } else {
-        const ringW = isSolid ? 4.5 : Math.max(2.6, sw * 1.45);
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = ringW;
-        ctx.lineCap = styleId === 'swiss-precision-ui' || isSolid ? 'round' : 'butt';
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad - 1, startAngle, endAngle);
-        ctx.stroke();
-        if (isDoubleTrack) {
-          ctx.strokeStyle = '#000000';
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.arc(cx, cy, rad - 1, startAngle, endAngle);
-          ctx.stroke();
-        }
-        if (isPcb) {
-          drawSolderVia(ctx, cx + Math.cos(endAngle) * (rad - 1), cy + Math.sin(endAngle) * (rad - 1), 2.3);
-        }
-      }
-
-      // Center indicator dot / crosshair
-      ctx.fillStyle = '#FFFFFF';
-      if (isHorology || isChamfer) {
-        drawDiamond(ctx, cx, cy, 2.4, 2.4);
-        ctx.fill();
-      } else {
-        ctx.fillRect(cx - 3.5, cy - 0.8, 7, 1.6);
-        ctx.fillRect(cx - 0.8, cy - 3.5, 1.6, 7);
-      }
-      break;
-    }
-
     case 'ecg-divider': {
       // Horizontal HUD divider + live telemetry waveform (64×20px)
       const midY = cy + 0.5;
@@ -831,19 +604,12 @@ export function renderIconAsset(
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, w, h);
   const box = getUiBox(w, h, options.padding);
-  const rendererOptions: RendererOptions = {
-    ...options,
-    batteryLevel: 80,
-    signalBars: 4,
-    progressPercent: 72,
-  };
-
   if (styleId === 'cyber-katana-ui') {
     ctx.save();
     ctx.translate(box.cx, box.cy);
     ctx.transform(1, 0, -0.15, 1, 0, 0);
     ctx.translate(-box.cx, -box.cy);
-    renderAssetCore(ctx, assetId, styleId, box, rendererOptions);
+    renderAssetCore(ctx, assetId, styleId, box, options);
     ctx.restore();
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 1.4;
