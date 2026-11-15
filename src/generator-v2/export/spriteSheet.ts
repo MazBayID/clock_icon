@@ -61,3 +61,43 @@ export function createSpriteSheetCanvas(
   });
   return sheet;
 }
+
+
+export interface SpriteSheetManifest {
+  format: 'PNG';
+  layout: SpriteSheetLayout;
+  assets: {
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }[];
+}
+
+export function createSpriteSheetManifest(
+  items: SpriteSheetItem[],
+  columns = 4,
+  gap = 2,
+): SpriteSheetManifest {
+  const layout = getSpriteSheetLayout(
+    items.map(({ canvas }) => ({ width: canvas.width, height: canvas.height })),
+    columns,
+    gap,
+  );
+  return {
+    format: 'PNG',
+    layout,
+    assets: items.map(({ id, canvas }, index) => {
+      const column = index % layout.columns;
+      const row = Math.floor(index / layout.columns);
+      return {
+        id,
+        x: column * (layout.cellWidth + layout.gap) + (layout.cellWidth - canvas.width) / 2,
+        y: row * (layout.cellHeight + layout.gap) + (layout.cellHeight - canvas.height) / 2,
+        width: canvas.width,
+        height: canvas.height,
+      };
+    }),
+  };
+}
