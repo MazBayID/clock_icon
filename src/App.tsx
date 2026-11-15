@@ -145,12 +145,12 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-transparent text-[#F2F4F8]">
       {/* Strict 3-Zone Top Bar */}
-      <header className="sticky top-0 z-30 bg-[#090A0D]/95 backdrop-blur border-b border-white/[0.08] px-3 sm:px-6 h-14 flex items-center justify-between gap-3 md:gap-8">
+      <header className="sticky top-0 z-30 bg-[#090A0D]/75 backdrop-blur border-b border-white/[0.08] px-3 sm:px-6 h-14 flex items-center justify-between gap-3 md:gap-8">
         <a
           href="#top"
           className="text-sm sm:text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
         >
-          ChronoGlyph Studio
+          Neo Clock
         </a>
 
         <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-400">
@@ -593,7 +593,7 @@ export default function App() {
       {/* Quiet Studio Footer */}
       <footer className="border-t border-white/[0.08] bg-[#090A0D] px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
         <span>
-          ChronoGlyph Studio — Generator Aset, UI Smartwatch &amp; Animation Studio
+          Neo Clock — Generator Aset, UI Smartwatch &amp; Animation Studio
         </span>
         <span className="font-mono-tabular">
           Format Ekspor: PNG · BMP 1b/24b · C Header (.h) · image2cpp · ZIP
