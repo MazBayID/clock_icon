@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { downloadBlob } from '../export/download';
 import JSZip from 'jszip';
 import { Download, Grid3X3, Package, RotateCcw } from 'lucide-react';
 import { UiStyleId, UI_STYLES } from '../model/styles';
