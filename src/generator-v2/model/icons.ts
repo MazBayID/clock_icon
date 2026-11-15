@@ -37,3 +37,27 @@ export const ICON_ASSET_CATALOG: IconAssetMeta[] = [
 export function getIconAssetMeta(id: IconAssetId): IconAssetMeta {
   return ICON_ASSET_CATALOG.find((asset) => asset.id === id) ?? ICON_ASSET_CATALOG[0];
 }
+
+
+export interface IconRenderOptions {
+  strokeScale: number;
+  padding: number;
+  pixelSnap: boolean;
+  threshold: number;
+}
+
+export const DEFAULT_ICON_RENDER_OPTIONS: IconRenderOptions = {
+  strokeScale: 1,
+  padding: 1,
+  pixelSnap: false,
+  threshold: 128,
+};
+
+export function normalizeIconRenderOptions(options: IconRenderOptions): IconRenderOptions {
+  return {
+    strokeScale: Math.max(0.75, Math.min(1.3, Number.isFinite(options.strokeScale) ? options.strokeScale : 1)),
+    padding: Math.max(0, Math.min(3, Math.round(Number.isFinite(options.padding) ? options.padding : 1))),
+    pixelSnap: Boolean(options.pixelSnap),
+    threshold: Math.max(64, Math.min(210, Math.round(Number.isFinite(options.threshold) ? options.threshold : 128))),
+  };
+}
