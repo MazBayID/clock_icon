@@ -1073,7 +1073,8 @@ export function renderUiAssetToCanvas(
   // luminance quantization, keeping its aspect ratio and configured padding.
   // Dynamic Wi-Fi levels intentionally change the occupied bounds as arcs
   // disappear. Fitting each frame independently would enlarge the dot.
-  if (assetId !== 'wifi-meter') {
+  const isTinySharpProgressBar = assetId === 'progress-bar' && options.pixelSnap && h <= 2;
+  if (assetId !== 'wifi-meter' && !isTinySharpProgressBar) {
     fitRenderedContentToCanvas(canvas, ctx, options.padding, options.pixelSnap);
   }
 
