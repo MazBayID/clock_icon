@@ -129,101 +129,37 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         </span>
       </div>
 
-      {/* Battery State Slider */}
-      <div className="flex items-center gap-2">
-        <label
-          htmlFor="ui-battery-slider"
-          className="text-xs text-slate-400 whitespace-nowrap"
-        >
-          Baterai
-        </label>
-        <input
-          id="ui-battery-slider"
-          type="range"
-          min={0}
-          max={100}
-          step={10}
-          value={options.batteryLevel}
-          onChange={(e) =>
-            onChange({ ...options, batteryLevel: parseInt(e.target.value, 10) })
-          }
-          className="w-16 accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer"
-        />
-        <span className="text-xs font-mono-tabular text-slate-200 w-8 text-right">
-          {options.batteryLevel}%
-        </span>
+      {/* Contextual Preview Slider: follows the selected asset */}
+      <div className="w-full flex flex-wrap items-center gap-3 rounded-md border border-sky-400/20 bg-sky-400/[0.04] px-3 py-2.5">
+        <span className="text-xs font-semibold text-sky-300 whitespace-nowrap">Preview {selectedAssetId === 'battery' ? 'Baterai' : selectedAssetId === 'signal' ? 'Sinyal' : selectedAssetId === 'wifi-meter' ? 'Wi-Fi' : selectedAssetId === 'progress-arc' ? 'Progress Arc' : selectedAssetId === 'progress-bar' ? 'Progress Bar' : 'Ikon Terpilih'}</span>
+        {selectedAssetId === 'battery' && (
+          <>
+            <input aria-label="Level baterai preview" type="range" min={0} max={100} step={1} value={options.batteryLevel} onChange={(e) => onChange({ ...options, batteryLevel: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.batteryLevel}%</span>
+          </>
+        )}
+        {(selectedAssetId === 'signal' || selectedAssetId === 'wifi-meter') && (
+          <>
+            <input aria-label="Kekuatan sinyal preview" type="range" min={0} max={4} step={1} value={options.signalBars} onChange={(e) => onChange({ ...options, signalBars: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.signalBars}/4</span>
+          </>
+        )}
+        {selectedAssetId === 'progress-arc' && (
+          <>
+            <input aria-label="Progress Arc preview" type="range" min={0} max={100} step={1} value={options.progressPercent} onChange={(e) => onChange({ ...options, progressPercent: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.progressPercent}%</span>
+          </>
+        )}
+        {selectedAssetId === 'progress-bar' && (
+          <>
+            <input aria-label="Progress Bar preview" type="range" min={0} max={100} step={1} value={options.progressBarPercent} onChange={(e) => onChange({ ...options, progressBarPercent: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.progressBarPercent}%</span>
+          </>
+        )}
+        {selectedAssetId !== 'battery' && selectedAssetId !== 'signal' && selectedAssetId !== 'wifi-meter' && selectedAssetId !== 'progress-arc' && selectedAssetId !== 'progress-bar' && (
+          <span className="text-xs text-slate-400">Ikon ini tidak memiliki nilai preview dinamis.</span>
+        )}
       </div>
-
-      {/* Signal Bars Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-400 whitespace-nowrap">Sinyal:</span>
-        <div className="flex items-center gap-1">
-          {[0, 1, 2, 3, 4].map((lvl) => (
-            <button
-              key={lvl}
-              type="button"
-              onClick={() => onChange({ ...options, signalBars: lvl })}
-              className={`w-6 h-6 text-xs font-mono-tabular rounded border transition-colors cursor-pointer ${
-                options.signalBars === lvl
-                  ? 'bg-sky-500 text-slate-950 border-sky-400 font-semibold'
-                  : 'bg-black text-slate-400 border-white/[0.08] hover:text-white'
-              }`}
-            >
-              {lvl}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Progress Ring Slider */}
-      <div className="flex items-center gap-2">
-        <label
-          htmlFor="ui-progress-slider"
-          className="text-xs text-slate-400 whitespace-nowrap"
-        >
-          Progres
-        </label>
-        <input
-          id="ui-progress-slider"
-          type="range"
-          min={0}
-          max={100}
-          step={5}
-          value={options.progressPercent}
-          onChange={(e) =>
-            onChange({
-              ...options,
-              progressPercent: parseInt(e.target.value, 10),
-            })
-          }
-          className="w-16 accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer"
-        />
-        <span className="text-xs font-mono-tabular text-slate-200 w-8 text-right">
-          {options.progressPercent}%
-        </span>
-      </div>
-
-      {/* Horizontal Progress Bar Slider */}
-      {selectedAssetId === 'progress-bar' && (
-        <div className="flex items-center gap-2 min-w-[180px]">
-          <label htmlFor="ui-progress-bar-slider" className="text-xs text-slate-400 whitespace-nowrap">
-            Bar Horizontal
-          </label>
-          <input
-            id="ui-progress-bar-slider"
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={options.progressBarPercent}
-            onChange={(e) => onChange({ ...options, progressBarPercent: parseInt(e.target.value, 10) })}
-            className="w-24 accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer"
-          />
-          <span className="text-xs font-mono-tabular text-slate-200 w-9 text-right">
-            {options.progressBarPercent}%
-          </span>
-        </div>
-      )}
 
       {options.pixelSnap && (
         <div className="flex items-center gap-2 min-w-[155px]">
