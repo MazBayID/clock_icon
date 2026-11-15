@@ -22,8 +22,8 @@ export const UiAssetCanvas: React.FC<UiAssetCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const meta = getUiAssetMeta(assetId);
-  const width = options.width || meta.width;
-  const height = options.height || meta.height;
+  const width = options.assetSizes?.[assetId]?.width || meta.width;
+  const height = options.assetSizes?.[assetId]?.height || meta.height;
 
   useEffect(() => {
     const el = canvasRef.current;
