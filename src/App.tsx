@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileArchive, Globe2, Menu, X } from 'lucide-react';
+import { FileArchive, Globe2, Hash, LayoutGrid, Menu, X } from 'lucide-react';
 import { applyLanguage, LANGUAGES, Language } from './i18n';
 import {
   CustomPixelMap,
@@ -8,14 +8,27 @@ import {
   StyleCategory,
   StyleId,
 } from './types/glyph';
+import {
+  CustomUiPixelMap,
+  UiAssetId,
+  UiRenderOptions,
+  UiStyleCategory,
+  UiStyleId,
+} from './types/uiAsset';
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
+import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
+import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
 import {
   downloadSingleGlyphPng,
+  downloadSingleUiAssetPng,
   downloadSpriteSheetPng,
+  downloadUiSpriteSheetPng,
   exportAllStylesZip,
+  exportAllUiStylesZip,
   exportCategoryZip,
   exportStyleZip,
+  exportUiStyleZip,
 } from './engine/exportEngine';
 import { StyleSidebar } from './components/StyleSidebar';
 import { TuningControls } from './components/TuningControls';
@@ -23,12 +36,19 @@ import { AssetSheetGrid } from './components/AssetSheetGrid';
 import { WatchPreview } from './components/WatchPreview';
 import { PixelInspector } from './components/PixelInspector';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
+import { UiStyleSidebar } from './components/UiStyleSidebar';
+import { UiTuningControls } from './components/UiTuningControls';
+import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
+import { UiWatchPreview } from './components/UiWatchPreview';
+import { UiPixelInspector } from './components/UiPixelInspector';
+import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 import { AnimationStudio } from './components/AnimationStudio';
 import { ProgressGeneratorWorkbench } from './generator-v2/components/ProgressGeneratorWorkbench';
 
 type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 
 const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
+const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
 
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
@@ -68,7 +88,17 @@ export default function App() {
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
 
+  // === UI Asset Generator State ===
+  const [selectedUiCategory, setSelectedUiCategory] = useState<UiStyleCategory>('all');
+  const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
+  const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
+  const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
+  const customUiMap = EMPTY_CUSTOM_UI_MAP;
+  const [isExportingUi, setIsExportingUi] = useState(false);
+  const [isExportingAllUi, setIsExportingAllUi] = useState(false);
+
   const activeStyleMeta = getStyleMeta(selectedStyleId);
+  const activeUiStyleMeta = getUiStyleMeta(selectedUiStyleId);
 
   // === Numeral Handlers ===
   const handleSelectStyle = (id: StyleId) => {
@@ -104,6 +134,34 @@ export default function App() {
       await exportAllStylesZip(options, customMap);
     } finally {
       setIsExportingAll(false);
+    }
+  };
+
+  // === UI Asset Handlers ===
+  const handleSelectUiStyle = (id: UiStyleId) => {
+    setSelectedUiStyleId(id);
+    const meta = getUiStyleMeta(id);
+    setUiOptions((prev) => ({
+      ...prev,
+      pixelSnap: meta.recommendedMode === 'pixel-snap',
+    }));
+  };
+
+  const handleDownloadUiStyleZip = async () => {
+    setIsExportingUi(true);
+    try {
+      await exportUiStyleZip(selectedUiStyleId, uiOptions, customUiMap);
+    } finally {
+      setIsExportingUi(false);
+    }
+  };
+
+  const handleDownloadAllUiZip = async () => {
+    setIsExportingAllUi(true);
+    try {
+      await exportAllUiStylesZip(uiOptions, customUiMap);
+    } finally {
+      setIsExportingAllUi(false);
     }
   };
 
@@ -195,7 +253,232 @@ export default function App() {
               <FileArchive className="w-3.5 h-3.5" />
               {isExporting ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh Paket Lengkap (ZIP)</span><span className="sm:hidden">ZIP</span></>}
             </button>
+          ) : null}
+        </div>
+      </header>
+
+      {isMobileNavOpen && (
+        <nav
+          id="mobile-navigation"
+          aria-label="Navigasi utama"
+          className="md:hidden sticky top-14 z-20 border-b border-white/[0.08] bg-[#090A0D]/[0.98] backdrop-blur px-5 py-3 grid grid-cols-2 gap-2"
+        >
+          {[
+            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
+            { href: '#simulasi', label: 'Simulasi Jam' },
+            { href: '#inspektor', label: 'Inspektor Piksel' },
+            { href: '#komparasi', label: 'Komparasi Gaya' },
+          ].map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsMobileNavOpen(false)}
+              className="rounded-md px-3 py-2.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      )}
+
+      {/* Dedicated Generator Mode Switcher Bar (Separated: Generating Angka vs Generating Asset UI) */}
+      <div className="bg-[#0B0D12] border-b border-white/[0.08] px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+            Pilihan Generating:
+          </span>
+          <div
+            role="tablist"
+            aria-label="Pilihan Mode Generator Aset Smartwatch"
+            className="inline-flex items-center gap-1 p-1 rounded-md bg-black border border-white/[0.08]"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'numerals'}
+              onClick={() => setGeneratorMode('numerals')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'numerals'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <Hash className="w-3.5 h-3.5" />
+              Generator Angka ({GLYPH_STYLES.length} Gaya)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'ui-assets'}
+              onClick={() => setGeneratorMode('ui-assets')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'ui-assets'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Generator Asset UI ({UI_STYLES.length} Gaya)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'animation'}
+              onClick={() => setGeneratorMode('animation')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'animation'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Animation Studio
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-slate-400 font-mono-tabular">
+          {generatorMode === 'numerals' ? (
+            <>
+              <span>Set: 0–9 &amp; : (11 glif)</span>
+              <span aria-hidden="true">·</span>
+              <span>Kanvas: 25×50 px</span>
+            </>
           ) : generatorMode === 'ui-assets' ? (
+            <>
+              <span>Set: {UI_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
+              <span aria-hidden="true">·</span>
+              <span>Palet: #FFFFFF / #000000</span>
+            </>
+          ) : (
+            <>
+              <span>Karakter: Mochi Face</span>
+              <span aria-hidden="true">·</span>
+              <span>Animasi: 10 koleksi</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Main Studio Shell */}
+      {generatorMode === 'numerals' ? (
+        <div id="top" className="flex-1 flex flex-col lg:flex-row">
+          <StyleSidebar
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+            selectedStyleId={selectedStyleId}
+            onSelectStyle={handleSelectStyle}
+            options={options}
+          />
+
+          <main className="flex-1 min-w-0 flex flex-col">
+            {/* Active Numeral Style Header */}
+            <section className="px-6 py-5 border-b border-white/[0.08] bg-[#0B0D12]">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <span className="text-sky-400 font-medium">
+                      {activeStyleMeta.categoryLabel}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{activeStyleMeta.targetWatches}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">25 × 50 px</span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-mono-tabular">#FFFFFF / #000000</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    {activeStyleMeta.name}
+                  </h1>
+                  <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
+                    {activeStyleMeta.architectureNote}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-white/[0.06]">
+                  <div>
+                    <div className="text-[11px] text-slate-400">Karakter</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      0–9 &amp; : (11)
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Dimensi</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      25 × 50 px
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-slate-400">Rasio</div>
+                    <div className="text-base font-mono-tabular font-semibold text-white">
+                      1 : 2
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Calibration Toolbar */}
+            <TuningControls
+              options={options}
+              onChange={setOptions}
+              onReset={() => setOptions(DEFAULT_RENDER_OPTIONS)}
+            />
+
+            {/* Main Numeral Workbench Content */}
+            <div className="p-5 sm:p-6 space-y-6">
+              <div id="aset-grid">
+                <AssetSheetGrid
+                  styleId={selectedStyleId}
+                  options={options}
+                  customMap={customMap}
+                  selectedChar={selectedChar}
+                  onSelectChar={setSelectedChar}
+                  onDownloadGlyph={(ch) =>
+                    downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
+                  }
+                  onDownloadSpriteSheet={() =>
+                    downloadSpriteSheetPng(selectedStyleId, options, customMap)
+                  }
+                  onDownloadStyleZip={handleDownloadStyleZip}
+                  isExporting={isExporting}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
+                <div id="simulasi" className="xl:col-span-5 flex flex-col">
+                  <WatchPreview
+                    styleId={selectedStyleId}
+                    options={options}
+                    customMap={customMap}
+                  />
+                </div>
+
+                <div id="inspektor" className="xl:col-span-7 flex flex-col">
+                  <PixelInspector
+                    char={selectedChar}
+                    styleId={selectedStyleId}
+                    options={options}
+                    onDownloadGlyph={(ch) =>
+                      downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
+                    }
+                  />
+                </div>
+              </div>
+
+              <ComparisonMatrix
+                selectedStyleId={selectedStyleId}
+                onSelectStyle={handleSelectStyle}
+                options={options}
+                onDownloadCyberpunkZip={handleDownloadCyberpunkZip}
+                isExportingCyberpunk={isExportingCyberpunk}
+                onDownloadAllZip={handleDownloadAllZip}
+                isExportingAll={isExportingAll}
+              />
+            </div>
+          </main>
+        </div>
+      ) : generatorMode === 'ui-assets' ? (
         <ProgressGeneratorWorkbench />
       ) : (
         <AnimationStudio />
