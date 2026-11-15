@@ -11,6 +11,7 @@ import {
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
 import { PROGRESS_ASSET_CATALOG } from './generator-v2/model/progress';
+import { ICON_ASSET_CATALOG } from './generator-v2/model/icons';
 import {
   downloadSingleGlyphPng,
   downloadSpriteSheetPng,
@@ -289,7 +290,7 @@ export default function App() {
             </>
           ) : generatorMode === 'ui-assets' ? (
             <>
-              <span>Set: {PROGRESS_ASSET_CATALOG.length} Progress Types</span>
+              <span>Set: {PROGRESS_ASSET_CATALOG.length + ICON_ASSET_CATALOG.length} UI Assets</span>
               <span aria-hidden="true">·</span>
               <span>Palet: #FFFFFF / #000000</span>
             </>
