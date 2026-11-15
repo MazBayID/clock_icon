@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/clock_icon/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
