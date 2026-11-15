@@ -1,4 +1,4 @@
-export const DYNAMIC_UI_ASSET_IDS = ['battery', 'signal', 'wifi-meter', 'progress-arc', 'heart-dynamic'] as const;
+export const DYNAMIC_UI_ASSET_IDS = ['battery', 'signal', 'wifi-meter', 'progress-arc', 'progress-bar', 'heart-dynamic'] as const;
 export const STATIC_UI_ASSET_IDS = ['bluetooth', 'wifi-static', 'weather-sun', 'weather-moon', 'alarm', 'notification', 'heart-static', 'ecg-divider'] as const;
 export const UI_ASSET_IDS = [...DYNAMIC_UI_ASSET_IDS, ...STATIC_UI_ASSET_IDS] as const;
 
@@ -52,6 +52,7 @@ export interface UiRenderOptions {
   batteryLevel: number; // 0 to 100
   signalBars: number; // 0 to 4
   progressPercent: number; // 0 to 100
+  progressBarPercent: number; // 0 to 100
   assetSizes?: Partial<Record<UiAssetId, { width?: number; height?: number }>>;
 }
 
