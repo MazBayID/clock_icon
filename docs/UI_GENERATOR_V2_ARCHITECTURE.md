@@ -19,12 +19,13 @@ Replace the tightly coupled UI-asset controls with a modular generator workspace
 - `catalog/`: asset metadata, groups and style presets.
 - `model/`: typed configuration and validation.
 - `renderers/`: isolated Canvas 2D renderers for progress, status and icon families.
+- `components/`: separate workbenches for progress/status and icon families.
 - `components/`: editor shell, asset picker, context-aware controls, preview and export.
 - `export/`: PNG, sprite sheet and manifest packaging.
 
 ## First implementation slice
 
-The first vertical slice establishes a typed progress model and renderer. It covers battery, signal, linear progress, segmented progress, ring, storage and volume. It is deliberately independent from the legacy UI renderer so it can be validated before the rest of the UI catalog is migrated.
+The first vertical slice establishes a typed progress model and renderer. It covers battery, signal, linear progress, segmented progress, ring, storage and volume. A unified workspace now exposes this progress family alongside the existing icon catalog. The icon family temporarily uses the proven legacy icon renderer as an adapter; its controls and exports are isolated in the V2 workbench while its rendering internals are scheduled for a later migration.
 
 ## Migration policy
 
