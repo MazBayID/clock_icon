@@ -243,13 +243,11 @@ export async function downloadSingleUiAssetPng(assetId: UiAssetId, styleId: UiSt
   const size = uiSize(assetId, options), canvas = renderUiAssetToCanvas(assetId, styleId, options, customMap[styleId]?.[assetId] ?? null);
   triggerBlobDownload(await canvasToPngBlob(canvas), styleId + '_' + assetId + '_' + size.width + 'x' + size.height + '.png');
 }
-export async function exportSingleStaticUiAssetZip(assetId: UiAssetId, styleId: UiStyleId, options: UiRenderOptions, customMap: CustomUiPixelMap) {
+export async function downloadSingleStaticUiAssetPng(assetId: UiAssetId, styleId: UiStyleId, options: UiRenderOptions, customMap: CustomUiPixelMap) {
   if (!(STATIC_UI_ASSET_IDS as readonly string[]).includes(assetId)) throw new Error('Bukan ikon statis.');
-  const zip = new JSZip(), meta = getUiAssetMeta(assetId), size = uiSize(assetId, options);
+  const size = uiSize(assetId, options);
   const canvas = renderUiAssetToCanvas(assetId, styleId, options, customMap[styleId]?.[assetId] ?? null);
-  zip.file(assetId + '_' + size.width + 'x' + size.height + '.png', await canvasToPngBlob(canvas));
-  zip.file('manifest.json', JSON.stringify({ styleId, asset: { id: assetId, name: meta.name, width: size.width, height: size.height }, renderOptions: options }, null, 2));
-  triggerBlobDownload(await zip.generateAsync({ type: 'blob' }), 'ui_static_' + assetId + '.zip');
+  triggerBlobDownload(await canvasToPngBlob(canvas), 'ui_static_' + assetId + '_' + size.width + 'x' + size.height + '.png');
 }
 export async function exportSingleDynamicUiAssetZip(assetId: UiAssetId, styleId: UiStyleId, options: UiRenderOptions, customMap: CustomUiPixelMap) {
   if (!(DYNAMIC_UI_ASSET_IDS as readonly string[]).includes(assetId)) throw new Error('Bukan ikon dinamis.');
