@@ -15,6 +15,16 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
 }) => {
   return (
     <div className="bg-[#0C0E13] border-b border-white/[0.08] px-5 py-3.5 flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
+        <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
+        <input id="ui-width" type="number" min={8} max={256} placeholder="Auto" value={options.width ?? ''} onChange={(e) => onChange({ ...options, width: e.target.value === '' ? undefined : Math.max(8, Math.min(256, Number(e.target.value))) })} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <span className="text-[11px] text-slate-500">×</span>
+        <label className="text-[11px] text-slate-500" htmlFor="ui-height">H</label>
+        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={options.height ?? ''} onChange={(e) => onChange({ ...options, height: e.target.value === '' ? undefined : Math.max(8, Math.min(256, Number(e.target.value))) })} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <span className="text-[10px] text-slate-500">8–256 px · kosong = ukuran asli</span>
+      </div>
+
       {/* Render Precision Toggle */}
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Mode Render:</span>
@@ -80,7 +90,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         <input
           id="ui-battery-slider"
           type="range"
-          min={10}
+          min={0}
           max={100}
           step={10}
           value={options.batteryLevel}
@@ -126,7 +136,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         <input
           id="ui-progress-slider"
           type="range"
-          min={10}
+          min={0}
           max={100}
           step={5}
           value={options.progressPercent}
