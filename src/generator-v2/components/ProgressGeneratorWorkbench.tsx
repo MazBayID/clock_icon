@@ -19,14 +19,7 @@ const STYLE_OPTIONS: { id: ProgressStyle; label: string }[] = [
   { id: 'tactical', label: 'Tactical' },
 ];
 
-function saveBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
+
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
