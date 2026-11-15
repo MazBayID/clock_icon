@@ -1,6 +1,6 @@
 {
   "name": "ChronoGlyph Studio",
-  "description": "Generator aset angka jam digital smartwatch profesional 25x50 pixel putih di atas hitam dengan gaya modern, elegan, berteknologi, dan cyberpunk.",
+  "description": "Generator and pixel inspector for smartwatch numerals (25×50 px) and monochrome smartwatch UI assets, with live previews and firmware-oriented exports.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
