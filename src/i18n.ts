@@ -272,7 +272,7 @@ export function applyLanguage(root: HTMLElement, language: Language): void {
     attributes.forEach((attribute) => {
       const current = element.getAttribute(attribute);
       if (current === null) return;
-      const dataKey = 'i18nOriginal' + attribute;
+      const dataKey = 'i18nOriginal' + attribute.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
       if (element.dataset[dataKey] === undefined) {
         element.dataset[dataKey] = current;
       }
