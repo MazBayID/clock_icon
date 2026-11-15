@@ -167,7 +167,8 @@ function uiFrames(assetId: UiAssetId, options: UiRenderOptions): UiFrame[] {
 }
 function uiSize(id: UiAssetId, options: UiRenderOptions) {
   const meta = getUiAssetMeta(id);
-  return { width: options.width || meta.width, height: options.height || meta.height };
+  const custom = options.assetSizes?.[id];
+  return { width: custom?.width || meta.width, height: custom?.height || meta.height };
 }
 function buildDynamicSheet(id: UiAssetId, styleId: UiStyleId, options: UiRenderOptions, customMap: CustomUiPixelMap) {
   const frames = uiFrames(id, options), size = uiSize(id, options);
@@ -236,7 +237,7 @@ function makeUiManifest(styleId: UiStyleId, options: UiRenderOptions, dynamic: u
   return { schemaVersion: 2, generator: 'Neo Clock UI Asset Generator',
     style: { id: styleId, name: style.name, category: style.categoryLabel },
     colors: { foreground: '#FFFFFF', background: '#000000' },
-    outputDimensions: { width: options.width || 'native', height: options.height || 'native' },
+    outputDimensions: { mode: 'per-asset', customSizes: options.assetSizes || {}, nativeFallback: true },
     renderOptions: options, groups: { dynamic: { assets: dynamic }, static: { assets: statics } } };
 }
 export async function downloadSingleUiAssetPng(assetId: UiAssetId, styleId: UiStyleId, options: UiRenderOptions, customMap: CustomUiPixelMap) {
