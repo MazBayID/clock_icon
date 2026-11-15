@@ -138,13 +138,6 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
                 />
                 <div className="flex items-center gap-3">
                   <UiAssetCanvas
-                    assetId="steps"
-                    styleId={styleId}
-                    options={options}
-                    customPixels={customMap[styleId]?.['steps'] ?? null}
-                    scale={0.7}
-                  />
-                  <UiAssetCanvas
                     assetId="notification"
                     styleId={styleId}
                     options={options}
@@ -276,8 +269,7 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
               <UiAssetCanvas assetId="wifi-meter" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="bluetooth" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="heart-dynamic" styleId={styleId} options={options} scale={1} />
-              <UiAssetCanvas assetId="steps" styleId={styleId} options={options} scale={1} />
-              <UiAssetCanvas assetId="notification" styleId={styleId} options={options} scale={1} />
+                            <UiAssetCanvas assetId="notification" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="alarm" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId={weatherAsset} styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="progress-arc" styleId={styleId} options={options} scale={1} />
