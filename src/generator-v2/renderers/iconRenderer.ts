@@ -8,16 +8,6 @@ type RendererOptions = IconRenderOptions & {
   progressPercent: number;
 };
 
-export const DEFAULT_UI_RENDER_OPTIONS: UiRenderOptions = {
-  strokeScale: 1.0,
-  padding: 1,
-  pixelSnap: false,
-  threshold: 128,
-  batteryLevel: 80,
-  signalBars: 4,
-  progressPercent: 72,
-};
-
 interface UiBox {
   w: number;
   h: number;
