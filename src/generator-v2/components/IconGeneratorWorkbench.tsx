@@ -5,7 +5,7 @@ import { Download, Grid3X3, Package, RotateCcw } from 'lucide-react';
 import { UiStyleId, UI_STYLES } from '../model/styles';
 import { createDefaultIconRenderOptions, DEFAULT_ICON_RENDER_OPTIONS, ICON_ASSET_CATALOG, IconAssetId, IconRenderOptions, normalizeIconRenderOptions } from '../model/icons';
 import { renderIconAsset } from '../renderers/iconRenderer';
-import { createSpriteSheetCanvas } from '../export/spriteSheet';
+import { createSpriteSheetCanvas, createSpriteSheetManifest } from '../export/spriteSheet';
 
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -53,9 +53,23 @@ export const IconGeneratorWorkbench: React.FC = () => {
   const downloadSpriteSheet = async () => {
     setExportingSheet(true);
     try {
-      const items = ICON_ASSET_CATALOG.map((asset) => ({ id: asset.id, canvas: renderIconAsset(asset.id, styleId, normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height })) }));
-      const sheet = createSpriteSheetCanvas(items, 4, 2);
-      downloadBlob(await canvasBlob(sheet), 'clock-icon-ui-icons-' + styleId + '-spritesheet.png');
+      const items = ICON_ASSET_CATALOG.map((asset) => ({
+        id: asset.id,
+        canvas: renderIconAsset(asset.id, styleId, normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height })),
+      }));
+      const columns = 4;
+      const gap = 2;
+      const sheet = createSpriteSheetCanvas(items, columns, gap);
+      const filename = 'clock-icon-ui-icons-' + styleId + '-spritesheet';
+      downloadBlob(await canvasBlob(sheet), filename + '.png');
+      downloadBlob(new Blob([JSON.stringify({
+        generator: 'Clock Icon UI Generator V2',
+        family: 'icons',
+        style: styleId,
+        background: '#000000',
+        renderOptions: { ...options },
+        ...createSpriteSheetManifest(items, columns, gap),
+      }, null, 2)], { type: 'application/json' }), filename + '.json');
     } finally { setExportingSheet(false); }
   };
 
@@ -63,14 +77,34 @@ export const IconGeneratorWorkbench: React.FC = () => {
     setPackaging(true);
     try {
       const zip = new JSZip();
-      const manifest: { id: string; filename: string; width: number; height: number }[] = [];
+      const manifest: {
+        id: string;
+        filename: string;
+        width: number;
+        height: number;
+        renderOptions: IconRenderOptions;
+      }[] = [];
       for (const asset of ICON_ASSET_CATALOG) {
         const assetOptions = normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height });
         const canvas = renderIconAsset(asset.id, styleId, assetOptions);
         zip.file(`icons/${asset.id}.png`, await canvasBlob(canvas));
-        manifest.push({ id: asset.id, filename: `icons/${asset.id}.png`, width: asset.width, height: asset.height });
+        manifest.push({
+          id: asset.id,
+          filename: `icons/${asset.id}.png`,
+          width: canvas.width,
+          height: canvas.height,
+          renderOptions: assetOptions,
+        });
       }
-      zip.file('manifest.json', JSON.stringify({ generator: 'Clock Icon UI Generator V2', family: 'icons', style: styleId, format: 'PNG', assets: manifest }, null, 2));
+      zip.file('manifest.json', JSON.stringify({
+        generator: 'Clock Icon UI Generator V2',
+        family: 'icons',
+        style: styleId,
+        format: 'PNG',
+        background: '#000000',
+        sharedRenderOptions: { ...options },
+        assets: manifest,
+      }, null, 2));
       downloadBlob(await zip.generateAsync({ type: 'blob' }), `clock-icon-ui-icons-${styleId}.zip`);
     } finally {
       setPackaging(false);
