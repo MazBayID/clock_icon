@@ -95,7 +95,7 @@ export const WatchPreview: React.FC<WatchPreviewProps> = ({
             Simulasi Layar Smartwatch
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Dirender langsung dari kanvas 25×50px aktual pada latar hitam OLED.
+            Dirender dari kanvas 25×50px aktual. Data kesehatan dan baterai adalah simulasi.
           </p>
         </div>
 
@@ -257,9 +257,11 @@ export const WatchPreview: React.FC<WatchPreviewProps> = ({
         <div className="flex items-center gap-3">
           {timeMode === 'custom' && (
             <input
-              type="text"
+              type="time"
               value={customTime}
-              maxLength={5}
+              min="00:00"
+              max="23:59"
+              step={60}
               onChange={(e) => setCustomTime(e.target.value)}
               placeholder="10:48"
               aria-label="Masukkan waktu uji kustom"
