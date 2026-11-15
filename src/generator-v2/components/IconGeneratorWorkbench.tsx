@@ -102,7 +102,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
             <span className="text-xs font-mono text-slate-500">{options.width}×{options.height}px</span>
           </div>
           <div className="min-h-[250px] rounded-md border border-white/[0.08] bg-black flex items-center justify-center overflow-auto p-8">
-            <canvas ref={canvasRef} width={options.width} height={options.height} className="pixelated-canvas block" style={{ width: `${Math.min(activeAsset.width * 5, 480)}px`, height: 'auto', imageRendering: 'pixelated' }} />
+            <canvas ref={canvasRef} width={options.width} height={options.height} className="pixelated-canvas block" style={{ width: `${Math.min(options.width * 5, 480)}px`, height: 'auto', imageRendering: 'pixelated' }} />
           </div>
           <div className="flex flex-wrap justify-between gap-2 mt-4 text-[11px] font-mono text-slate-500"><span>{activeAsset.id}.png</span><span>{styleId}</span><span>#FFFFFF / #000000</span></div>
         </section>
