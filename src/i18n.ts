@@ -83,7 +83,7 @@ const dictionaries: Record<Exclude<Language, 'id'>, Record<string, string>> = {
     'Identifier / Prefix': 'Identifier / Prefix', 'Cakupan Karakter': 'Character Range',
     'Semua 11': 'All 11', 'Brightness / Alpha Threshold': 'Brightness / Alpha Threshold',
     'Sertakan allArray[11]': 'Include allArray[11]', 'Karakter Paket (25×50px)': 'Package Characters (25×50px)',
-    'Katalog Gaya Aset UI': 'UI Asset Style Catalog', 'Mode Render:': 'Render Mode:',
+    'Katalog Gaya Aset UI': 'UI Asset Style Catalog',
     'Tebal Garis': 'Line Thickness', 'Baterai': 'Battery', 'Progres': 'Progress',
     'Ambang': 'Threshold', 'Reset UI': 'Reset UI', 'Set Aset UI Smartwatch Lengkap (12 Ikon & Widget HUD)': 'Complete Smartwatch UI Asset Set (12 Icons & HUD Widgets)',
     '12 elemen UI siap pakai · Putih (#FFFFFF) di atas Hitam (#000000). Klik aset untuk inspeksi & edit piksel.': '12 ready-to-use UI elements · White (#FFFFFF) on Black (#000000). Select an asset to inspect and edit its pixels.',
@@ -100,7 +100,7 @@ const dictionaries: Record<Exclude<Language, 'id'>, Record<string, string>> = {
     'Elemen Paket UI (12 Aset)': 'UI Package Elements (12 Assets)',
     'Perbandingan 10 Gaya Aset UI Smartwatch': 'Comparison of 10 Smartwatch UI Asset Styles',
     'Bandingkan seluruh bahasa visual UI mulai dari Swiss Micro-Line, Horologi, Aerospace HUD, hingga Cyberpunk UI secara berdampingan.': 'Compare all UI visual languages side by side, from Swiss Micro-Line and Horology to Aerospace HUD and Cyberpunk UI.',
-    'Ulangi': 'Repeat', 'Pilih koleksi karakter': 'Choose a Character Collection',
+    'Ulangi': 'Repeat',
   },
   fil: {
     'Aset 25×50': 'Mga Asset 25×50', 'Aset UI': 'Mga UI Asset', 'Simulasi Jam': 'Preview ng Relo',
