@@ -55,7 +55,6 @@ const dictionaries: Record<Exclude<Language, 'id'>, Record<string, string>> = {
     'File audio tidak dapat dimuat. Periksa jalur aset WAV.': 'Audio file could not be loaded. Check the WAV asset path.',
     'Unduh Paket Lengkap (PNG + BMP + image2cpp ZIP)': 'Download Full Package (PNG + BMP + image2cpp ZIP)',
     'Koordinat 0–9 & : pada Sprite 275×50': 'Coordinates 0–9 & : on 275×50 Sprite',
-    'Mengemas Paket...': 'Packaging package...', 'Palet ekspor': 'Export Palette',
     'Generator Angka': 'Numeral Generator', 'Generator Asset UI': 'UI Asset Generator',
     'Gaya Cyberpunk': 'Cyberpunk Styles', 'Unduh Semua': 'Download All',
     'Pilih': 'Select', 'Reset': 'Reset', 'Default': 'Default',
