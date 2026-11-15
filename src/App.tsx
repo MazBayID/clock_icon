@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { FileArchive, Hash, LayoutGrid, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FileArchive, Globe2, Hash, LayoutGrid, Menu, X } from 'lucide-react';
+import { applyLanguage, LANGUAGES, Language } from './i18n';
 import {
   CustomPixelMap,
   GlyphChar,
@@ -54,6 +55,30 @@ const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [language, setLanguage] = useState<Language>(() => {
+    try {
+      const saved = window.localStorage.getItem('neo-clock-language') as Language | null;
+      return saved && LANGUAGES.some((item) => item.code === saved) ? saved : 'en';
+    } catch {
+      return 'en';
+    }
+  });
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
+    document.documentElement.lang = language === 'zh' ? 'zh-CN' : language;
+    try {
+      window.localStorage.setItem('neo-clock-language', language);
+    } catch {
+      // Language selection still works for this page session when storage is unavailable.
+    }
+    applyLanguage(root, language);
+    const observer = new MutationObserver(() => applyLanguage(root, language));
+    observer.observe(root, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [language]);
 
   // === Numeral Generator State ===
   const [selectedCategory, setSelectedCategory] = useState<StyleCategory>('all');
@@ -187,6 +212,35 @@ export default function App() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="relative">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/[0.12] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+              aria-label="Choose language"
+              aria-haspopup="menu"
+              aria-expanded={isLanguageMenuOpen}
+              onClick={() => setIsLanguageMenuOpen((open) => !open)}
+            >
+              <Globe2 className="w-4 h-4" />
+            </button>
+            {isLanguageMenuOpen && (
+              <div role="menu" aria-label="Language" className="absolute right-0 top-11 z-50 min-w-44 rounded-lg border border-white/15 bg-[#081322]/95 p-1.5 shadow-2xl backdrop-blur-xl">
+                {LANGUAGES.map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={language === item.code}
+                    onClick={() => { setLanguage(item.code); setIsLanguageMenuOpen(false); }}
+                    className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-xs transition-colors ${language === item.code ? "bg-sky-400/15 text-white" : "text-slate-300 hover:bg-white/[0.07] hover:text-white"}`}
+                  >
+                    <span>{item.native}</span>
+                    <span className="text-[10px] text-slate-500">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/[0.12] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
