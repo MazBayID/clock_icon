@@ -110,6 +110,15 @@ export const UI_ASSET_CATALOG: UiAssetMeta[] = [
     description: 'Widget gauge melingkar 48×48px dengan jalur latar dan busur target.',
   },
   {
+    id: 'progress-bar',
+    name: 'Progress Bar Horizontal',
+    shortLabel: 'Progress Bar',
+    group: 'Widget & HUD',
+    width: 64,
+    height: 16,
+    description: 'Bilah progres horizontal dengan isi dinamis 0–100%.',
+  },
+  {
     id: 'ecg-divider',
     name: 'Gelombang Telemetry & HUD',
     shortLabel: 'ECG Bar',
