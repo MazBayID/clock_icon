@@ -796,8 +796,9 @@ export function renderUiAssetToCanvas(
   targetCanvas?: HTMLCanvasElement | null
 ): HTMLCanvasElement {
   const meta = getUiAssetMeta(assetId);
-  const w = Math.max(8, Math.min(256, Math.round(options.width || meta.width)));
-  const h = Math.max(8, Math.min(256, Math.round(options.height || meta.height)));
+  const customSize = options.assetSizes?.[assetId];
+  const w = Math.max(8, Math.min(256, Math.round(customSize?.width || meta.width)));
+  const h = Math.max(8, Math.min(256, Math.round(customSize?.height || meta.height)));
 
   const canvas = targetCanvas ?? document.createElement('canvas');
   if (canvas.width !== w) canvas.width = w;
