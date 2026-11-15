@@ -40,6 +40,8 @@ export function getIconAssetMeta(id: IconAssetId): IconAssetMeta {
 
 
 export interface IconRenderOptions {
+  width: number;
+  height: number;
   strokeScale: number;
   padding: number;
   pixelSnap: boolean;
@@ -47,14 +49,23 @@ export interface IconRenderOptions {
 }
 
 export const DEFAULT_ICON_RENDER_OPTIONS: IconRenderOptions = {
+  width: 28,
+  height: 28,
   strokeScale: 1,
   padding: 1,
   pixelSnap: false,
   threshold: 128,
 };
 
+export function createDefaultIconRenderOptions(id: IconAssetId): IconRenderOptions {
+  const asset = getIconAssetMeta(id);
+  return { ...DEFAULT_ICON_RENDER_OPTIONS, width: asset.width, height: asset.height };
+}
+
 export function normalizeIconRenderOptions(options: IconRenderOptions): IconRenderOptions {
   return {
+    width: Math.max(8, Math.min(512, Math.round(Number.isFinite(options.width) ? options.width : 28))),
+    height: Math.max(8, Math.min(512, Math.round(Number.isFinite(options.height) ? options.height : 28))),
     strokeScale: Math.max(0.75, Math.min(1.3, Number.isFinite(options.strokeScale) ? options.strokeScale : 1)),
     padding: Math.max(0, Math.min(3, Math.round(Number.isFinite(options.padding) ? options.padding : 1))),
     pixelSnap: Boolean(options.pixelSnap),
