@@ -55,7 +55,7 @@ export default function App() {
   const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('ronin-katana-split');
   const [selectedChar, setSelectedChar] = useState<GlyphChar>('8');
   const [options, setOptions] = useState<GlyphRenderOptions>(DEFAULT_RENDER_OPTIONS);
-  const [customMap, setCustomMap] = useState<CustomPixelMap>({});
+  const customMap: CustomPixelMap = {};
   const [isExporting, setIsExporting] = useState(false);
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
@@ -65,7 +65,7 @@ export default function App() {
   const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
   const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
   const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
-  const [customUiMap, setCustomUiMap] = useState<CustomUiPixelMap>({});
+  const customUiMap: CustomUiPixelMap = {};
   const [isExportingUi, setIsExportingUi] = useState(false);
   const [isExportingAllUi, setIsExportingAllUi] = useState(false);
 
@@ -80,27 +80,6 @@ export default function App() {
       ...prev,
       pixelSnap: meta.recommendedMode === 'pixel-snap',
     }));
-  };
-
-  const handleUpdateCustomPixels = (char: GlyphChar, pixels: Uint8ClampedArray) => {
-    setCustomMap((prev) => ({
-      ...prev,
-      [selectedStyleId]: {
-        ...(prev[selectedStyleId] ?? {}),
-        [char]: pixels,
-      },
-    }));
-  };
-
-  const handleResetCustomPixels = (char: GlyphChar) => {
-    setCustomMap((prev) => {
-      const styleMap = { ...(prev[selectedStyleId] ?? {}) };
-      delete styleMap[char];
-      return {
-        ...prev,
-        [selectedStyleId]: styleMap,
-      };
-    });
   };
 
   const handleDownloadStyleZip = async () => {
@@ -138,30 +117,6 @@ export default function App() {
       ...prev,
       pixelSnap: meta.recommendedMode === 'pixel-snap',
     }));
-  };
-
-  const handleUpdateCustomUiPixels = (
-    assetId: UiAssetId,
-    pixels: Uint8ClampedArray
-  ) => {
-    setCustomUiMap((prev) => ({
-      ...prev,
-      [selectedUiStyleId]: {
-        ...(prev[selectedUiStyleId] ?? {}),
-        [assetId]: pixels,
-      },
-    }));
-  };
-
-  const handleResetCustomUiPixels = (assetId: UiAssetId) => {
-    setCustomUiMap((prev) => {
-      const styleMap = { ...(prev[selectedUiStyleId] ?? {}) };
-      delete styleMap[assetId];
-      return {
-        ...prev,
-        [selectedUiStyleId]: styleMap,
-      };
-    });
   };
 
   const handleDownloadUiStyleZip = async () => {
@@ -412,9 +367,6 @@ export default function App() {
                     char={selectedChar}
                     styleId={selectedStyleId}
                     options={options}
-                    customPixels={customMap[selectedStyleId]?.[selectedChar] ?? null}
-                    onUpdateCustomPixels={handleUpdateCustomPixels}
-                    onResetCustomPixels={handleResetCustomPixels}
                     onDownloadGlyph={(ch) =>
                       downloadSingleGlyphPng(ch, selectedStyleId, options, customMap)
                     }
@@ -542,11 +494,6 @@ export default function App() {
                     assetId={selectedUiAssetId}
                     styleId={selectedUiStyleId}
                     options={uiOptions}
-                    customPixels={
-                      customUiMap[selectedUiStyleId]?.[selectedUiAssetId] ?? null
-                    }
-                    onUpdateCustomPixels={handleUpdateCustomUiPixels}
-                    onResetCustomPixels={handleResetCustomUiPixels}
                     onDownloadAsset={(id) =>
                       downloadSingleUiAssetPng(
                         id,
