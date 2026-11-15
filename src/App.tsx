@@ -218,7 +218,6 @@ export default function App() {
               {isExportingUi ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh ZIP (Aset UI)</span><span className="sm:hidden">ZIP UI</span></>}
             </button>
           ) : null}
-}
         </div>
       </header>
 
@@ -587,8 +586,6 @@ export default function App() {
             </div>
           </main>
         </div>
-      )}
-
       ) : (
         <AnimationStudio />
       )}
