@@ -1,4 +1,4 @@
-import { IconAssetId, getIconAssetMeta, IconRenderOptions } from '../model/icons';
+import { IconAssetId, IconRenderOptions } from '../model/icons';
 import { UiStyleId } from '../model/styles';
 
 type RendererAssetId = IconAssetId | 'battery' | 'signal' | 'progress-arc';
@@ -820,9 +820,8 @@ export function renderIconAsset(
   options: IconRenderOptions,
   targetCanvas?: HTMLCanvasElement | null
 ): HTMLCanvasElement {
-  const meta = getIconAssetMeta(assetId);
-  const w = meta.width;
-  const h = meta.height;
+  const w = options.width;
+  const h = options.height;
   const canvas = targetCanvas ?? document.createElement('canvas');
   if (canvas.width !== w) canvas.width = w;
   if (canvas.height !== h) canvas.height = h;
