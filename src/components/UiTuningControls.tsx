@@ -133,15 +133,18 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
             <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.progressBarPercent}%</span>
           </>
         )}
-        {options.pixelSnap && (
-        {selectedAssetId !== 'battery' && selectedAssetId !== 'signal' && selectedAssetId !== 'wifi-meter' && selectedAssetId !== 'progress-arc' && selectedAssetId !== 'progress-bar' && (
-          <>
-            <span className="text-xs text-slate-400 whitespace-nowrap">Ketebalan ikon</span>
-            <input aria-label="Ketebalan ikon preview" type="range" min={0.75} max={1.3} step={0.05} value={options.strokeScale} onChange={(e) => onChange({ ...options, strokeScale: parseFloat(e.target.value) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
-            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.strokeScale.toFixed(2)}×</span>
-          </>
-        )}
-        )}
+        {options.pixelSnap &&
+          selectedAssetId !== 'battery' &&
+          selectedAssetId !== 'signal' &&
+          selectedAssetId !== 'wifi-meter' &&
+          selectedAssetId !== 'progress-arc' &&
+          selectedAssetId !== 'progress-bar' && (
+            <>
+              <span className="text-xs text-slate-400 whitespace-nowrap">Ketebalan ikon</span>
+              <input aria-label="Ketebalan ikon preview" type="range" min={0.75} max={1.3} step={0.05} value={options.strokeScale} onChange={(e) => onChange({ ...options, strokeScale: parseFloat(e.target.value) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+              <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.strokeScale.toFixed(2)}×</span>
+            </>
+          )}
       </div>
 
       {options.pixelSnap && (
