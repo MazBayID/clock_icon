@@ -965,8 +965,10 @@ export function renderUiAssetToCanvas(
 ): HTMLCanvasElement {
   const meta = getUiAssetMeta(assetId);
   const customSize = options.assetSizes?.[assetId];
-  const w = Math.max(8, Math.min(256, Math.round(customSize?.width || meta.width)));
-  const minHeight = assetId === 'progress-bar' ? 2 : 8;
+  const isSharpProgressBar = assetId === 'progress-bar' && options.pixelSnap;
+  const minWidth = isSharpProgressBar ? 1 : 8;
+  const minHeight = isSharpProgressBar ? 1 : 8;
+  const w = Math.max(minWidth, Math.min(256, Math.round(customSize?.width || meta.width)));
   const h = Math.max(minHeight, Math.min(256, Math.round(customSize?.height || meta.height)));
 
   const canvas = targetCanvas ?? document.createElement('canvas');
@@ -993,6 +995,19 @@ export function renderUiAssetToCanvas(
   // Strict pure #000000 background
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, w, h);
+
+  // Sharp 1-bit Progress Bar is a dedicated pixel primitive, not a framed icon.
+  // Its canvas dimensions are independent and the filled area uses the full
+  // height, with no style ornaments, outline, padding, or aspect-ratio fitting.
+  if (isSharpProgressBar) {
+    const pct = Math.max(0, Math.min(1, options.progressBarPercent / 100));
+    const fillWidth = pct <= 0 ? 0 : Math.min(w, Math.max(1, Math.round(w * pct)));
+    if (fillWidth > 0) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, fillWidth, h);
+    }
+    return canvas;
+  }
 
   const box = getUiBox(w, h, options.padding);
 
