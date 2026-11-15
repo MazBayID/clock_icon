@@ -574,14 +574,12 @@ export default function App() {
                   customMap={customUiMap}
                   selectedAssetId={selectedUiAssetId}
                   onSelectAsset={setSelectedUiAssetId}
-                  onDownloadAsset={(id) =>
-                    downloadSingleUiAssetPng(id, selectedUiStyleId, uiOptions, customUiMap)
-                  }
-                  onDownloadSpriteSheet={() =>
-                    downloadUiSpriteSheetPng(selectedUiStyleId, uiOptions, customUiMap)
-                  }
-                  onDownloadStyleZip={handleDownloadUiStyleZip}
-                  isExporting={isExportingUi}
+                  onDownloadSingleStatic={handleExportStaticOne}
+                  onDownloadAllStatic={handleExportAllStatic}
+                  onDownloadSingleDynamic={handleExportDynamicOne}
+                  onDownloadAllDynamic={handleExportAllDynamic}
+                  onDownloadFullZip={handleDownloadUiStyleZip}
+                  isExporting={isExportingUi || isExportingUiAction}
                 />
               </div>
 
