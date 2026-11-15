@@ -9,6 +9,13 @@
   body {
     font-family: var(--font-sans);
     background-color: #090A0D;
+    background-image:
+      linear-gradient(rgba(9, 10, 13, 0.76), rgba(9, 10, 13, 0.86)),
+      url('/clock_icon/background_clock.jpg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: #F2F4F8;
   }
 }
