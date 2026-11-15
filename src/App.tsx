@@ -560,6 +560,7 @@ export default function App() {
 
             {/* UI Calibration Toolbar */}
             <UiTuningControls
+              selectedAssetId={selectedUiAssetId}
               options={uiOptions}
               onChange={setUiOptions}
               onReset={() => setUiOptions(DEFAULT_UI_RENDER_OPTIONS)}
