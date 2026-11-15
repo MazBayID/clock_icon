@@ -60,8 +60,8 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
     const height = pendingHeight.trim() === '' ? nativeSize.height : Number(pendingHeight);
     if (!Number.isFinite(width) || !Number.isFinite(height) ||
         !Number.isInteger(width) || !Number.isInteger(height) ||
-        width < 8 || width > 256 || height < 8 || height > 256) {
-      setSizeError('Masukkan ukuran bilangan bulat antara 8–256 px.');
+        width < 8 || width > 256 || height < (selectedAssetId === 'progress-bar' ? 2 : 8) || height > 256) {
+      setSizeError('Lebar harus 8–256 px; tinggi Progress Bar 2–256 px, ikon lain 8–256 px.');
       return;
     }
     onChange({
