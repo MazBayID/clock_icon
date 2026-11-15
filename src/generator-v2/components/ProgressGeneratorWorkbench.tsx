@@ -91,7 +91,7 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
         zip.file(`assets/${meta.id}.png`, blob);
         manifest.push({
           id: meta.id,
-          filename: `${meta.id}.png`,
+          filename: `assets/${meta.id}.png`,
           width: assetConfig.width,
           height: assetConfig.height,
           value: assetConfig.value,
@@ -100,6 +100,11 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
       zip.file('manifest.json', JSON.stringify({
         generator: 'Clock Icon UI Generator V2',
         format: 'PNG',
+        style: config.style,
+        showTrack: config.showTrack,
+        strokeWidth: config.strokeWidth,
+        cornerRadius: config.cornerRadius,
+        gap: config.gap,
         assets: manifest,
       }, null, 2));
       saveBlob(await zip.generateAsync({ type: 'blob' }), 'clock-icon-ui-progress-assets.zip');
