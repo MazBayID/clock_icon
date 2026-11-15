@@ -67,7 +67,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
         const assetOptions = normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height });
         const canvas = renderIconAsset(asset.id, styleId, assetOptions);
         zip.file(`icons/${asset.id}.png`, await canvasBlob(canvas));
-        manifest.push({ id: asset.id, filename: `${asset.id}.png`, width: asset.width, height: asset.height });
+        manifest.push({ id: asset.id, filename: `icons/${asset.id}.png`, width: asset.width, height: asset.height });
       }
       zip.file('manifest.json', JSON.stringify({ generator: 'Clock Icon UI Generator V2', family: 'icons', style: styleId, format: 'PNG', assets: manifest }, null, 2));
       downloadBlob(await zip.generateAsync({ type: 'blob' }), `clock-icon-ui-icons-${styleId}.zip`);
