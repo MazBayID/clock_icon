@@ -26,7 +26,7 @@ import {
   downloadUiSpriteSheetPng,
   exportAllStylesZip,
   exportAllUiStylesZip,
-  exportSingleStaticUiAssetZip,
+  downloadSingleStaticUiAssetPng,
   exportSingleDynamicUiAssetZip,
   exportAllStaticUiAssetsZip,
   exportAllDynamicUiAssetsZip,
