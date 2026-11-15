@@ -57,7 +57,7 @@ export interface UiRenderOptions {
   assetSizes?: Partial<Record<UiAssetId, { width?: number; height?: number }>>;
 }
 
-export type CustomUiPixelMap = Partial<Record<UiStyleId, Partial<Record<UiAssetId, Uint8ClampedArray>>>>;
+export type CustomUiPixelMap = Partial<Record<UiStyleId, Partial<Record<UiAssetId, Int16Array>>>>;
 
 export interface UiAssetMetrics {
   activePixels: number;

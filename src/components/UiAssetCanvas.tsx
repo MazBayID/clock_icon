@@ -7,7 +7,7 @@ interface UiAssetCanvasProps {
   assetId: UiAssetId;
   styleId: UiStyleId;
   options: UiRenderOptions;
-  customPixels?: Uint8ClampedArray | null;
+  customPixels?: Int16Array | null;
   scale?: number;
   className?: string;
 }

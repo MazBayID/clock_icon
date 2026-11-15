@@ -18,6 +18,8 @@ interface UiPixelInspectorProps {
   assetId: UiAssetId;
   styleId: UiStyleId;
   options: UiRenderOptions;
+  customPixels: Int16Array | null;
+  onChangeCustomPixels: (pixels: Int16Array) => void;
   onDownloadAsset: (assetId: UiAssetId) => void;
 }
 
@@ -25,10 +27,14 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
   assetId,
   styleId,
   options,
+  customPixels,
+  onChangeCustomPixels,
   onDownloadAsset,
 }) => {
   const [showGrid, setShowGrid] = useState(true);
+  const [editMode, setEditMode] = useState<'draw' | 'erase'>('draw');
   const [hoverCoord, setHoverCoord] = useState<{ x: number; y: number; lum: number } | null>(null);
+  const lastPaintedRef = useRef<string | null>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const meta = getUiAssetMeta(assetId);
   const assetWidth = options.assetSizes?.[assetId]?.width || meta.width;
@@ -38,12 +44,31 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
   const viewH = assetHeight * zoom;
 
   const { alphaMap, metrics } = useMemo(() => {
+    const width = options.assetSizes?.[assetId]?.width || meta.width;
+    const height = options.assetSizes?.[assetId]?.height || meta.height;
     const canvas = renderUiAssetToCanvas(assetId, styleId, options, null);
-    return {
-      alphaMap: extractUiAlphaMap(canvas),
-      metrics: computeUiAssetMetrics(canvas) as UiAssetMetrics,
-    };
-  }, [assetId, styleId, options]);
+    const generated = extractUiAlphaMap(canvas);
+    const pixels = new Uint8ClampedArray(generated);
+    if (customPixels?.length === width * height) {
+      for (let p = 0; p < customPixels.length; p++) {
+        if (customPixels[p] >= 0) pixels[p] = customPixels[p];
+      }
+    }
+    const pixelCanvas = document.createElement('canvas');
+    pixelCanvas.width = width;
+    pixelCanvas.height = height;
+    const context = pixelCanvas.getContext('2d')!;
+    const image = context.createImageData(width, height);
+    for (let p = 0; p < pixels.length; p++) {
+      const offset = p * 4;
+      image.data[offset] = pixels[p];
+      image.data[offset + 1] = pixels[p];
+      image.data[offset + 2] = pixels[p];
+      image.data[offset + 3] = 255;
+    }
+    context.putImageData(image, 0, 0);
+    return { alphaMap: pixels, metrics: computeUiAssetMetrics(pixelCanvas) as UiAssetMetrics };
+  }, [assetId, styleId, options, customPixels, meta.width, meta.height]);
 
   useEffect(() => {
     const canvas = gridCanvasRef.current;
@@ -80,15 +105,36 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
     }
   }, [alphaMap, showGrid, assetWidth, assetHeight, zoom, viewW, viewH]);
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const getPointerPixel = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = Math.floor(((event.clientX - rect.left) / rect.width) * assetWidth);
     const y = Math.floor(((event.clientY - rect.top) / rect.height) * assetHeight);
-    if (x < 0 || x >= assetWidth || y < 0 || y >= assetHeight) {
-      setHoverCoord(null);
-      return;
-    }
-    setHoverCoord({ x, y, lum: alphaMap[y * assetWidth + x] });
+    return x >= 0 && x < assetWidth && y >= 0 && y < assetHeight ? { x, y } : null;
+  };
+
+  const paintPixel = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.buttons !== 1 && event.type === 'pointermove') return;
+    const point = getPointerPixel(event);
+    if (!point) return;
+    const key = point.x + ':' + point.y;
+    if (lastPaintedRef.current === key) return;
+    lastPaintedRef.current = key;
+    const next = customPixels?.length === assetWidth * assetHeight
+      ? new Int16Array(customPixels)
+      : new Int16Array(assetWidth * assetHeight).fill(-1);
+    next[point.y * assetWidth + point.x] = editMode === 'draw' ? 255 : 0;
+    onChangeCustomPixels(next);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const point = getPointerPixel(event);
+    if (!point) { setHoverCoord(null); return; }
+    setHoverCoord({ ...point, lum: alphaMap[point.y * assetWidth + point.x] });
+    if (event.buttons === 1) paintPixel(event);
+  };
+
+  const resetPixels = () => {
+    onChangeCustomPixels(new Int16Array(assetWidth * assetHeight).fill(-1));
   };
 
   return (
@@ -96,13 +142,20 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
         <div>
           <h3 className="text-sm font-semibold text-white">Inspektor Piksel UI — {meta.name}</h3>
-          <p className="text-xs text-slate-400 mt-0.5">Pratinjau detail dan pengukuran aset UI {assetWidth}×{assetHeight} px. Piksel bersifat hanya-baca.</p>
+          <p className="text-xs text-slate-400 mt-0.5">Edit setiap piksel dengan sentuhan atau mouse. Gambar menyalakan piksel, Hapus mematikannya. Perubahan masuk ke preview dan ekspor.</p>
         </div>
         <div className="flex items-center gap-2">
           <button type="button" onClick={() => setShowGrid((value) => !value)} aria-pressed={showGrid}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${showGrid ? 'bg-sky-500/15 text-sky-300 border-sky-400/30' : 'bg-white/[0.03] text-slate-400 border-white/[0.08] hover:text-white'}`}>
             <Grid3X3 className="w-3.5 h-3.5" /> {showGrid ? 'Sembunyikan kisi' : 'Tampilkan kisi'}
           </button>
+          <div className="flex items-center gap-1 rounded-md border border-white/10 p-1">
+            <button type="button" onClick={() => setEditMode('draw')} aria-pressed={editMode === 'draw'}
+              className={`px-2 py-1 text-xs rounded ${editMode === 'draw' ? 'bg-sky-400 text-slate-950' : 'text-slate-300'}`}>Gambar</button>
+            <button type="button" onClick={() => setEditMode('erase')} aria-pressed={editMode === 'erase'}
+              className={`px-2 py-1 text-xs rounded ${editMode === 'erase' ? 'bg-sky-400 text-slate-950' : 'text-slate-300'}`}>Hapus</button>
+          </div>
+          <button type="button" onClick={resetPixels} className="px-3 py-1.5 text-xs font-medium text-slate-300 bg-white/[0.04] border border-white/10 rounded-md">Reset Pixel</button>
           <button type="button" onClick={() => onDownloadAsset(assetId)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-950 bg-white hover:bg-slate-200 rounded-md transition-colors">
             <Download className="w-3.5 h-3.5" /> Unduh PNG
@@ -114,13 +167,15 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
         <div className="flex flex-col gap-3 max-w-full overflow-x-auto">
           <div className="p-2 bg-black border border-white/[0.12] rounded-md inline-block self-start">
             <canvas ref={gridCanvasRef} width={viewW} height={viewH}
-              onPointerMove={handlePointerMove} onPointerLeave={() => setHoverCoord(null)}
+              onPointerDown={(event) => { lastPaintedRef.current = null; event.currentTarget.setPointerCapture(event.pointerId); paintPixel(event); }}
+              onPointerMove={handlePointerMove} onPointerUp={() => { lastPaintedRef.current = null; }}
+              onPointerLeave={() => setHoverCoord(null)} onContextMenu={(event) => event.preventDefault()}
               aria-label={`Pembesaran aset ${meta.name}, ${assetWidth} kali ${assetHeight} piksel`}
               className="block pixelated-canvas"
               style={{ width: `${viewW}px`, height: `${viewH}px` }} />
           </div>
           <div className="text-xs font-mono-tabular text-slate-400 h-4">
-            {hoverCoord ? `X:${String(hoverCoord.x).padStart(2, '0')} · Y:${String(hoverCoord.y).padStart(2, '0')} · L:${hoverCoord.lum}` : `${assetWidth} × ${assetHeight} px · Skala ${zoom}× · Hanya-baca`}
+            {hoverCoord ? `X:${String(hoverCoord.x).padStart(2, '0')} · Y:${String(hoverCoord.y).padStart(2, '0')} · L:${hoverCoord.lum}` : `${assetWidth} × ${assetHeight} px · Skala ${zoom}× · Editor pixel`}
           </div>
         </div>
 
@@ -129,7 +184,7 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
             <div className="text-xs font-medium text-slate-400 mb-2">Ukuran Asli 1:1 ({assetWidth}×{assetHeight} px)</div>
             <div className="flex items-center gap-4 p-4 rounded-md bg-black border border-white/[0.08]">
               <div className="p-2 border border-dashed border-white/[0.18] bg-black inline-block">
-                <UiAssetCanvas assetId={assetId} styleId={styleId} options={options} customPixels={null} scale={1} />
+                <UiAssetCanvas assetId={assetId} styleId={styleId} options={options} customPixels={customPixels} scale={1} />
               </div>
               <div className="text-xs text-slate-400 space-y-1"><div className="text-slate-200 font-medium">{meta.group}</div><div>{meta.description}</div></div>
             </div>
