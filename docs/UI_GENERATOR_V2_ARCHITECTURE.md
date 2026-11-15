@@ -23,16 +23,24 @@ Replace the tightly coupled UI-asset controls with a modular generator workspace
 - `components/`: editor shell, asset picker, context-aware controls, preview and export.
 - `export/`: PNG, sprite sheet and manifest packaging.
 
+## Current V2 asset coverage
+
+- **Progress & status:** battery, signal, linear progress, segmented progress, progress ring, storage, volume.
+- **Icon library:** Bluetooth, Wi-Fi, heart, steps, notification, sun, moon, alarm, ECG divider.
+- **Style presets:** ten shared visual styles are now modeled inside V2 and consumed by the icon workbench and renderer.
+- **Exports:** individual PNG, family ZIP with JSON manifest, and family sprite-sheet PNG. Sprite sheets use a deterministic grid layout with centered cells and a black background.
+- **Validation:** pure model/catalog/layout logic is covered by Bun tests; every pushed change is checked by type-check, tests, and production build in GitHub Actions.
+
 ## First implementation slice
 
-The first vertical slice establishes a typed progress model and renderer. It covers battery, signal, linear progress, segmented progress, ring, storage and volume. A unified workspace now exposes this progress family alongside the existing icon catalog. The icon family temporarily uses the proven legacy icon renderer as an adapter; its controls and exports are isolated in the V2 workbench while its rendering internals are scheduled for a later migration.
+The first vertical slice establishes a typed progress model and renderer. It covers battery, signal, linear progress, segmented progress, ring, storage and volume. A unified workspace now exposes this progress family alongside the existing icon catalog. The icon family now has its own Canvas 2D renderer, typed render options, catalog, and style model. The legacy icon renderer remains in the repository for the old engine and migration comparison, but the V2 icon workbench no longer imports it.
 
 ## Migration policy
 
 - Keep the old glyph generator and animation studio unchanged during this experiment.
 - Do not delete legacy UI code until the V2 workspace has parity for the required assets.
 - Migrate by asset family, not by arbitrary file replacement.
-- Each migration slice must pass TypeScript checks, production build and visual inspection before it is considered stable.
+- Each migration slice must pass TypeScript checks, unit tests, production build and visual inspection before it is considered stable. Automated CI is not a substitute for browser-level visual inspection.
 - Do not merge this branch into `main` until the user approves the result.
 
 ## Initial known architectural debt
