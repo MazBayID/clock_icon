@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { getSpriteSheetLayout } from '../src/generator-v2/export/spriteSheet';
+import { createSpriteSheetManifest, getSpriteSheetLayout } from '../src/generator-v2/export/spriteSheet';
 
 describe('sprite sheet layout', () => {
   test('fits a mixed-size collection into a predictable grid', () => {
@@ -14,5 +14,22 @@ describe('sprite sheet layout', () => {
 
   test('rejects an empty collection', () => {
     expect(() => getSpriteSheetLayout([])).toThrow('Cannot create an empty sprite sheet.');
+  });
+
+  test('maps every asset to its exact centered sprite-sheet coordinates', () => {
+    const items = [
+      { id: 'small', canvas: { width: 24, height: 20 } as HTMLCanvasElement },
+      { id: 'large', canvas: { width: 40, height: 30 } as HTMLCanvasElement },
+      { id: 'wide', canvas: { width: 30, height: 10 } as HTMLCanvasElement },
+    ];
+    expect(createSpriteSheetManifest(items, 2, 2)).toEqual({
+      format: 'PNG',
+      layout: { width: 82, height: 62, columns: 2, rows: 2, cellWidth: 40, cellHeight: 30, gap: 2 },
+      assets: [
+        { id: 'small', x: 8, y: 5, width: 24, height: 20 },
+        { id: 'large', x: 42, y: 0, width: 40, height: 30 },
+        { id: 'wide', x: 5, y: 32, width: 30, height: 10 },
+      ],
+    });
   });
 });
