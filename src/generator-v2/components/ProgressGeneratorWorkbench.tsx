@@ -11,7 +11,7 @@ import {
   ProgressStyle,
 } from '../model/progress';
 import { renderProgressAsset } from '../renderers/progressRenderer';
-import { createSpriteSheetCanvas } from '../export/spriteSheet';
+import { createSpriteSheetCanvas, createSpriteSheetManifest } from '../export/spriteSheet';
 
 const STYLE_OPTIONS: { id: ProgressStyle; label: string }[] = [
   { id: 'outline', label: 'Outline' },
@@ -25,6 +25,16 @@ const STYLE_OPTIONS: { id: ProgressStyle; label: string }[] = [
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('PNG encoding failed.')), 'image/png');
+  });
+}
+
+function createFamilyConfig(meta: (typeof PROGRESS_ASSET_CATALOG)[number], active: ProgressAssetConfig): ProgressAssetConfig {
+  return normalizeProgressConfig({
+    ...createDefaultProgressConfig(meta.id),
+    ...active,
+    id: meta.id,
+    width: meta.defaultWidth,
+    height: meta.defaultHeight,
   });
 }
 
@@ -61,13 +71,33 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
   const downloadSpriteSheet = async () => {
     setExportingSheet(true);
     try {
-      const items = PROGRESS_ASSET_CATALOG.map((meta) => {
-        const base = createDefaultProgressConfig(meta.id);
-        const assetConfig = normalizeProgressConfig({ ...base, value: config.value, style: config.style, showTrack: config.showTrack, strokeWidth: config.strokeWidth, cornerRadius: config.cornerRadius, gap: config.gap });
-        return { id: meta.id, canvas: renderProgressAsset(assetConfig) };
-      });
-      const sheet = createSpriteSheetCanvas(items, 3, 3);
-      saveBlob(await canvasToBlob(sheet), 'clock-icon-ui-progress-spritesheet.png');
+      const items = PROGRESS_ASSET_CATALOG.map((meta) => ({
+        id: meta.id,
+        canvas: renderProgressAsset(createFamilyConfig(meta, config)),
+      }));
+      const columns = 3;
+      const gap = 2;
+      const sheet = createSpriteSheetCanvas(items, columns, gap);
+      const filename = 'clock-icon-ui-progress-spritesheet';
+      saveBlob(await canvasToBlob(sheet), filename + '.png');
+      saveBlob(new Blob([JSON.stringify({
+        generator: 'Clock Icon UI Generator V2',
+        family: 'progress',
+        sharedSettings: {
+          value: config.value,
+          min: config.min,
+          max: config.max,
+          segments: config.segments,
+          gap: config.gap,
+          strokeWidth: config.strokeWidth,
+          cornerRadius: config.cornerRadius,
+          padding: config.padding,
+          orientation: config.orientation,
+          style: config.style,
+          showTrack: config.showTrack,
+        },
+        ...createSpriteSheetManifest(items, columns, gap),
+      }, null, 2)], { type: 'application/json' }), filename + '.json');
     } finally { setExportingSheet(false); }
   };
 
@@ -75,37 +105,44 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
     setIsPackaging(true);
     try {
       const zip = new JSZip();
-      const manifest: { id: string; filename: string; width: number; height: number; value: number }[] = [];
+      const manifest: {
+        id: string;
+        filename: string;
+        width: number;
+        height: number;
+        config: ProgressAssetConfig;
+      }[] = [];
       for (const meta of PROGRESS_ASSET_CATALOG) {
-        const base = createDefaultProgressConfig(meta.id);
-        const assetConfig = normalizeProgressConfig({
-          ...base,
-          value: config.value,
-          style: config.style,
-          showTrack: config.showTrack,
-          strokeWidth: config.strokeWidth,
-          cornerRadius: config.cornerRadius,
-          gap: config.gap,
-        });
+        const assetConfig = createFamilyConfig(meta, config);
         const canvas = renderProgressAsset(assetConfig);
         const blob = await canvasToBlob(canvas);
-        zip.file(`assets/${meta.id}.png`, blob);
+        zip.file(`progress/${meta.id}.png`, blob);
         manifest.push({
           id: meta.id,
-          filename: `assets/${meta.id}.png`,
+          filename: `progress/${meta.id}.png`,
           width: assetConfig.width,
           height: assetConfig.height,
-          value: assetConfig.value,
+          config: assetConfig,
         });
       }
       zip.file('manifest.json', JSON.stringify({
         generator: 'Clock Icon UI Generator V2',
+        family: 'progress',
         format: 'PNG',
-        style: config.style,
-        showTrack: config.showTrack,
-        strokeWidth: config.strokeWidth,
-        cornerRadius: config.cornerRadius,
-        gap: config.gap,
+        background: '#000000',
+        sharedSettings: {
+          value: config.value,
+          min: config.min,
+          max: config.max,
+          segments: config.segments,
+          gap: config.gap,
+          strokeWidth: config.strokeWidth,
+          cornerRadius: config.cornerRadius,
+          padding: config.padding,
+          orientation: config.orientation,
+          style: config.style,
+          showTrack: config.showTrack,
+        },
         assets: manifest,
       }, null, 2));
       saveBlob(await zip.generateAsync({ type: 'blob' }), 'clock-icon-ui-progress-assets.zip');
