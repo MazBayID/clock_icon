@@ -6,13 +6,16 @@ ChronoGlyph Studio is a browser-based workspace for generating monochrome smartw
 
 - Generate numeral glyphs **0–9 and colon** at 25×50 px.
 - Browse and compare multiple numeral styles.
-- Generate a catalog of smartwatch UI assets.
-- Preview assets in round, square, and native-size watch layouts.
+- Generate seven semantic progress/status families: battery, signal, linear, segmented, ring, storage, and volume.
+- Generate a separate icon library for connectivity, health, alerts, weather, and telemetry.
+- Tune each asset family with context-aware controls and live preview.
+- Preview assets at configurable native canvas dimensions.
 - Inspect pixels, coordinates, and image metrics in read-only mode.
 - Download individual PNG assets and PNG sprite sheets.
 - Package visual assets as PNG-only ZIP archives with manifests.
 - Export individual PNG files, sprite sheets, and PNG-only ZIP packages.
 - Tune rendering options and preview changes without editing individual pixels.
+- Export progress assets and icon collections as PNG ZIP packages with manifests.
 
 ## Development
 
@@ -47,7 +50,8 @@ The current export scope is PNG images, PNG sprite sheets, and ZIP packages cont
 
 ## Project structure
 
-- `src/engine/` — glyph rendering, UI asset rendering, and PNG export logic.
+- `src/engine/` — legacy glyph and icon rendering plus PNG export logic.
+- `src/generator-v2/` — modular UI generator model, semantic progress renderers, and V2 workbenches.
 - `src/components/` — asset views, previews, inspectors, and comparison views.
 - `src/types/` — TypeScript types for glyphs and UI assets.
 - `src/App.tsx` — application shell and generator-mode state.
