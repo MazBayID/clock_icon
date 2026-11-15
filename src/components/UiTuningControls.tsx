@@ -104,31 +104,6 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         </div>
       </div>
 
-      {/* Stroke Weight Slider */}
-      <div className="flex items-center gap-2.5 min-w-[165px]">
-        <label
-          htmlFor="ui-stroke-slider"
-          className="text-xs text-slate-400 whitespace-nowrap"
-        >
-          Tebal Garis
-        </label>
-        <input
-          id="ui-stroke-slider"
-          type="range"
-          min={0.75}
-          max={1.3}
-          step={0.05}
-          value={options.strokeScale}
-          onChange={(e) =>
-            onChange({ ...options, strokeScale: parseFloat(e.target.value) })
-          }
-          className="w-20 accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer"
-        />
-        <span className="text-xs font-mono-tabular text-slate-200 w-9 text-right">
-          {options.strokeScale.toFixed(2)}×
-        </span>
-      </div>
-
       {/* Contextual Preview Slider: follows the selected asset */}
       <div className="w-full flex flex-wrap items-center gap-3 rounded-md border border-sky-400/20 bg-sky-400/[0.04] px-3 py-2.5">
         <span className="text-xs font-semibold text-sky-300 whitespace-nowrap">Preview {selectedAssetId === 'battery' ? 'Baterai' : selectedAssetId === 'signal' ? 'Sinyal' : selectedAssetId === 'wifi-meter' ? 'Wi-Fi' : selectedAssetId === 'progress-arc' ? 'Progress Arc' : selectedAssetId === 'progress-bar' ? 'Progress Bar' : 'Ikon Terpilih'}</span>
@@ -157,7 +132,11 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
           </>
         )}
         {selectedAssetId !== 'battery' && selectedAssetId !== 'signal' && selectedAssetId !== 'wifi-meter' && selectedAssetId !== 'progress-arc' && selectedAssetId !== 'progress-bar' && (
-          <span className="text-xs text-slate-400">Ikon ini tidak memiliki nilai preview dinamis.</span>
+          <>
+            <span className="text-xs text-slate-400 whitespace-nowrap">Ketebalan ikon</span>
+            <input aria-label="Ketebalan ikon preview" type="range" min={0.75} max={1.3} step={0.05} value={options.strokeScale} onChange={(e) => onChange({ ...options, strokeScale: parseFloat(e.target.value) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.strokeScale.toFixed(2)}×</span>
+          </>
         )}
       </div>
 
