@@ -31,8 +31,8 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
   const [hoverCoord, setHoverCoord] = useState<{ x: number; y: number; lum: number } | null>(null);
   const gridCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const meta = getUiAssetMeta(assetId);
-  const assetWidth = options.width || meta.width;
-  const assetHeight = options.height || meta.height;
+  const assetWidth = options.assetSizes?.[assetId]?.width || meta.width;
+  const assetHeight = options.assetSizes?.[assetId]?.height || meta.height;
   const zoom = assetWidth >= 60 ? 6 : assetWidth >= 48 ? 7 : 10;
   const viewW = assetWidth * zoom;
   const viewH = assetHeight * zoom;
