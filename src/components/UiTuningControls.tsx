@@ -28,6 +28,15 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
     setSizeError('');
   }, [selectedAssetId, selectedSize.width, selectedSize.height, nativeSize.width, nativeSize.height]);
 
+  const resetCustomSize = () => {
+    const nextSizes = { ...options.assetSizes };
+    delete nextSizes[selectedAssetId];
+    onChange({ ...options, assetSizes: nextSizes });
+    setPendingWidth(String(nativeSize.width));
+    setPendingHeight(String(nativeSize.height));
+    setSizeError('');
+  };
+
   const applyCustomSize = () => {
     const width = pendingWidth.trim() === '' ? nativeSize.width : Number(pendingWidth);
     const height = pendingHeight.trim() === '' ? nativeSize.height : Number(pendingHeight);
@@ -60,6 +69,9 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={pendingHeight} onChange={(e) => setPendingHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[10px] text-slate-500">Ukuran ikon terpilih · 8–256 px</span>
         <button type="button" onClick={applyCustomSize} className="px-2.5 py-1 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded transition-colors cursor-pointer">OK</button>
+        <button type="button" onClick={resetCustomSize} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] border border-white/[0.08] rounded transition-colors cursor-pointer">
+          <RotateCcw className="w-3 h-3" /> Reset Pixel
+        </button>
         {sizeError && <span role="alert" className="w-full text-[10px] text-rose-400">{sizeError}</span>}
       </div>
 
