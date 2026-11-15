@@ -1,0 +1,58 @@
+name: UI Generator V2 Preview
+
+on:
+  push:
+    branches:
+      - rebuild/ui-generator-v2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V2 branch
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build preview
+        run: bun run build
+
+      - name: Start preview server
+        run: |
+          bunx vite preview --host 127.0.0.1 --port 4173 > /tmp/vite-preview.log 2>&1 &
+          for i in {1..30}; do
+            if curl --fail http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/vite-preview.log
+          exit 1
+
+      - name: Install Chromium for visual smoke tests
+        run: npx --yes playwright@1.56.1 install --with-deps chromium
+
+      - name: Capture desktop preview
+        run: npx --yes playwright@1.56.1 screenshot --browser chromium --viewport-size "1440,1000" --wait-for-timeout 1500 http://127.0.0.1:4173/ preview-desktop.png
+
+      - name: Capture mobile preview
+        run: npx --yes playwright@1.56.1 screenshot --browser chromium --viewport-size "390,844" --wait-for-timeout 1500 http://127.0.0.1:4173/ preview-mobile.png
+
+      - name: Upload isolated preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-generator-v2-preview
+          path: |
+            dist/
+            preview-desktop.png
+            preview-mobile.png
+          if-no-files-found: error
+          retention-days: 7
