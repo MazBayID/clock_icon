@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 
 type CharacterOption = {
@@ -34,15 +34,18 @@ const CHARACTER_CATALOG: CharacterOption[] = [
 
 const FRAME_WIDTH = 98;
 const FRAME_HEIGHT = 64;
+const SOURCE_FPS = 10;
 const BASE_URL = import.meta.env.BASE_URL;
 
 export function AnimationStudio() {
   const [selectedCharacterId, setSelectedCharacterId] = useState('mochi-face');
   const [selectedAnimationId, setSelectedAnimationId] = useState('mochi_001');
   const [frame, setFrame] = useState(1);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [fps, setFps] = useState(12);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [fps, setFps] = useState(SOURCE_FPS);
   const [isMuted, setIsMuted] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const character = CHARACTER_CATALOG.find((item) => item.id === selectedCharacterId) ?? CHARACTER_CATALOG[0];
   const animation = character.animations.find((item) => item.id === selectedAnimationId) ?? character.animations[0];
@@ -55,17 +58,82 @@ export function AnimationStudio() {
   const audioUrl = `${BASE_URL}${animation.id}/audio_${animation.id}/${animation.id}.wav`;
 
   useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.playbackRate = fps / SOURCE_FPS;
+    }
     setFrame(1);
-    setIsPlaying(true);
+    setIsPlaying(false);
+    setAudioError(null);
   }, [selectedAnimationId, selectedCharacterId]);
 
   useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.playbackRate = fps / SOURCE_FPS;
+  }, [fps]);
+
+  useEffect(() => {
     if (!isPlaying) return;
-    const interval = window.setInterval(() => {
-      setFrame((current) => (current >= animation.frameCount ? 1 : current + 1));
-    }, 1000 / fps);
-    return () => window.clearInterval(interval);
-  }, [animation.frameCount, fps, isPlaying]);
+
+    let animationFrameId = 0;
+    const updateFrame = () => {
+      const audio = audioRef.current;
+      if (audio && Number.isFinite(audio.currentTime)) {
+        const nextFrame = Math.min(
+          animation.frameCount,
+          Math.floor(audio.currentTime * SOURCE_FPS) + 1,
+        );
+        setFrame((current) => current === nextFrame ? current : nextFrame);
+      }
+      animationFrameId = window.requestAnimationFrame(updateFrame);
+    };
+
+    animationFrameId = window.requestAnimationFrame(updateFrame);
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [animation.frameCount, isPlaying]);
+
+  const handlePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    setAudioError(null);
+    audio.playbackRate = fps / SOURCE_FPS;
+    try {
+      await audio.play();
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
+      setAudioError('Audio gagal diputar. Periksa pemuatan file atau coba tekan Putar lagi.');
+    }
+  };
+
+  const handlePause = () => {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+  };
+
+  const handleReset = () => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    setFrame(1);
+    setIsPlaying(false);
+    setAudioError(null);
+  };
+
+  const handleFrameChange = (nextFrame: number) => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = (nextFrame - 1) / SOURCE_FPS;
+    }
+    setFrame(nextFrame);
+    setIsPlaying(false);
+  };
 
   const handleCharacterChange = (id: string) => {
     setSelectedCharacterId(id);
@@ -118,11 +186,15 @@ export function AnimationStudio() {
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setIsPlaying((value) => !value)} className="inline-flex items-center gap-2 rounded-md bg-sky-400 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-sky-300">
+            <button
+              type="button"
+              onClick={isPlaying ? handlePause : handlePlay}
+              className="inline-flex items-center gap-2 rounded-md bg-sky-400 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-sky-300"
+            >
               {isPlaying ? <Pause size={16} /> : <Play size={16} />}
               {isPlaying ? 'Jeda' : 'Putar'}
             </button>
-            <button type="button" onClick={() => { setFrame(1); setIsPlaying(false); }} className="inline-flex items-center gap-2 rounded-md border border-white/[0.12] px-3 py-2.5 text-sm text-slate-200 hover:bg-white/[0.06]">
+            <button type="button" onClick={handleReset} className="inline-flex items-center gap-2 rounded-md border border-white/[0.12] px-3 py-2.5 text-sm text-slate-200 hover:bg-white/[0.06]">
               <RotateCcw size={15} /> Ulangi
             </button>
             <div className="ml-auto flex items-center gap-2 text-xs text-slate-400">
@@ -133,7 +205,15 @@ export function AnimationStudio() {
             </div>
           </div>
 
-          <input aria-label="Posisi frame" type="range" min={1} max={animation.frameCount} value={frame} onChange={(event) => { setFrame(Number(event.target.value)); setIsPlaying(false); }} className="w-full mt-5 accent-sky-400" />
+          <input
+            aria-label="Posisi frame"
+            type="range"
+            min={1}
+            max={animation.frameCount}
+            value={frame}
+            onChange={(event) => handleFrameChange(Number(event.target.value))}
+            className="w-full mt-5 accent-sky-400"
+          />
         </div>
 
         <aside id="inspektor" className="space-y-6">
@@ -156,14 +236,28 @@ export function AnimationStudio() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-white">Audio</h2>
-                <p className="text-xs text-slate-500 mt-1">Audio bawaan animasi</p>
+                <p className="text-xs text-slate-500 mt-1">Audio dan frame berjalan tersinkronisasi</p>
               </div>
               <button type="button" onClick={() => setIsMuted((value) => !value)} aria-label={isMuted ? 'Aktifkan audio' : 'Bisukan audio'} className="rounded-md border border-white/[0.12] p-2 text-slate-300 hover:bg-white/[0.06]">
                 {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
               </button>
             </div>
-            <audio key={audioUrl} controls={!isMuted} muted={isMuted} preload="none" src={audioUrl} className="w-full mt-4" />
-            <p className="text-[11px] text-slate-600 mt-2">Audio dapat diputar manual melalui kontrol di atas.</p>
+            <audio
+              key={audioUrl}
+              ref={audioRef}
+              controls
+              loop
+              muted={isMuted}
+              preload="auto"
+              src={audioUrl}
+              onLoadedMetadata={(event) => { event.currentTarget.playbackRate = fps / SOURCE_FPS; }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onError={() => setAudioError('File audio tidak dapat dimuat. Periksa jalur aset WAV.')}
+              className="w-full mt-4"
+            />
+            {audioError && <p role="alert" className="text-xs text-rose-400 mt-2">{audioError}</p>}
+            <p className="text-[11px] text-slate-600 mt-2">Putar, jeda, dan pengaturan FPS mengendalikan audio serta animasi bersama.</p>
           </section>
 
           <section id="komparasi" className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
