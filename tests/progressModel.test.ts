@@ -31,8 +31,8 @@ describe('progress generator model', () => {
     expect(normalized.value).toBe(100);
     expect(normalized.segments).toBe(32);
     expect(normalized.gap).toBe(0);
-    expect(normalized.strokeWidth).toBe(8);
-    expect(normalized.cornerRadius).toBe(16);
+    expect(normalized.strokeWidth).toBe(4);
+    expect(normalized.cornerRadius).toBe(4);
     expect(normalized.padding).toBe(0);
   });
 
