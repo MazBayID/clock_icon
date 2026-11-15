@@ -27,7 +27,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
   const [options, setOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
   const [packaging, setPackaging] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const activeAsset = useMemo(() => ICON_ASSET_CATALOG.find((asset) => asset.id === assetId) ?? ICON_CATALOG[0], [assetId]);
+  const activeAsset = useMemo(() => ICON_ASSET_CATALOG.find((asset) => asset.id === assetId) ?? ICON_ASSET_CATALOG[0], [assetId]);
   const activeStyle = UI_STYLES.find((style) => style.id === styleId) ?? UI_STYLES[0];
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
     try {
       const zip = new JSZip();
       const manifest: { id: string; filename: string; width: number; height: number }[] = [];
-      for (const asset of ICON_CATALOG) {
+      for (const asset of ICON_ASSET_CATALOG) {
         const canvas = renderUiAssetToCanvas(asset.id, styleId, options);
         zip.file(`icons/${asset.id}.png`, await canvasBlob(canvas));
         manifest.push({ id: asset.id, filename: `${asset.id}.png`, width: asset.width, height: asset.height });
@@ -65,9 +65,9 @@ export const IconGeneratorWorkbench: React.FC = () => {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)] min-h-[calc(100vh-15rem)]">
       <aside className="border-b xl:border-b-0 xl:border-r border-white/[0.08] bg-[#0C0E13] p-4">
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Icon Catalog · {ICON_CATALOG.length}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Icon Catalog · {ICON_ASSET_CATALOG.length}</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-1 gap-2">
-          {ICON_CATALOG.map((asset) => (
+          {ICON_ASSET_CATALOG.map((asset) => (
             <button key={asset.id} type="button" onClick={() => setAssetId(asset.id)} aria-pressed={assetId === asset.id}
               className={`text-left rounded-md border p-3 ${assetId === asset.id ? 'border-sky-400/60 bg-sky-400/10' : 'border-white/[0.08] bg-black/20 hover:bg-white/[0.04]'}`}>
               <span className="block text-sm font-semibold text-slate-200">{asset.name}</span>
