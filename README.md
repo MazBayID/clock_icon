@@ -25,7 +25,7 @@ The V2 architecture separates asset catalogs, typed configuration models, Canvas
 
 ## Development
 
-Requirements: Node.js 20.19+ or 22.12+.
+Requirements: Node.js 20.19+ or 22.12+ for the app; Bun 1.4+ is required for the test script.
 
 ```bash
 npm install
