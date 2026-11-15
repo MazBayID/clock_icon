@@ -96,7 +96,6 @@ export const UiAssetSheetGrid: React.FC<UiAssetSheetGridProps> = ({
       <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
         {UI_ASSET_CATALOG.map((asset) => {
           const isSelected = asset.id === selectedAssetId;
-          const hasCustom = Boolean(customMap[styleId]?.[asset.id]);
           const scale =
             asset.width >= 60 ? 1.8 : asset.width >= 48 ? 1.6 : 2.1;
 
@@ -126,15 +125,7 @@ export const UiAssetSheetGrid: React.FC<UiAssetSheetGridProps> = ({
                 >
                   {asset.shortLabel}
                 </span>
-                {hasCustom ? (
-                  <span className="text-[10px] font-mono-tabular text-amber-300 shrink-0">
-                    Edit
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono-tabular text-slate-500 shrink-0">
-                    {asset.width}×{asset.height}
-                  </span>
-                )}
+                <span className="text-[10px] font-mono-tabular text-slate-500 shrink-0">{asset.width}×{asset.height}</span>
               </div>
 
               <div className="w-full min-h-[82px] flex items-center justify-center p-2 bg-black border border-white/[0.08] rounded-sm overflow-hidden">
