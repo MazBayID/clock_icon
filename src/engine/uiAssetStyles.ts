@@ -28,6 +28,16 @@ export const UI_ASSET_CATALOG: UiAssetMeta[] = [
     description: 'Indikator kekuatan sinyal 4-tingkat untuk pelacakan satelit & seluler.',
   },
   {
+    id: 'wifi-meter', name: 'Wi-Fi dengan Meter Sinyal', shortLabel: 'Wi-Fi Meter',
+    group: 'Status & Konektivitas', width: 28, height: 24,
+    description: 'Ikon Wi-Fi dinamis dengan empat tingkat kekuatan sinyal.',
+  },
+  {
+    id: 'heart-dynamic', name: 'Jantung Dinamis', shortLabel: 'Heart Live',
+    group: 'Kesehatan & Aktivitas', width: 28, height: 28,
+    description: 'Ikon jantung untuk indikator detak; disiapkan untuk animasi berikutnya.',
+  },
+  {
     id: 'bluetooth',
     name: 'Koneksi Bluetooth',
     shortLabel: 'BT Link',
@@ -37,8 +47,8 @@ export const UI_ASSET_CATALOG: UiAssetMeta[] = [
     description: 'Simbol tautan nirkabel jarak dekat menuju ponsel pendamping.',
   },
   {
-    id: 'wifi',
-    name: 'Gelombang Wi-Fi',
+    id: 'wifi-static',
+    name: 'Wi-Fi Statis',
     shortLabel: 'Wi-Fi',
     group: 'Status & Konektivitas',
     width: 28,
@@ -46,22 +56,13 @@ export const UI_ASSET_CATALOG: UiAssetMeta[] = [
     description: 'Busur transmisi data nirkabel berkecepatan tinggi untuk sinkronisasi OTA.',
   },
   {
-    id: 'heart',
-    name: 'Detak Jantung (BPM)',
+    id: 'heart-static',
+    name: 'Jantung Statis',
     shortLabel: 'Jantung',
     group: 'Kesehatan & Aktivitas',
     width: 28,
     height: 28,
     description: 'Emblem sensor optik PPG untuk pemantauan denyut jantung kontinu.',
-  },
-  {
-    id: 'steps',
-    name: 'Penghitung Langkah',
-    shortLabel: 'Langkah',
-    group: 'Kesehatan & Aktivitas',
-    width: 28,
-    height: 28,
-    description: 'Ikon aktivitas langkah harian untuk ringkasan kebugaran.',
   },
   {
     id: 'notification',
