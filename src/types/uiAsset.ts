@@ -52,7 +52,7 @@ export interface UiRenderOptions {
   batteryLevel: number; // 10 to 100
   signalBars: number; // 1 to 4
   progressPercent: number; // 0 to 100
-  assetSizes?: Partial<Record<UiAssetId, { width: number; height: number }>>;
+  assetSizes?: Partial<Record<UiAssetId, { width?: number; height?: number }>>;
 }
 
 export type CustomUiPixelMap = Partial<Record<UiStyleId, Partial<Record<UiAssetId, Uint8ClampedArray>>>>;
