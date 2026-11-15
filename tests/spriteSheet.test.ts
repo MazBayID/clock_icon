@@ -9,7 +9,7 @@ describe('sprite sheet layout', () => {
 
   test('clamps columns and spacing', () => {
     expect(getSpriteSheetLayout([{ width: 8, height: 8 }, { width: 8, height: 8 }], 9, -4))
-      .toEqual({ width: 16, height: 16, columns: 2, rows: 1, cellWidth: 8, cellHeight: 8, gap: 0 });
+      .toEqual({ width: 16, height: 8, columns: 2, rows: 1, cellWidth: 8, cellHeight: 8, gap: 0 });
   });
 
   test('rejects an empty collection', () => {
