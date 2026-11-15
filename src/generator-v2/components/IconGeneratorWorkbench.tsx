@@ -32,19 +32,23 @@ export const IconGeneratorWorkbench: React.FC = () => {
   const activeAsset = useMemo(() => ICON_ASSET_CATALOG.find((asset) => asset.id === assetId) ?? ICON_ASSET_CATALOG[0], [assetId]);
   const activeStyle = UI_STYLES.find((style) => style.id === styleId) ?? UI_STYLES[0];
 
+  const updateOptions = (patch: Partial<IconRenderOptions>) => {
+    setOptions((current) => normalizeIconRenderOptions({ ...current, ...patch }));
+  };
+
   useEffect(() => {
     if (canvasRef.current) renderIconAsset(assetId, styleId, normalizeIconRenderOptions(options), canvasRef.current);
   }, [assetId, styleId, options]);
 
   const selectAsset = (next: IconAssetId) => {
     setAssetId(next);
-    setOptions((current) => ({ ...current, width: createDefaultIconRenderOptions(next).width, height: createDefaultIconRenderOptions(next).height }));
+    setOptions((current) => normalizeIconRenderOptions({ ...current, width: createDefaultIconRenderOptions(next).width, height: createDefaultIconRenderOptions(next).height }));
   };
 
   const selectStyle = (next: UiStyleId) => {
     setStyleId(next);
     const meta = UI_STYLES.find((style) => style.id === next);
-    setOptions((current) => ({ ...current, pixelSnap: meta?.recommendedMode === 'pixel-snap' }));
+    updateOptions({ pixelSnap: meta?.recommendedMode === 'pixel-snap' });
   };
 
   const downloadCurrent = async () => {
@@ -112,13 +116,13 @@ export const IconGeneratorWorkbench: React.FC = () => {
           <div className="space-y-4">
             <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Visual Style</span><select value={styleId} onChange={(e) => selectStyle(e.target.value as UiStyleId)} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white">{UI_STYLES.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}</select></label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Width (px)</span><input type="number" min="8" max="512" value={options.width} onChange={(e) => setOptions((current) => ({ ...current, width: Number(e.target.value) }))} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
-              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Height (px)</span><input type="number" min="8" max="512" value={options.height} onChange={(e) => setOptions((current) => ({ ...current, height: Number(e.target.value) }))} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
+              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Width (px)</span><input type="number" min="8" max="512" value={options.width} onChange={(e) => updateOptions({ width: Number(e.target.value) })} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
+              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Height (px)</span><input type="number" min="8" max="512" value={options.height} onChange={(e) => updateOptions({ height: Number(e.target.value) })} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
             </div>
-            <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Stroke Weight</span><strong className="text-white">{options.strokeScale.toFixed(2)}×</strong></span><input type="range" min="0.75" max="1.3" step="0.05" value={options.strokeScale} onChange={(e) => setOptions((current) => ({ ...current, strokeScale: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>
-            <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Padding</span><strong className="text-white">{options.padding}px</strong></span><input type="range" min="0" max="3" step="1" value={options.padding} onChange={(e) => setOptions((current) => ({ ...current, padding: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>
-            <label className="flex items-center justify-between text-xs text-slate-300"><span>Pixel snap (1-bit)</span><input type="checkbox" checked={options.pixelSnap} onChange={(e) => setOptions((current) => ({ ...current, pixelSnap: e.target.checked }))} className="accent-sky-400" /></label>
-            {options.pixelSnap && <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Threshold</span><strong className="text-white">{options.threshold}</strong></span><input type="range" min="64" max="210" step="2" value={options.threshold} onChange={(e) => setOptions((current) => ({ ...current, threshold: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>}
+            <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Stroke Weight</span><strong className="text-white">{options.strokeScale.toFixed(2)}×</strong></span><input type="range" min="0.75" max="1.3" step="0.05" value={options.strokeScale} onChange={(e) => updateOptions({ strokeScale: Number(e.target.value) })} className="w-full accent-sky-400" /></label>
+            <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Padding</span><strong className="text-white">{options.padding}px</strong></span><input type="range" min="0" max="3" step="1" value={options.padding} onChange={(e) => updateOptions({ padding: Number(e.target.value) })} className="w-full accent-sky-400" /></label>
+            <label className="flex items-center justify-between text-xs text-slate-300"><span>Pixel snap (1-bit)</span><input type="checkbox" checked={options.pixelSnap} onChange={(e) => updateOptions({ pixelSnap: e.target.checked })} className="accent-sky-400" /></label>
+            {options.pixelSnap && <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Threshold</span><strong className="text-white">{options.threshold}</strong></span><input type="range" min="64" max="210" step="2" value={options.threshold} onChange={(e) => updateOptions({ threshold: Number(e.target.value) })} className="w-full accent-sky-400" /></label>}
             <div className="grid grid-cols-1 gap-2 pt-2"><button type="button" onClick={downloadCurrent} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1]"><Download className="w-4 h-4" /> Unduh PNG</button><button type="button" disabled={packaging} onClick={downloadPackage} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-sky-400 text-slate-950 text-sm font-semibold hover:bg-sky-300 disabled:opacity-50"><Package className="w-4 h-4" /> {packaging ? 'Mengemas…' : 'Ekspor Paket Ikon'}</button><button type="button" disabled={exportingSheet} onClick={downloadSpriteSheet} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1] disabled:opacity-50"><Grid3X3 className="w-4 h-4" /> {exportingSheet ? 'Membuat…' : 'Ekspor Sprite Sheet PNG'}</button></div>
             <div className="grid grid-cols-1 gap-2 pt-2"><button type="button" onClick={downloadCurrent} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1]"><Download className="w-4 h-4" /> Unduh PNG</button><button type="button" disabled={packaging} onClick={downloadPackage} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-sky-400 text-slate-950 text-sm font-semibold hover:bg-sky-300 disabled:opacity-50"><Package className="w-4 h-4" /> {packaging ? 'Mengemas…' : 'Ekspor Paket Ikon'}</button></div>
           </div>
