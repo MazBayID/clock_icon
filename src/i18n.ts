@@ -145,7 +145,7 @@ export function translateText(input: string, language: Language): string {
     if (source.length > 2) output = output.split(source).join(target);
   }
   for (const [source, target] of Object.entries(wordMaps[language]).sort((a, b) => b[0].length - a[0].length)) {
-    output = output.replace(new RegExp(source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), target);
+    output = output.split(source).join(target);
   }
   return output;
 }
