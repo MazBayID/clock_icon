@@ -47,6 +47,9 @@ import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 
 type GeneratorMode = 'numerals' | 'ui-assets';
 
+const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
+const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
+
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
 
@@ -55,7 +58,7 @@ export default function App() {
   const [selectedStyleId, setSelectedStyleId] = useState<StyleId>('ronin-katana-split');
   const [selectedChar, setSelectedChar] = useState<GlyphChar>('8');
   const [options, setOptions] = useState<GlyphRenderOptions>(DEFAULT_RENDER_OPTIONS);
-  const customMap: CustomPixelMap = {};
+  const customMap = EMPTY_CUSTOM_MAP;
   const [isExporting, setIsExporting] = useState(false);
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
@@ -65,7 +68,7 @@ export default function App() {
   const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
   const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
   const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
-  const customUiMap: CustomUiPixelMap = {};
+  const customUiMap = EMPTY_CUSTOM_UI_MAP;
   const [isExportingUi, setIsExportingUi] = useState(false);
   const [isExportingAllUi, setIsExportingAllUi] = useState(false);
 
