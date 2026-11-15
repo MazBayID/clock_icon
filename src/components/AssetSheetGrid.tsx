@@ -90,7 +90,7 @@ export const AssetSheetGrid: React.FC<AssetSheetGridProps> = ({
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
             >
               <FileArchive className="w-3.5 h-3.5" />
-              {isExporting ? 'Mengemas ZIP...' : 'Unduh Paket ZIP (11 PNG)'}
+              {isExporting ? 'Mengemas ZIP...' : 'Unduh Paket Lengkap (ZIP)'}
             </button>
           </div>
         </div>
