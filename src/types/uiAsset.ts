@@ -49,8 +49,8 @@ export interface UiRenderOptions {
   padding: number; // 0 to 3 px
   pixelSnap: boolean;
   threshold: number; // 64 to 210
-  batteryLevel: number; // 10 to 100
-  signalBars: number; // 1 to 4
+  batteryLevel: number; // 0 to 100
+  signalBars: number; // 0 to 4
   progressPercent: number; // 0 to 100
   assetSizes?: Partial<Record<UiAssetId, { width?: number; height?: number }>>;
 }
