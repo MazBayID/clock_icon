@@ -877,6 +877,20 @@ function renderAssetCore(
   }
 }
 
+function applyCustomUiPixels(ctx: CanvasRenderingContext2D, pixels: Int16Array | null | undefined, width: number, height: number) {
+  if (!pixels || pixels.length !== width * height) return;
+  const image = ctx.getImageData(0, 0, width, height);
+  for (let i = 0; i < pixels.length; i++) {
+    if (pixels[i] < 0) continue;
+    const offset = i * 4;
+    image.data[offset] = pixels[i];
+    image.data[offset + 1] = pixels[i];
+    image.data[offset + 2] = pixels[i];
+    image.data[offset + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
 /**
  * Fits the rendered glyph to the available canvas area without distorting
  * its aspect ratio. This is applied to generated vector assets only;
@@ -977,22 +991,7 @@ export function renderUiAssetToCanvas(
 
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
-  if (customAlphaMap && customAlphaMap.length === w * h) {
-    const img = ctx.createImageData(w, h);
-    const data = img.data;
-    for (let i = 0; i < customAlphaMap.length; i++) {
-      const v = customAlphaMap[i];
-      const idx = i * 4;
-      data[idx] = v;
-      data[idx + 1] = v;
-      data[idx + 2] = v;
-      data[idx + 3] = 255;
-    }
-    ctx.putImageData(img, 0, 0);
-    return canvas;
-  }
-
-  // Strict pure #000000 background
+remove full override  // Strict pure #000000 background
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, w, h);
 
@@ -1006,6 +1005,7 @@ export function renderUiAssetToCanvas(
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, fillWidth, h);
     }
+    applyCustomUiPixels(ctx, customAlphaMap as Int16Array | null, w, h);
     return canvas;
   }
 
@@ -1105,6 +1105,7 @@ export function renderUiAssetToCanvas(
     d[i + 3] = 255;
   }
   ctx.putImageData(imgData, 0, 0);
+  applyCustomUiPixels(ctx, customAlphaMap as Int16Array | null, w, h);
 
   return canvas;
 }
