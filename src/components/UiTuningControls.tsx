@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { UiAssetId, UiRenderOptions } from '../types/uiAsset';
 import { getUiAssetMeta } from '../engine/uiAssetStyles';
@@ -18,20 +18,49 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
 }) => {
   const nativeSize = getUiAssetMeta(selectedAssetId);
   const selectedSize = options.assetSizes?.[selectedAssetId] ?? {};
-  const updateSize = (key: 'width' | 'height', value: string) => onChange({
-    ...options,
-    assetSizes: { ...options.assetSizes, [selectedAssetId]: { ...selectedSize, [key]: value === '' ? undefined : Math.max(8, Math.min(256, Number(value))) } },
-  });
+  const [pendingWidth, setPendingWidth] = useState(String(selectedSize.width ?? nativeSize.width));
+  const [pendingHeight, setPendingHeight] = useState(String(selectedSize.height ?? nativeSize.height));
+  const [sizeError, setSizeError] = useState('');
+
+  useEffect(() => {
+    setPendingWidth(String(selectedSize.width ?? nativeSize.width));
+    setPendingHeight(String(selectedSize.height ?? nativeSize.height));
+    setSizeError('');
+  }, [selectedAssetId, selectedSize.width, selectedSize.height, nativeSize.width, nativeSize.height]);
+
+  const applyCustomSize = () => {
+    const width = pendingWidth.trim() === '' ? nativeSize.width : Number(pendingWidth);
+    const height = pendingHeight.trim() === '' ? nativeSize.height : Number(pendingHeight);
+    if (!Number.isFinite(width) || !Number.isFinite(height) ||
+        !Number.isInteger(width) || !Number.isInteger(height) ||
+        width < 8 || width > 256 || height < 8 || height > 256) {
+      setSizeError('Masukkan ukuran bilangan bulat antara 8–256 px.');
+      return;
+    }
+    onChange({
+      ...options,
+      assetSizes: {
+        ...options.assetSizes,
+        [selectedAssetId]: {
+          width: pendingWidth.trim() === '' ? undefined : width,
+          height: pendingHeight.trim() === '' ? undefined : height,
+        },
+      },
+    });
+    setSizeError('');
+  };
   return (
     <div className="bg-[#0C0E13] border-b border-white/[0.08] px-5 py-3.5 flex flex-wrap items-center gap-x-6 gap-y-3">
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
-        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={selectedSize.width ?? nativeSize.width} onChange={(e) => updateSize('width', e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={pendingWidth} onChange={(e) => setPendingWidth(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[11px] text-slate-500">×</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-height">H</label>
-        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={selectedSize.height ?? nativeSize.height} onChange={(e) => updateSize('height', e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={pendingHeight} onChange={(e) => setPendingHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[10px] text-slate-500">Ukuran ikon terpilih · 8–256 px</span>
+        <button type="button" onClick={applyCustomSize} className="px-2.5 py-1 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded transition-colors cursor-pointer">OK</button>
+        {sizeError && <span role="alert" className="w-full text-[10px] text-rose-400">{sizeError}</span>}
       </div>
 
       {/* Render Precision Toggle */}
@@ -161,6 +190,28 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
           {options.progressPercent}%
         </span>
       </div>
+
+      {/* Horizontal Progress Bar Slider */}
+      {selectedAssetId === 'progress-bar' && (
+        <div className="flex items-center gap-2 min-w-[180px]">
+          <label htmlFor="ui-progress-bar-slider" className="text-xs text-slate-400 whitespace-nowrap">
+            Bar Horizontal
+          </label>
+          <input
+            id="ui-progress-bar-slider"
+            type="range"
+            min={0}
+            max={100}
+            step={1}
+            value={options.progressBarPercent}
+            onChange={(e) => onChange({ ...options, progressBarPercent: parseInt(e.target.value, 10) })}
+            className="w-24 accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer"
+          />
+          <span className="text-xs font-mono-tabular text-slate-200 w-9 text-right">
+            {options.progressBarPercent}%
+          </span>
+        </div>
+      )}
 
       {options.pixelSnap && (
         <div className="flex items-center gap-2 min-w-[155px]">
