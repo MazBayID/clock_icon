@@ -664,7 +664,7 @@ function renderAssetCore(
     }
 
     case 'progress-arc': {
-      const rad = Math.min(bw, bh) * 0.43;
+      const rad = Math.max(1, Math.min(bw, bh) * 0.43);
       const startAngle = -Math.PI / 2;
       const pct = Math.max(0, Math.min(1, options.progressPercent / 100));
       const endAngle = startAngle + Math.PI * 2 * pct;
@@ -695,14 +695,16 @@ function renderAssetCore(
           ctx.strokeStyle = isLit ? '#FFFFFF' : 'rgba(255,255,255,0.3)';
           ctx.lineWidth = i % 3 === 0 ? 1.8 : 1.1;
           ctx.beginPath();
-          ctx.moveTo(cx + Math.cos(a) * (rad - 3.5), cy + Math.sin(a) * (rad - 3.5));
-          ctx.lineTo(cx + Math.cos(a) * (rad + 1.5), cy + Math.sin(a) * (rad + 1.5));
+          const tickInnerRadius = Math.max(rad * 0.55, rad - 3.5);
+          const tickOuterRadius = rad + Math.min(1.5, rad * 0.2);
+          ctx.moveTo(cx + Math.cos(a) * tickInnerRadius, cy + Math.sin(a) * tickInnerRadius);
+          ctx.lineTo(cx + Math.cos(a) * tickOuterRadius, cy + Math.sin(a) * tickOuterRadius);
           ctx.stroke();
         }
         ctx.strokeStyle = '#FFFFFF';
         ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(cx, cy, rad - 6.5, startAngle, endAngle);
+        ctx.arc(cx, cy, Math.max(0.5, rad - 6.5), startAngle, endAngle);
         ctx.stroke();
       } else if (isBrutal || isChamfer) {
         const segs = 12;
