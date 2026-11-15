@@ -8,8 +8,8 @@ import {
   ProgressAssetConfig,
   ProgressAssetId,
   ProgressStyle,
-} from '../generator-v2/model/progress';
-import { renderProgressAsset } from '../generator-v2/renderers/progressRenderer';
+} from '../model/progress';
+import { renderProgressAsset } from '../renderers/progressRenderer';
 
 const STYLE_OPTIONS: { id: ProgressStyle; label: string }[] = [
   { id: 'outline', label: 'Outline' },
