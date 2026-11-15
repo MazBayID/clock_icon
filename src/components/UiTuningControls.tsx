@@ -135,7 +135,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         )}
         {(selectedAssetId === 'signal' || selectedAssetId === 'wifi-meter') && (
           <>
-            <input aria-label={selectedAssetId === 'signal' ? 'Kekuatan sinyal seluler preview' : 'Kekuatan Wi-Fi preview'} type="range" min={0} max={4} step={1} value={selectedAssetId === 'signal' ? options.signalLevel : options.wifiLevel} onChange={(e) => onChange({ ...options, [selectedAssetId === 'signal' ? 'signalLevel' : 'wifiLevel']: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
+            <input aria-label={selectedAssetId === 'signal' ? 'Kekuatan sinyal seluler preview' : 'Kekuatan Wi-Fi preview'} type="range" min={0} max={3} step={1} value={selectedAssetId === 'signal' ? options.signalLevel : options.wifiLevel} onChange={(e) => onChange({ ...options, [selectedAssetId === 'signal' ? 'signalLevel' : 'wifiLevel']: parseInt(e.target.value, 10) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
             <span className="text-xs font-mono-tabular text-white w-10 text-right">{selectedAssetId === 'signal' ? options.signalLevel : options.wifiLevel}/3</span>
           </>
         )}
