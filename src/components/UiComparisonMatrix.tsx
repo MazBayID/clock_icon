@@ -130,7 +130,7 @@ export const UiComparisonMatrix: React.FC<UiComparisonMatrixProps> = ({
                   scale={1.15}
                 />
                 <UiAssetCanvas
-                  assetId="heart"
+                  assetId="heart-static"
                   styleId={style.id}
                   options={options}
                   scale={1.1}
