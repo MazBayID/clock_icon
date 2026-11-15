@@ -74,8 +74,8 @@ export function AnimationStudio() {
   };
 
   return (
-    <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
-      <section className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5 sm:p-6">
+    <main id="top" className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-6">
+      <section id="aset-grid" className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
           <div>
             <div className="text-xs font-semibold tracking-[0.18em] uppercase text-sky-400 mb-2">Character animation workspace</div>
@@ -96,7 +96,7 @@ export function AnimationStudio() {
       </section>
 
       <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)] gap-6">
-        <div className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5 sm:p-6">
+        <div id="simulasi" className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <div>
               <h2 className="text-sm font-semibold text-white">Live Preview</h2>
@@ -136,7 +136,7 @@ export function AnimationStudio() {
           <input aria-label="Posisi frame" type="range" min={1} max={animation.frameCount} value={frame} onChange={(event) => { setFrame(Number(event.target.value)); setIsPlaying(false); }} className="w-full mt-5 accent-sky-400" />
         </div>
 
-        <aside className="space-y-6">
+        <aside id="inspektor" className="space-y-6">
           <section className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
             <h2 className="text-sm font-semibold text-white mb-4">Karakter</h2>
             <label className="block text-xs text-slate-400 mb-2" htmlFor="animation-character">Pilih koleksi karakter</label>
