@@ -44,8 +44,9 @@ import { UiWatchPreview } from './components/UiWatchPreview';
 import { UiPixelInspector } from './components/UiPixelInspector';
 import { UiBitmapGeneratorPanel } from './components/UiBitmapGeneratorPanel';
 import { UiComparisonMatrix } from './components/UiComparisonMatrix';
+import { AnimationStudio } from './components/AnimationStudio';
 
-type GeneratorMode = 'numerals' | 'ui-assets';
+type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 
 const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
 const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
@@ -157,7 +158,7 @@ export default function App() {
             href="#aset-grid"
             className="hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
-            {generatorMode === 'numerals' ? 'Aset 25×50' : 'Aset UI'}
+            {generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio'}
           </a>
           <a
             href="#simulasi"
@@ -206,7 +207,7 @@ export default function App() {
               <FileArchive className="w-3.5 h-3.5" />
               {isExporting ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh Paket Lengkap (ZIP)</span><span className="sm:hidden">ZIP</span></>}
             </button>
-          ) : (
+          ) : generatorMode === 'ui-assets' ? (
             <button
               type="button"
               disabled={isExportingUi}
@@ -216,7 +217,8 @@ export default function App() {
               <FileArchive className="w-3.5 h-3.5" />
               {isExportingUi ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh ZIP (Aset UI)</span><span className="sm:hidden">ZIP UI</span></>}
             </button>
-          )}
+          ) : null}
+}
         </div>
       </header>
 
@@ -227,7 +229,7 @@ export default function App() {
           className="md:hidden sticky top-14 z-20 border-b border-white/[0.08] bg-[#090A0D]/[0.98] backdrop-blur px-5 py-3 grid grid-cols-2 gap-2"
         >
           {[
-            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : 'Aset UI' },
+            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
             { href: '#simulasi', label: 'Simulasi Jam' },
             { href: '#inspektor', label: 'Inspektor Piksel' },
             { href: '#bitmap', label: 'Generator Bitmap' },
@@ -284,6 +286,20 @@ export default function App() {
               <LayoutGrid className="w-3.5 h-3.5" />
               Generator Asset UI ({UI_STYLES.length} Gaya)
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={generatorMode === 'animation'}
+              onClick={() => setGeneratorMode('animation')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                generatorMode === 'animation'
+                  ? 'bg-sky-400 text-slate-950'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Animation Studio
+            </button>
           </div>
         </div>
 
@@ -294,11 +310,17 @@ export default function App() {
               <span aria-hidden="true">·</span>
               <span>Kanvas: 25×50 px</span>
             </>
-          ) : (
+          ) : generatorMode === 'ui-assets' ? (
             <>
               <span>Set: {UI_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
               <span aria-hidden="true">·</span>
               <span>Palet: #FFFFFF / #000000</span>
+            </>
+          ) : (
+            <>
+              <span>Karakter: Mochi Face</span>
+              <span aria-hidden="true">·</span>
+              <span>Animasi: 10 koleksi</span>
             </>
           )}
         </div>
@@ -435,7 +457,7 @@ export default function App() {
             </div>
           </main>
         </div>
-      ) : (
+      ) : generatorMode === 'ui-assets' ? (
         <div id="top" className="flex-1 flex flex-col lg:flex-row">
           <UiStyleSidebar
             selectedCategory={selectedUiCategory}
@@ -567,10 +589,14 @@ export default function App() {
         </div>
       )}
 
+      ) : (
+        <AnimationStudio />
+      )}
+
       {/* Quiet Studio Footer */}
       <footer className="border-t border-white/[0.08] bg-[#090A0D] px-6 py-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
         <span>
-          ChronoGlyph Studio — Generator Aset Angka (25×50px) &amp; Aset UI Smartwatch
+          ChronoGlyph Studio — Generator Aset, UI Smartwatch &amp; Animation Studio
         </span>
         <span className="font-mono-tabular">
           Format Ekspor: PNG · BMP 1b/24b · C Header (.h) · image2cpp · ZIP
