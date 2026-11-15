@@ -48,7 +48,12 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
     const height = options.assetSizes?.[assetId]?.height || meta.height;
     const canvas = renderUiAssetToCanvas(assetId, styleId, options, null);
     const generated = extractUiAlphaMap(canvas);
-    const pixels = customPixels?.length === width * height ? new Uint8ClampedArray(customPixels) : generated;
+    const pixels = new Uint8ClampedArray(generated);
+    if (customPixels?.length === width * height) {
+      for (let p = 0; p < customPixels.length; p++) {
+        if (customPixels[p] >= 0) pixels[p] = customPixels[p];
+      }
+    }
     const pixelCanvas = document.createElement('canvas');
     pixelCanvas.width = width;
     pixelCanvas.height = height;
@@ -114,7 +119,9 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
     const key = point.x + ':' + point.y;
     if (lastPaintedRef.current === key) return;
     lastPaintedRef.current = key;
-    const next = new Uint8ClampedArray(alphaMap);
+    const next = customPixels?.length === assetWidth * assetHeight
+      ? new Int16Array(customPixels)
+      : new Int16Array(assetWidth * assetHeight).fill(-1);
     next[point.y * assetWidth + point.x] = editMode === 'draw' ? 255 : 0;
     onChangeCustomPixels(next);
   };
@@ -127,8 +134,7 @@ export const UiPixelInspector: React.FC<UiPixelInspectorProps> = ({
   };
 
   const resetPixels = () => {
-    const generated = extractUiAlphaMap(renderUiAssetToCanvas(assetId, styleId, options, null));
-    onChangeCustomPixels(generated);
+    onChangeCustomPixels(new Int16Array(assetWidth * assetHeight).fill(-1));
   };
 
   return (
