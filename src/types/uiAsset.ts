@@ -1,17 +1,6 @@
-export const UI_ASSET_IDS = [
-  'battery',
-  'heart',
-  'steps',
-  'bluetooth',
-  'wifi',
-  'signal',
-  'notification',
-  'weather-sun',
-  'weather-moon',
-  'alarm',
-  'progress-arc',
-  'ecg-divider',
-] as const;
+export const DYNAMIC_UI_ASSET_IDS = ['battery', 'signal', 'wifi-meter', 'progress-arc', 'heart-dynamic'] as const;
+export const STATIC_UI_ASSET_IDS = ['bluetooth', 'wifi-static', 'weather-sun', 'weather-moon', 'alarm', 'notification', 'heart-static', 'ecg-divider'] as const;
+export const UI_ASSET_IDS = [...DYNAMIC_UI_ASSET_IDS, ...STATIC_UI_ASSET_IDS] as const;
 
 export type UiAssetId = (typeof UI_ASSET_IDS)[number];
 
@@ -62,7 +51,9 @@ export interface UiRenderOptions {
   threshold: number; // 64 to 210
   batteryLevel: number; // 10 to 100
   signalBars: number; // 1 to 4
-  progressPercent: number; // 10 to 100
+  progressPercent: number; // 0 to 100
+  width?: number;
+  height?: number;
 }
 
 export type CustomUiPixelMap = Partial<Record<UiStyleId, Partial<Record<UiAssetId, Uint8ClampedArray>>>>;
