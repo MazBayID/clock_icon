@@ -34,7 +34,7 @@ function drawBattery(ctx: CanvasRenderingContext2D, c: ProgressAssetConfig, rati
   const bodyH = c.height - p * 2;
   const x = p;
   const y = p;
-  const inner = Math.max(2, c.strokeWidth + 1);
+  const inner = Math.max(1, Math.min(c.strokeWidth + 1, bodyH / 2, bodyW / 2));
   const fillW = Math.max(0, (bodyW - inner * 2) * ratio);
   ctx.fillStyle = WHITE;
   ctx.fillRect(x + bodyW, y + bodyH * 0.3, terminalW, bodyH * 0.4);
@@ -145,8 +145,8 @@ function drawStorage(ctx: CanvasRenderingContext2D, c: ProgressAssetConfig, rati
   ctx.strokeStyle = WHITE;
   ctx.lineWidth = c.strokeWidth;
   ctx.stroke();
-  const inner = c.strokeWidth + 1;
-  const innerW = w - inner * 2;
+  const inner = Math.max(1, Math.min(c.strokeWidth + 1, shellH / 2, w / 2));
+  const innerW = Math.max(0, w - inner * 2);
   if (c.showTrack) {
     ctx.fillStyle = '#252525';
     ctx.fillRect(p + inner, y + inner, innerW, shellH - inner * 2);
