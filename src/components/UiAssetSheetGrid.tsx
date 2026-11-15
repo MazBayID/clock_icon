@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Code2, Check, Copy, Download, FileArchive, Layers } from 'lucide-react';
+import React from 'react';
+import { Download, FileArchive, Layers } from 'lucide-react';
 import {
   CustomUiPixelMap,
   UiAssetId,
@@ -7,8 +7,6 @@ import {
   UiStyleId,
 } from '../types/uiAsset';
 import { UI_ASSET_CATALOG } from '../engine/uiAssetStyles';
-import { buildUiCL8Header } from '../engine/bitmapEncoder';
-import { downloadTextFile } from '../engine/exportEngine';
 import { UiAssetCanvas } from './UiAssetCanvas';
 
 interface UiAssetSheetGridProps {
@@ -34,19 +32,6 @@ export const UiAssetSheetGrid: React.FC<UiAssetSheetGridProps> = ({
   onDownloadStyleZip,
   isExporting,
 }) => {
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(false);
-
-  const cHeaderPreview = showCodeModal
-    ? buildUiCL8Header(styleId, options, customMap)
-    : '';
-
-  const handleCopyCode = async () => {
-    await navigator.clipboard.writeText(cHeaderPreview);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 1800);
-  };
-
   return (
     <div className="bg-[#0C0E13] border border-white/[0.08] rounded-lg p-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/[0.08]">
@@ -68,18 +53,7 @@ export const UiAssetSheetGrid: React.FC<UiAssetSheetGridProps> = ({
             <Layers className="w-3.5 h-3.5" />
             Atlas UI PNG
           </button>
-          <button
-            type="button"
-            onClick={() => setShowCodeModal((v) => !v)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border rounded-md transition-colors whitespace-nowrap cursor-pointer ${
-              showCodeModal
-                ? 'bg-sky-500/15 text-sky-300 border-sky-400/30'
-                : 'text-slate-200 bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08]'
-            }`}
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            Header C (.h)
-          </button>
+
           <button
             type="button"
             disabled={isExporting}
@@ -184,51 +158,7 @@ export const UiAssetSheetGrid: React.FC<UiAssetSheetGridProps> = ({
         </div>
       </div>
 
-      {/* Optional Embedded C Header Drawer */}
-      {showCodeModal && (
-        <div className="mt-5 pt-4 border-t border-white/[0.08]">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-            <span className="text-xs font-medium text-slate-200">
-              Array Firmware UI C/C++ (uint8_t L8 Luminance · 12 Aset)
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCopyCode}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-200 bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] rounded transition-colors cursor-pointer"
-              >
-                {copiedCode ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    Tersalin
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    Salin Kode
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadTextFile(
-                    cHeaderPreview,
-                    `${styleId}_ui_assets_l8.h`
-                  )
-                }
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-950 bg-white hover:bg-slate-200 rounded transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Unduh .h
-              </button>
-            </div>
-          </div>
-          <pre className="max-h-64 overflow-auto p-3.5 rounded bg-black border border-white/[0.08] text-[11px] font-mono-tabular text-slate-300 leading-relaxed">
-            {cHeaderPreview}
-          </pre>
-        </div>
-      )}
+
     </div>
   );
 };
