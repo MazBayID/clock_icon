@@ -2,7 +2,7 @@ export const GLYPH_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':
 export type GlyphChar = (typeof GLYPH_CHARS)[number];
 
 export const GLYPH_WIDTH = 25;
-export const GLYPH_HEIGHT = 50;
+export const GLYPH_HEIGHT = 48;
 
 export type StyleCategory = 'all' | 'modern' | 'elegan' | 'teknologi' | 'cyberpunk';
 
