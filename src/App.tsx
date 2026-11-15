@@ -18,7 +18,7 @@ import {
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
 import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
-import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
+import { UI_ASSET_CATALOG, UI_STYLES, getUiAssetMeta, getUiStyleMeta } from './engine/uiAssetStyles';
 import {
   downloadSingleGlyphPng,
   downloadSingleUiAssetPng,
@@ -42,6 +42,7 @@ import { PixelInspector } from './components/PixelInspector';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
 import { UiStyleSidebar } from './components/UiStyleSidebar';
 import { UiTuningControls } from './components/UiTuningControls';
+import { UiAssetCanvas } from './components/UiAssetCanvas';
 import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
 import { UiWatchPreview } from './components/UiWatchPreview';
 import { UiPixelInspector } from './components/UiPixelInspector';
@@ -558,16 +559,39 @@ export default function App() {
               </div>
             </section>
 
-            {/* UI Calibration Toolbar */}
-            <UiTuningControls
-              selectedAssetId={selectedUiAssetId}
-              options={uiOptions}
-              onChange={setUiOptions}
-              onReset={() => setUiOptions(DEFAULT_UI_RENDER_OPTIONS)}
-            />
-
             {/* Main UI Asset Workbench Content */}
             <div className="p-5 sm:p-6 space-y-6">
+              <section className="rounded-lg border border-white/[0.08] bg-[#0C0E13] p-5">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">Preview Aset Terpilih</h2>
+                    <p className="mt-1 text-xs text-slate-400">Pratinjau ikon yang sedang diedit. Pengaturan berada tepat di bawah preview.</p>
+                  </div>
+                  <span className="font-mono-tabular text-xs text-slate-400">
+                    {uiOptions.assetSizes?.[selectedUiAssetId]?.width ?? getUiAssetMeta(selectedUiAssetId).width} × {uiOptions.assetSizes?.[selectedUiAssetId]?.height ?? getUiAssetMeta(selectedUiAssetId).height} px
+                  </span>
+                </div>
+                <div className="flex min-h-[150px] items-center justify-center overflow-auto rounded-md border border-white/[0.08] bg-black p-6">
+                  <UiAssetCanvas
+                    assetId={selectedUiAssetId}
+                    styleId={selectedUiStyleId}
+                    options={uiOptions}
+                    customPixels={customUiMap[selectedUiStyleId]?.[selectedUiAssetId] ?? null}
+                    scale={Math.min(4, 256 / Math.max(
+                      uiOptions.assetSizes?.[selectedUiAssetId]?.width ?? getUiAssetMeta(selectedUiAssetId).width,
+                      uiOptions.assetSizes?.[selectedUiAssetId]?.height ?? getUiAssetMeta(selectedUiAssetId).height
+                    ))}
+                  />
+                </div>
+              </section>
+
+              <UiTuningControls
+                selectedAssetId={selectedUiAssetId}
+                options={uiOptions}
+                onChange={setUiOptions}
+                onReset={() => setUiOptions(DEFAULT_UI_RENDER_OPTIONS)}
+              />
+
               <div id="aset-grid">
                 <UiAssetSheetGrid
                   styleId={selectedUiStyleId}
