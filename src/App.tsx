@@ -195,7 +195,7 @@ export default function App() {
             href="#aset-grid"
             className="hover:text-white transition-colors whitespace-nowrap shrink-0"
           >
-            {generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio'}
+            {generatorMode === 'numerals' ? 'Aset 25×48' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio'}
           </a>
           <a
             href="#simulasi"
@@ -288,7 +288,7 @@ export default function App() {
           className="md:hidden sticky top-14 z-20 border-b border-white/[0.08] bg-[#090A0D]/[0.98] backdrop-blur px-5 py-3 grid grid-cols-2 gap-2"
         >
           {[
-            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
+            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×48' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
             { href: '#simulasi', label: 'Simulasi Jam' },
             { href: '#inspektor', label: 'Inspektor Piksel' },
             { href: '#komparasi', label: 'Komparasi Gaya' },
@@ -366,7 +366,7 @@ export default function App() {
             <>
               <span>Set: 0–9 &amp; : (11 glif)</span>
               <span aria-hidden="true">·</span>
-              <span>Kanvas: 25×50 px</span>
+              <span>Kanvas: 25×48 px</span>
             </>
           ) : generatorMode === 'ui-assets' ? (
             <>
@@ -407,7 +407,7 @@ export default function App() {
                     <span aria-hidden="true">·</span>
                     <span>{activeStyleMeta.targetWatches}</span>
                     <span aria-hidden="true">·</span>
-                    <span className="font-mono-tabular">25 × 50 px</span>
+                    <span className="font-mono-tabular">25 × 48 px</span>
                     <span aria-hidden="true">·</span>
                     <span className="font-mono-tabular">#FFFFFF / #000000</span>
                   </div>
@@ -429,13 +429,13 @@ export default function App() {
                   <div>
                     <div className="text-[11px] text-slate-400">Dimensi</div>
                     <div className="text-base font-mono-tabular font-semibold text-white">
-                      25 × 50 px
+                      25 × 48 px
                     </div>
                   </div>
                   <div>
                     <div className="text-[11px] text-slate-400">Rasio</div>
                     <div className="text-base font-mono-tabular font-semibold text-white">
-                      1 : 2
+                      25 : 48
                     </div>
                   </div>
                 </div>
