@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileArchive, Globe2, Hash, LayoutGrid, Menu, X } from 'lucide-react';
+import { FileArchive, Globe2, Menu, X } from 'lucide-react';
 import { applyLanguage, LANGUAGES, Language } from './i18n';
 import {
   CustomPixelMap,
@@ -8,27 +8,14 @@ import {
   StyleCategory,
   StyleId,
 } from './types/glyph';
-import {
-  CustomUiPixelMap,
-  UiAssetId,
-  UiRenderOptions,
-  UiStyleCategory,
-  UiStyleId,
-} from './types/uiAsset';
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
-import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
-import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
 import {
   downloadSingleGlyphPng,
-  downloadSingleUiAssetPng,
   downloadSpriteSheetPng,
-  downloadUiSpriteSheetPng,
   exportAllStylesZip,
-  exportAllUiStylesZip,
   exportCategoryZip,
   exportStyleZip,
-  exportUiStyleZip,
 } from './engine/exportEngine';
 import { StyleSidebar } from './components/StyleSidebar';
 import { TuningControls } from './components/TuningControls';
@@ -36,19 +23,12 @@ import { AssetSheetGrid } from './components/AssetSheetGrid';
 import { WatchPreview } from './components/WatchPreview';
 import { PixelInspector } from './components/PixelInspector';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
-import { UiStyleSidebar } from './components/UiStyleSidebar';
-import { UiTuningControls } from './components/UiTuningControls';
-import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
-import { UiWatchPreview } from './components/UiWatchPreview';
-import { UiPixelInspector } from './components/UiPixelInspector';
-import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 import { AnimationStudio } from './components/AnimationStudio';
 import { ProgressGeneratorWorkbench } from './generator-v2/components/ProgressGeneratorWorkbench';
 
 type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 
 const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
-const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
 
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
@@ -88,17 +68,7 @@ export default function App() {
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
 
-  // === UI Asset Generator State ===
-  const [selectedUiCategory, setSelectedUiCategory] = useState<UiStyleCategory>('all');
-  const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
-  const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
-  const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
-  const customUiMap = EMPTY_CUSTOM_UI_MAP;
-  const [isExportingUi, setIsExportingUi] = useState(false);
-  const [isExportingAllUi, setIsExportingAllUi] = useState(false);
-
   const activeStyleMeta = getStyleMeta(selectedStyleId);
-  const activeUiStyleMeta = getUiStyleMeta(selectedUiStyleId);
 
   // === Numeral Handlers ===
   const handleSelectStyle = (id: StyleId) => {
@@ -134,34 +104,6 @@ export default function App() {
       await exportAllStylesZip(options, customMap);
     } finally {
       setIsExportingAll(false);
-    }
-  };
-
-  // === UI Asset Handlers ===
-  const handleSelectUiStyle = (id: UiStyleId) => {
-    setSelectedUiStyleId(id);
-    const meta = getUiStyleMeta(id);
-    setUiOptions((prev) => ({
-      ...prev,
-      pixelSnap: meta.recommendedMode === 'pixel-snap',
-    }));
-  };
-
-  const handleDownloadUiStyleZip = async () => {
-    setIsExportingUi(true);
-    try {
-      await exportUiStyleZip(selectedUiStyleId, uiOptions, customUiMap);
-    } finally {
-      setIsExportingUi(false);
-    }
-  };
-
-  const handleDownloadAllUiZip = async () => {
-    setIsExportingAllUi(true);
-    try {
-      await exportAllUiStylesZip(uiOptions, customUiMap);
-    } finally {
-      setIsExportingAllUi(false);
     }
   };
 
