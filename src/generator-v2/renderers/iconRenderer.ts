@@ -1,5 +1,5 @@
 import { IconAssetId, getIconAssetMeta, IconRenderOptions } from '../model/icons';
-import { UiStyleId } from '../../types/uiAsset';
+import { UiStyleId } from '../model/styles';
 
 type RendererAssetId = IconAssetId | 'battery' | 'signal' | 'progress-arc';
 type RendererOptions = IconRenderOptions & {
