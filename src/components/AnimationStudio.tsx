@@ -253,6 +253,15 @@ export function AnimationStudio() {
               onLoadedMetadata={(event) => { event.currentTarget.playbackRate = fps / SOURCE_FPS; }}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
+              onTimeUpdate={(event) => {
+                if (!isPlaying) {
+                  const nextFrame = Math.min(
+                    animation.frameCount,
+                    Math.floor(event.currentTarget.currentTime * SOURCE_FPS) + 1,
+                  );
+                  setFrame(nextFrame);
+                }
+              }}
               onError={() => setAudioError('File audio tidak dapat dimuat. Periksa jalur aset WAV.')}
               className="w-full mt-4"
             />
