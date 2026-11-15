@@ -1,0 +1,38 @@
+name: Convert Mochi audio to browser-compatible PCM WAV
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  convert-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Convert all Mochi audio files
+        run: bash scripts/convert_mochi_audio.sh
+
+      - name: Commit converted WAV files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mochi_assets/mochi_*/audio_mochi_*/*.wav
+          if git diff --cached --quiet; then
+            echo "No audio changes to commit."
+          else
+            git commit -m "Convert Mochi audio to PCM WAV"
+            git push
+          fi
