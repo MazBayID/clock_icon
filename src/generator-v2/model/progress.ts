@@ -27,7 +27,6 @@ export interface ProgressAssetConfig {
   orientation: ProgressOrientation;
   style: ProgressStyle;
   showTrack: boolean;
-  showValue: boolean;
 }
 
 export interface ProgressAssetMeta {
@@ -66,7 +65,6 @@ export function createDefaultProgressConfig(id: ProgressAssetId): ProgressAssetC
     orientation: 'horizontal',
     style: 'outline',
     showTrack: true,
-    showValue: false,
   };
 }
 
@@ -75,6 +73,12 @@ export function normalizeProgressConfig(config: ProgressAssetConfig): ProgressAs
   const height = Math.max(8, Math.min(512, Math.round(config.height)));
   const min = Number.isFinite(config.min) ? config.min : 0;
   const max = Number.isFinite(config.max) && config.max > min ? config.max : min + 1;
+  const paddingLimit = Math.max(0, Math.floor((Math.min(width, height) - 2) / 2));
+  const padding = Math.min(paddingLimit, Math.max(0, Math.min(24, config.padding)));
+  const segmentAxis = config.id === 'signal' || config.id === 'volume' || config.id === 'segmented-progress'
+    ? (config.orientation === 'vertical' && config.id === 'segmented-progress' ? height : width)
+    : width;
+  const segmentLimit = Math.max(2, Math.floor((segmentAxis - padding * 2 + Math.max(0, config.gap)) / (1 + Math.max(0, config.gap))));
   return {
     ...config,
     width,
@@ -82,11 +86,11 @@ export function normalizeProgressConfig(config: ProgressAssetConfig): ProgressAs
     min,
     max,
     value: Math.max(min, Math.min(max, Number.isFinite(config.value) ? config.value : min)),
-    segments: Math.max(2, Math.min(32, Math.round(config.segments))),
+    segments: Math.max(2, Math.min(32, segmentLimit, Math.round(config.segments))),
     gap: Math.max(0, Math.min(12, config.gap)),
-    strokeWidth: Math.max(1, Math.min(8, config.strokeWidth)),
-    cornerRadius: Math.max(0, Math.min(16, config.cornerRadius)),
-    padding: Math.max(0, Math.min(24, config.padding)),
+    strokeWidth: Math.max(1, Math.min(8, Math.floor(Math.min(width, height) / 2), config.strokeWidth)),
+    cornerRadius: Math.max(0, Math.min(16, Math.floor(Math.min(width, height) / 2), config.cornerRadius)),
+    padding,
   };
 }
 
