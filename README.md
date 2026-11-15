@@ -1,6 +1,6 @@
 # ChronoGlyph Studio
 
-ChronoGlyph Studio is a browser-based workspace for generating monochrome smartwatch numerals and interface assets. It focuses on pixel-accurate previews, inspection, comparison, and firmware-oriented exports.
+ChronoGlyph Studio is a browser-based workspace for generating monochrome smartwatch numerals and interface assets. It focuses on pixel-accurate previews, inspection, and visual comparison.
 
 ## Features
 
@@ -9,7 +9,9 @@ ChronoGlyph Studio is a browser-based workspace for generating monochrome smartw
 - Generate a catalog of smartwatch UI assets.
 - Preview assets in round, square, and native-size watch layouts.
 - Inspect pixels, coordinates, and image metrics in read-only mode.
-- Export individual PNG files, sprite sheets, C headers, and ZIP packages.
+- Download individual PNG assets and PNG sprite sheets.
+- Package visual assets as PNG-only ZIP archives with manifests.
+- Export individual PNG files, sprite sheets, and PNG-only ZIP packages.
 - Tune rendering options and preview changes without editing individual pixels.
 
 ## Development
@@ -41,12 +43,12 @@ https://mazbayid.github.io/clock_icon/
 
 ## Export formats
 
-Depending on the selected generator and export action, the studio provides PNG images, bitmap/sprite-sheet assets, C header output, and ZIP packages.
+The current export scope is PNG images, PNG sprite sheets, and ZIP packages containing PNG files plus a manifest. Firmware and bitmap conversion formats are intentionally excluded while the rendering and hardware-output architecture is being redesigned.
 
 ## Project structure
 
-- `src/engine/` — glyph rendering, UI asset rendering, bitmap encoding, and export logic.
-- `src/components/` — generator panels, previews, inspectors, and comparison views.
+- `src/engine/` — glyph rendering, UI asset rendering, and PNG export logic.
+- `src/components/` — asset views, previews, inspectors, and comparison views.
 - `src/types/` — TypeScript types for glyphs and UI assets.
 - `src/App.tsx` — application shell and generator-mode state.
 
