@@ -261,7 +261,7 @@ export default function App() {
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              Generator Asset UI ({UI V2)
+              UI Generator V2
             </button>
             <button
               type="button"
@@ -289,7 +289,7 @@ export default function App() {
             </>
           ) : generatorMode === 'ui-assets' ? (
             <>
-              <span>Set: {PROGRESS_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
+              <span>Set: {PROGRESS_ASSET_CATALOG.length} Progress Types</span>
               <span aria-hidden="true">·</span>
               <span>Palet: #FFFFFF / #000000</span>
             </>
