@@ -118,7 +118,7 @@
     background:
       linear-gradient(180deg, rgba(5, 9, 20, .10) 0%, rgba(5, 9, 20, .16) 48%, rgba(5, 9, 20, .28) 100%),
       linear-gradient(105deg, rgba(5, 17, 35, .08), rgba(30, 10, 44, .06) 55%, rgba(5, 17, 35, .08)),
-      url("/clock_icon/background_clock.jpg") center 42% / cover no-repeat;
+      url("../background_clock.jpg") center 42% / cover no-repeat;
     transform: scale(1.015);
   }
 
