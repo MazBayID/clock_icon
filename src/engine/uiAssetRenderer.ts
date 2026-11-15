@@ -12,7 +12,8 @@ export const DEFAULT_UI_RENDER_OPTIONS: UiRenderOptions = {
   pixelSnap: false,
   threshold: 128,
   batteryLevel: 80,
-  signalBars: 4,
+  signalLevel: 3,
+  wifiLevel: 3,
   progressPercent: 72,
   progressBarPercent: 65,
 };
@@ -293,18 +294,31 @@ function renderAssetCore(
     }
 
     case 'signal': {
-      const bars = 4;
+      const bars = 3;
       const gap = 2.0;
       const barW = (bw - gap * (bars - 1)) / bars;
-      const active = Math.max(0, Math.min(4, Math.round(options.signalBars)));
+      const level = Math.max(0, Math.min(3, Math.round(options.signalLevel)));
 
       for (let i = 0; i < bars; i++) {
         const hRatio = (i + 1) / bars;
         const barH = Math.max(4, bh * (0.28 + 0.72 * hRatio));
         const bx = l + i * (barW + gap);
         const by = b - barH;
-        const lit = i < active;
 
+        if (level === 0 && i === 0) {
+          // At zero signal, replace the first bar with a clear X indicator.
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = Math.max(1, Math.min(1.6, sw));
+          ctx.beginPath();
+          ctx.moveTo(bx + barW * 0.22, by + barH * 0.28);
+          ctx.lineTo(bx + barW * 0.78, by + barH * 0.72);
+          ctx.moveTo(bx + barW * 0.78, by + barH * 0.28);
+          ctx.lineTo(bx + barW * 0.22, by + barH * 0.72);
+          ctx.stroke();
+          continue;
+        }
+
+        const lit = i < level;
         if (lit) {
           ctx.fillStyle = '#FFFFFF';
           if (isChamfer) {
@@ -325,9 +339,7 @@ function renderAssetCore(
             ctx.fillStyle = '#000000';
             ctx.fillRect(bx + 1, by + 1.5, Math.max(0.8, barW - 2), Math.max(1, barH - 3));
           }
-          if (isPcb) {
-            drawSolderVia(ctx, bx + barW / 2, by + 1.2, 1.3);
-          }
+          if (isPcb) drawSolderVia(ctx, bx + barW / 2, by + 1.2, 1.3);
         } else {
           ctx.strokeStyle = '#FFFFFF';
           ctx.lineWidth = 1.0;
@@ -365,16 +377,27 @@ function renderAssetCore(
     case 'wifi-static':
     case 'wifi-meter': {
       const dynamicMeter = assetId === 'wifi-meter';
-      const active = dynamicMeter ? Math.max(0, Math.min(4, Math.round(options.signalBars))) : 4;
+      const level = dynamicMeter ? Math.max(0, Math.min(3, Math.round(options.wifiLevel))) : 3;
       const oy = b - 2.2;
       ctx.fillStyle = '#FFFFFF';
-      if (active > 0) {
-        if (isChamfer || isHorology) { drawDiamond(ctx, cx, oy, 2.0, 2.0); ctx.fill(); }
-        else { ctx.beginPath(); ctx.arc(cx, oy, Math.max(1.8, sw * 0.95), 0, Math.PI * 2); ctx.fill(); }
+      if (dynamicMeter && level === 0) {
+        // At zero Wi-Fi strength, replace the center dot with an X.
+        const mark = Math.max(2.2, sw * 1.15);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = Math.max(1, Math.min(1.6, sw));
+        ctx.beginPath();
+        ctx.moveTo(cx - mark, oy - mark);
+        ctx.lineTo(cx + mark, oy + mark);
+        ctx.moveTo(cx + mark, oy - mark);
+        ctx.lineTo(cx - mark, oy + mark);
+        ctx.stroke();
+        break;
       }
-      const radii = [bw * 0.25, bw * 0.43, bw * 0.61];
+      if (isChamfer || isHorology) { drawDiamond(ctx, cx, oy, 2.0, 2.0); ctx.fill(); }
+      else { ctx.beginPath(); ctx.arc(cx, oy, Math.max(1.8, sw * 0.95), 0, Math.PI * 2); ctx.fill(); }
+      const radii = [bw * 0.30, bw * 0.52];
       for (let index = 0; index < radii.length; index++) {
-        if (dynamicMeter && index >= active - 1) continue;
+        if (dynamicMeter && index >= level - 1) continue;
         const rad = radii[index];
         if (isChamfer) {
           applyDoubleTrackIfEnabled(() => {
