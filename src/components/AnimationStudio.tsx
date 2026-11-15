@@ -152,7 +152,7 @@ export function AnimationStudio() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
+          <section id="bitmap" className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-white">Audio</h2>
@@ -166,7 +166,7 @@ export function AnimationStudio() {
             <p className="text-[11px] text-slate-600 mt-2">Audio dapat diputar manual melalui kontrol di atas.</p>
           </section>
 
-          <section className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
+          <section id="komparasi" className="rounded-xl border border-white/[0.08] bg-[#0B0D12] p-5">
             <h2 className="text-sm font-semibold text-white mb-3">Informasi aset</h2>
             <dl className="space-y-2 text-xs">
               <div className="flex justify-between gap-3"><dt className="text-slate-500">Karakter</dt><dd className="text-slate-200">{character.label}</dd></div>
