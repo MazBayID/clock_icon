@@ -974,7 +974,7 @@ export function renderUiAssetToCanvas(
   assetId: UiAssetId,
   styleId: UiStyleId,
   options: UiRenderOptions,
-  customAlphaMap?: Uint8ClampedArray | null,
+  customAlphaMap?: Int16Array | null,
   targetCanvas?: HTMLCanvasElement | null
 ): HTMLCanvasElement {
   const meta = getUiAssetMeta(assetId);
