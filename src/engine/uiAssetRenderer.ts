@@ -237,7 +237,7 @@ function renderAssetCore(
         ctx.fillRect(l + pad, sy + pad, shellW - pad * 2, shellH - pad * 2);
 
         const maxBars = 4;
-        const activeBars = Math.max(1, Math.round((options.batteryLevel / 100) * maxBars));
+        const activeBars = Math.max(0, Math.round((options.batteryLevel / 100) * maxBars));
         const innerW = shellW - pad * 2 - 2;
         const barW = (innerW - (maxBars - 1) * 1.4) / maxBars;
         ctx.fillStyle = '#FFFFFF';
@@ -265,7 +265,7 @@ function renderAssetCore(
           }
         });
 
-        const fillRatio = Math.max(0.1, Math.min(1, options.batteryLevel / 100));
+        const fillRatio = Math.max(0, Math.min(1, options.batteryLevel / 100));
         const innerX = l + sw + 1.4;
         const innerY = sy + sw + 1.4;
         const innerW = Math.max(4, shellW - sw * 2 - 2.8);
@@ -295,7 +295,7 @@ function renderAssetCore(
       const bars = 4;
       const gap = 2.0;
       const barW = (bw - gap * (bars - 1)) / bars;
-      const active = Math.max(1, Math.min(4, Math.round(options.signalBars)));
+      const active = Math.max(0, Math.min(4, Math.round(options.signalBars)));
 
       for (let i = 0; i < bars; i++) {
         const hRatio = (i + 1) / bars;
@@ -361,20 +361,20 @@ function renderAssetCore(
       break;
     }
 
-    case 'wifi': {
+    case 'wifi-static':
+    case 'wifi-meter': {
+      const dynamicMeter = assetId === 'wifi-meter';
+      const active = dynamicMeter ? Math.max(0, Math.min(4, Math.round(options.signalBars))) : 4;
       const oy = b - 2.2;
       ctx.fillStyle = '#FFFFFF';
-      if (isChamfer || isHorology) {
-        drawDiamond(ctx, cx, oy, 2.0, 2.0);
-        ctx.fill();
-      } else {
-        ctx.beginPath();
-        ctx.arc(cx, oy, Math.max(1.8, sw * 0.95), 0, Math.PI * 2);
-        ctx.fill();
+      if (active > 0) {
+        if (isChamfer || isHorology) { drawDiamond(ctx, cx, oy, 2.0, 2.0); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(cx, oy, Math.max(1.8, sw * 0.95), 0, Math.PI * 2); ctx.fill(); }
       }
-
       const radii = [bw * 0.25, bw * 0.43, bw * 0.61];
-      for (const rad of radii) {
+      for (let index = 0; index < radii.length; index++) {
+        if (dynamicMeter && index >= active - 1) continue;
+        const rad = radii[index];
         if (isChamfer) {
           applyDoubleTrackIfEnabled(() => {
             ctx.beginPath();
@@ -396,7 +396,8 @@ function renderAssetCore(
       break;
     }
 
-    case 'heart': {
+    case 'heart-static':
+    case 'heart-dynamic': {
       const topY = t + bh * 0.25;
       const drawHeartPath = () => {
         if (isChamfer) {
@@ -453,41 +454,6 @@ function renderAssetCore(
         if (isPcb) {
           drawSolderVia(ctx, cx, b - 1.2, 1.5);
         }
-      }
-      break;
-    }
-
-    case 'steps': {
-      // Crisp pair of ergonomic footprints (left lower, right slightly higher)
-      const drawPrint = (px: number, py: number, w: number, h: number) => {
-        if (isChamfer) {
-          drawChamferRectPath(ctx, px, py, w, h * 0.62, 2);
-          if (isSolid) ctx.fill();
-          else ctx.stroke();
-          drawChamferRectPath(ctx, px + 0.5, py + h * 0.72, w - 1, h * 0.28, 1.2);
-          if (isSolid) ctx.fill();
-          else ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.ellipse(px + w / 2, py + h * 0.33, w / 2, h * 0.33, 0, 0, Math.PI * 2);
-          if (isSolid) ctx.fill();
-          else ctx.stroke();
-          ctx.beginPath();
-          ctx.ellipse(px + w / 2, py + h * 0.84, w * 0.38, h * 0.16, 0, 0, Math.PI * 2);
-          if (isSolid) ctx.fill();
-          else ctx.stroke();
-        }
-      };
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = Math.max(1.2, sw * 0.85);
-      drawPrint(l + 1.5, t + 4.5, bw * 0.36, bh - 5);
-      drawPrint(r - bw * 0.36 - 1.5, t + 0.5, bw * 0.36, bh - 5);
-      if (isDoubleTrack) {
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(l + 3.2, t + 8, 2, 4);
-        ctx.fillRect(r - bw * 0.36 + 0.2, t + 4, 2, 4);
       }
       break;
     }
@@ -699,7 +665,7 @@ function renderAssetCore(
     case 'progress-arc': {
       const rad = Math.min(bw, bh) * 0.43;
       const startAngle = -Math.PI / 2;
-      const pct = Math.max(0.1, Math.min(1, options.progressPercent / 100));
+      const pct = Math.max(0, Math.min(1, options.progressPercent / 100));
       const endAngle = startAngle + Math.PI * 2 * pct;
 
       // Subtle background track (dotted / hairline depending on style)
@@ -739,7 +705,7 @@ function renderAssetCore(
         ctx.stroke();
       } else if (isBrutal || isChamfer) {
         const segs = 12;
-        const litSegs = Math.max(1, Math.round(pct * segs));
+        const litSegs = Math.max(0, Math.round(pct * segs));
         for (let i = 0; i < litSegs; i++) {
           const a0 = -Math.PI / 2 + (i / segs) * Math.PI * 2 + 0.06;
           const a1 = -Math.PI / 2 + ((i + 1) / segs) * Math.PI * 2 - 0.06;
@@ -830,8 +796,8 @@ export function renderUiAssetToCanvas(
   targetCanvas?: HTMLCanvasElement | null
 ): HTMLCanvasElement {
   const meta = getUiAssetMeta(assetId);
-  const w = meta.width;
-  const h = meta.height;
+  const w = Math.max(8, Math.min(256, Math.round(options.width || meta.width)));
+  const h = Math.max(8, Math.min(256, Math.round(options.height || meta.height)));
 
   const canvas = targetCanvas ?? document.createElement('canvas');
   if (canvas.width !== w) canvas.width = w;
