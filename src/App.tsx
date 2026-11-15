@@ -33,7 +33,11 @@ type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
 
 export default function App() {
-  const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
+  const [generatorMode, setGeneratorMode] = useState<GeneratorMode>(() =>
+    new URLSearchParams(window.location.search).get('mode') === 'ui-assets'
+      ? 'ui-assets'
+      : 'numerals'
+  );
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [language, setLanguage] = useState<Language>(() => {
     try {
