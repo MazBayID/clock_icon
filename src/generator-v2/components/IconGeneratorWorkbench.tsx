@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { Download, Package, RotateCcw } from 'lucide-react';
-import { UiStyleId } from '../../types/uiAsset';
+import { UiStyleId, UI_STYLES } from '../model/styles';
 import { DEFAULT_ICON_RENDER_OPTIONS, ICON_ASSET_CATALOG, IconAssetId, IconRenderOptions, normalizeIconRenderOptions } from '../model/icons';
 import { renderIconAsset } from '../renderers/iconRenderer';
-import { UI_STYLES } from '../../engine/uiAssetStyles';
+
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
