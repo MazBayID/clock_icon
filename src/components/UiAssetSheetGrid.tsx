@@ -20,7 +20,7 @@ export const UiAssetSheetGrid: React.FC<Props> = (p) => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
         {ids.map((id) => {
           const asset = UI_ASSET_CATALOG.find((item) => item.id === id)!;
-          const width = p.options.width || asset.width, height = p.options.height || asset.height;
+          const width = p.options.assetSizes?.[id]?.width || asset.width, height = p.options.assetSizes?.[id]?.height || asset.height;
           const selected = p.selectedAssetId === id;
           return <div key={id} onClick={() => p.onSelectAsset(id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); p.onSelectAsset(id); } }} className={'rounded-md border p-3 flex flex-col gap-2.5 cursor-pointer ' + (selected ? 'bg-white/[0.07] border-sky-400/70' : 'bg-[#090A0D] border-white/[0.08] hover:border-white/25')}>
             <div className="flex items-center justify-between text-[11px]"><span className="text-slate-200">{asset.shortLabel}</span><span className="font-mono-tabular text-slate-500">{width}×{height}</span></div>
