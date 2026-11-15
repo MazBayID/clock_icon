@@ -32,7 +32,7 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
             Simulasi HUD UI Smartwatch
           </h3>
           <p className="text-xs text-slate-400 mt-0.5">
-            Komposisi langsung ikon &amp; widget UI paket aktif pada layar OLED.
+            Komposisi ikon dan widget UI pada layar OLED. Nilai telemetri adalah data simulasi.
           </p>
         </div>
 
