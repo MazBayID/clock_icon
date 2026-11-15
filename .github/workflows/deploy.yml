@@ -37,6 +37,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Type-check application
+        run: bun run lint
+
+      - name: Test bitmap encoders
+        run: bun run test
+
       - name: Build website
         run: bun run build
 
