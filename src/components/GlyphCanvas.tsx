@@ -42,7 +42,7 @@ export const GlyphCanvas: React.FC<GlyphCanvasProps> = ({
         height: `${GLYPH_HEIGHT * scale}px`,
       }}
       className={`pixelated-canvas block bg-black ${className}`}
-      aria-label={`Angka ${char === ':' ? 'titik dua' : char} ukuran 25x50 piksel`}
+      aria-label={`Angka ${char === ':' ? 'titik dua' : char} ukuran 25x48 piksel`}
     />
   );
 };
