@@ -523,7 +523,7 @@ export default function App() {
                     <span aria-hidden="true">·</span>
                     <span>{activeUiStyleMeta.targetWatches}</span>
                     <span aria-hidden="true">·</span>
-                    <span className="font-mono-tabular">12 Aset UI</span>
+                    <span className="font-mono-tabular">{UI_ASSET_CATALOG.length} Aset UI</span>
                     <span aria-hidden="true">·</span>
                     <span className="font-mono-tabular">#FFFFFF / #000000</span>
                   </div>
