@@ -96,10 +96,10 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
               <div className="flex items-center justify-center gap-4 w-full">
                 <div className="flex flex-col items-center gap-1">
                   <UiAssetCanvas
-                    assetId="heart"
+                    assetId="heart-dynamic"
                     styleId={styleId}
                     options={options}
-                    customPixels={customMap[styleId]?.['heart'] ?? null}
+                    customPixels={customMap[styleId]?.['heart-dynamic'] ?? null}
                     scale={0.85}
                   />
                   <span className="text-[11px] font-mono-tabular text-white">72</span>
@@ -182,10 +182,10 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
                     scale={0.75}
                   />
                   <UiAssetCanvas
-                    assetId="wifi"
+                    assetId="wifi-meter"
                     styleId={styleId}
                     options={options}
-                    customPixels={customMap[styleId]?.['wifi'] ?? null}
+                    customPixels={customMap[styleId]?.['wifi-meter'] ?? null}
                     scale={0.75}
                   />
                 </div>
@@ -211,20 +211,10 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-mono-tabular text-white">72</span>
                     <UiAssetCanvas
-                      assetId="heart"
+                      assetId="heart-dynamic"
                       styleId={styleId}
                       options={options}
-                      customPixels={customMap[styleId]?.['heart'] ?? null}
-                      scale={0.75}
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-mono-tabular text-white">6.4K</span>
-                    <UiAssetCanvas
-                      assetId="steps"
-                      styleId={styleId}
-                      options={options}
-                      customPixels={customMap[styleId]?.['steps'] ?? null}
+                      customPixels={customMap[styleId]?.['heart-dynamic'] ?? null}
                       scale={0.75}
                     />
                   </div>
@@ -283,9 +273,9 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
             <div className="p-4 bg-black border border-dashed border-white/20 flex flex-wrap items-center justify-center gap-3 max-w-full">
               <UiAssetCanvas assetId="battery" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="signal" styleId={styleId} options={options} scale={1} />
-              <UiAssetCanvas assetId="wifi" styleId={styleId} options={options} scale={1} />
+              <UiAssetCanvas assetId="wifi-meter" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="bluetooth" styleId={styleId} options={options} scale={1} />
-              <UiAssetCanvas assetId="heart" styleId={styleId} options={options} scale={1} />
+              <UiAssetCanvas assetId="heart-dynamic" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="steps" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="notification" styleId={styleId} options={options} scale={1} />
               <UiAssetCanvas assetId="alarm" styleId={styleId} options={options} scale={1} />
