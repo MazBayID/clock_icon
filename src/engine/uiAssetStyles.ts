@@ -25,12 +25,12 @@ export const UI_ASSET_CATALOG: UiAssetMeta[] = [
     group: 'Status & Konektivitas',
     width: 28,
     height: 24,
-    description: 'Indikator kekuatan sinyal 4-tingkat untuk pelacakan satelit & seluler.',
+    description: 'Indikator kekuatan sinyal 3-tingkat untuk pelacakan satelit & seluler.',
   },
   {
     id: 'wifi-meter', name: 'Wi-Fi dengan Meter Sinyal', shortLabel: 'Wi-Fi Meter',
     group: 'Status & Konektivitas', width: 28, height: 24,
-    description: 'Ikon Wi-Fi dinamis dengan empat tingkat kekuatan sinyal.',
+    description: 'Ikon Wi-Fi dinamis dengan satu titik dan dua busur; tanda X saat sinyal 0%.',
   },
   {
     id: 'heart-dynamic', name: 'Jantung Dinamis', shortLabel: 'Heart Live',
