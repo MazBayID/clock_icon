@@ -144,10 +144,10 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-[#090A0D] text-[#F2F4F8]">
       {/* Strict 3-Zone Top Bar */}
-      <header className="sticky top-0 z-30 bg-[#090A0D]/95 backdrop-blur border-b border-white/[0.08] px-6 h-14 flex items-center justify-between gap-8">
+      <header className="sticky top-0 z-30 bg-[#090A0D]/95 backdrop-blur border-b border-white/[0.08] px-3 sm:px-6 h-14 flex items-center justify-between gap-3 md:gap-8">
         <a
           href="#top"
-          className="text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
+          className="text-sm sm:text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
         >
           ChronoGlyph Studio
         </a>
@@ -185,7 +185,7 @@ export default function App() {
           </a>
         </nav>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             type="button"
             className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/[0.12] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
@@ -201,10 +201,10 @@ export default function App() {
               type="button"
               disabled={isExporting}
               onClick={handleDownloadStyleZip}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
             >
               <FileArchive className="w-3.5 h-3.5" />
-              {isExporting ? 'Mengemas...' : 'Unduh Paket Lengkap (ZIP)'}
+              {isExporting ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh Paket Lengkap (ZIP)</span><span className="sm:hidden">ZIP</span></>}
             </button>
           ) : (
             <button
@@ -214,7 +214,7 @@ export default function App() {
               className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
             >
               <FileArchive className="w-3.5 h-3.5" />
-              {isExportingUi ? 'Mengemas...' : 'Unduh ZIP (Aset UI)'}
+              {isExportingUi ? 'Mengemas...' : <><span className="hidden sm:inline">Unduh ZIP (Aset UI)</span><span className="sm:hidden">ZIP UI</span></>}
             </button>
           )}
         </div>
