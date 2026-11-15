@@ -18,6 +18,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
 }) => {
   const nativeSize = getUiAssetMeta(selectedAssetId);
   const selectedSize = options.assetSizes?.[selectedAssetId] ?? {};
+  const independentProgressBarSize = options.pixelSnap && selectedAssetId === 'progress-bar';
   const [pendingWidth, setPendingWidth] = useState(String(selectedSize.width ?? nativeSize.width));
   const [pendingHeight, setPendingHeight] = useState(String(selectedSize.height ?? nativeSize.height));
   const [sizeError, setSizeError] = useState('');
@@ -31,7 +32,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
   const updateWidth = (value: string) => {
     setPendingWidth(value);
     const width = Number(value);
-    if (value.trim() !== '' && Number.isFinite(width) && width > 0) {
+    if (!independentProgressBarSize && value.trim() !== '' && Number.isFinite(width) && width > 0) {
       setPendingHeight(String(Math.round(width * nativeSize.height / nativeSize.width)));
     }
     setSizeError('');
@@ -40,7 +41,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
   const updateHeight = (value: string) => {
     setPendingHeight(value);
     const height = Number(value);
-    if (value.trim() !== '' && Number.isFinite(height) && height > 0) {
+    if (!independentProgressBarSize && value.trim() !== '' && Number.isFinite(height) && height > 0) {
       setPendingWidth(String(Math.round(height * nativeSize.width / nativeSize.height)));
     }
     setSizeError('');
@@ -60,8 +61,10 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
     const height = pendingHeight.trim() === '' ? nativeSize.height : Number(pendingHeight);
     if (!Number.isFinite(width) || !Number.isFinite(height) ||
         !Number.isInteger(width) || !Number.isInteger(height) ||
-        width < 8 || width > 256 || height < (selectedAssetId === 'progress-bar' ? 2 : 8) || height > 256) {
-      setSizeError('Lebar harus 8–256 px; tinggi Progress Bar 2–256 px, ikon lain 8–256 px.');
+        width < (independentProgressBarSize ? 1 : 8) || width > 256 || height < (independentProgressBarSize ? 1 : 8) || height > 256) {
+      setSizeError(independentProgressBarSize
+        ? 'Panjang dan tinggi Progress Bar harus 1–256 px.'
+        : 'Lebar dan tinggi ikon harus 8–256 px.');
       return;
     }
     onChange({
@@ -82,11 +85,11 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
-        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={pendingWidth} onChange={(e) => updateWidth(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <input id="ui-width" type="number" min={independentProgressBarSize ? 1 : 8} max={256} placeholder="px" value={pendingWidth} onChange={(e) => updateWidth(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[11px] text-slate-500">×</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-height">H</label>
-        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={pendingHeight} onChange={(e) => updateHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
-        <span className="text-[10px] text-slate-500">Rasio {nativeSize.width}:{nativeSize.height} · sisi lain otomatis · 8–256 px</span>
+        <input id="ui-height" type="number" min={independentProgressBarSize ? 1 : 8} max={256} placeholder={independentProgressBarSize ? "px" : "Auto"} value={pendingHeight} onChange={(e) => updateHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <span className="text-[10px] text-slate-500">{independentProgressBarSize ? "Panjang dan tinggi bebas · 1–256 px" : `Rasio ${nativeSize.width}:${nativeSize.height} · sisi lain otomatis · 8–256 px`}</span>
         <button type="button" onClick={applyCustomSize} className="px-2.5 py-1 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded transition-colors cursor-pointer">OK</button>
         <button type="button" onClick={resetCustomSize} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] border border-white/[0.08] rounded transition-colors cursor-pointer">
           <RotateCcw className="w-3 h-3" /> Reset Pixel
