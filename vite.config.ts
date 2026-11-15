@@ -4,5 +4,6 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: '/clock_icon/',
+  publicDir: 'mochi_assets',
   plugins: [react(), tailwindcss()],
 });
