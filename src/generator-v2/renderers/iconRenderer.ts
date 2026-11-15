@@ -618,7 +618,7 @@ export function renderIconAsset(
     ctx.lineTo(box.x0 + 7, box.y1 - 7);
     ctx.stroke();
   } else {
-    renderAssetCore(ctx, assetId, styleId, box, rendererOptions);
+    renderAssetCore(ctx, assetId, styleId, box, options);
   }
 
   if (styleId === 'quantum-dot-ui') {
