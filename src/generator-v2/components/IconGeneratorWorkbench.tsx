@@ -1,15 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { Download, Package, RotateCcw } from 'lucide-react';
-import { UiAssetId, UiRenderOptions, UiStyleId } from '../../types/uiAsset';
+import { UiRenderOptions, UiStyleId } from '../../types/uiAsset';
+import { ICON_ASSET_CATALOG, IconAssetId } from '../model/icons';
 import { DEFAULT_UI_RENDER_OPTIONS, renderUiAssetToCanvas } from '../../engine/uiAssetRenderer';
-import { UI_ASSET_CATALOG, UI_STYLES } from '../../engine/uiAssetStyles';
-
-const ICON_IDS: UiAssetId[] = [
-  'bluetooth', 'wifi', 'heart', 'steps', 'notification',
-  'weather-sun', 'weather-moon', 'alarm', 'ecg-divider',
-];
-const ICON_CATALOG = UI_ASSET_CATALOG.filter((asset) => ICON_IDS.includes(asset.id));
+import { UI_STYLES } from '../../engine/uiAssetStyles';
 
 function canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -27,12 +22,12 @@ function downloadBlob(blob: Blob, filename: string) {
 }
 
 export const IconGeneratorWorkbench: React.FC = () => {
-  const [assetId, setAssetId] = useState<UiAssetId>('heart');
+  const [assetId, setAssetId] = useState<IconAssetId>('heart');
   const [styleId, setStyleId] = useState<UiStyleId>('swiss-precision-ui');
   const [options, setOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
   const [packaging, setPackaging] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const activeAsset = useMemo(() => ICON_CATALOG.find((asset) => asset.id === assetId) ?? ICON_CATALOG[0], [assetId]);
+  const activeAsset = useMemo(() => ICON_ASSET_CATALOG.find((asset) => asset.id === assetId) ?? ICON_CATALOG[0], [assetId]);
   const activeStyle = UI_STYLES.find((style) => style.id === styleId) ?? UI_STYLES[0];
 
   useEffect(() => {
