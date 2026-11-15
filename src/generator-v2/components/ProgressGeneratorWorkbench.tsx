@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
-import { Download, Package, RotateCcw } from 'lucide-react';
+import { Download, Grid3X3, Package, RotateCcw } from 'lucide-react';
 import {
   createDefaultProgressConfig,
   normalizeProgressConfig,
@@ -10,6 +10,7 @@ import {
   ProgressStyle,
 } from '../model/progress';
 import { renderProgressAsset } from '../renderers/progressRenderer';
+import { createSpriteSheetCanvas } from '../export/spriteSheet';
 
 const STYLE_OPTIONS: { id: ProgressStyle; label: string }[] = [
   { id: 'outline', label: 'Outline' },
@@ -37,6 +38,7 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
   const [assetId, setAssetId] = useState<ProgressAssetId>('battery');
   const [config, setConfig] = useState<ProgressAssetConfig>(() => createDefaultProgressConfig('battery'));
   const [isPackaging, setIsPackaging] = useState(false);
+  const [exportingSheet, setExportingSheet] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const activeMeta = useMemo(
@@ -60,6 +62,19 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
   const downloadCurrent = async () => {
     if (!canvasRef.current) return;
     saveBlob(await canvasToBlob(canvasRef.current), `${assetId}.png`);
+  };
+
+  const downloadSpriteSheet = async () => {
+    setExportingSheet(true);
+    try {
+      const items = PROGRESS_ASSET_CATALOG.map((meta) => {
+        const base = createDefaultProgressConfig(meta.id);
+        const assetConfig = normalizeProgressConfig({ ...base, value: config.value, style: config.style, showTrack: config.showTrack, strokeWidth: config.strokeWidth, cornerRadius: config.cornerRadius, gap: config.gap });
+        return { id: meta.id, canvas: renderProgressAsset(assetConfig) };
+      });
+      const sheet = createSpriteSheetCanvas(items, 3, 3);
+      saveBlob(await canvasToBlob(sheet), 'clock-icon-ui-progress-spritesheet.png');
+    } finally { setExportingSheet(false); }
   };
 
   const downloadPackage = async () => {
@@ -185,6 +200,7 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
               <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Segment Gap</span><strong className="text-white">{config.gap}px</strong></span><input type="range" min="0" max="8" value={config.gap} onChange={(e) => update({ gap: Number(e.target.value) })} className="w-full accent-sky-400" /></label>
 
               <label className="flex items-center justify-between text-xs text-slate-300"><span>Show empty track</span><input type="checkbox" checked={config.showTrack} onChange={(e) => update({ showTrack: e.target.checked })} className="accent-sky-400" /></label>
+              <div className="grid grid-cols-1 gap-2 pt-2"><button type="button" onClick={downloadCurrent} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1]"><Download className="w-4 h-4" /> Unduh PNG</button><button type="button" disabled={isPackaging} onClick={downloadPackage} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-sky-400 text-slate-950 text-sm font-semibold hover:bg-sky-300 disabled:opacity-50"><Package className="w-4 h-4" /> {isPackaging ? 'Mengemas…' : 'Ekspor Paket ZIP'}</button><button type="button" disabled={exportingSheet} onClick={downloadSpriteSheet} className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1] disabled:opacity-50"><Grid3X3 className="w-4 h-4" /> {exportingSheet ? 'Membuat…' : 'Ekspor Sprite Sheet PNG'}</button></div>
             </div>
           </aside>
         </main>
