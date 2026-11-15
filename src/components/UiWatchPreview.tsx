@@ -285,7 +285,7 @@ export const UiWatchPreview: React.FC<UiWatchPreviewProps> = ({
       {/* Weather Toggle */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <span className="text-xs text-slate-400">
-          Status UI mengikuti kalibrasi Baterai ({options.batteryLevel}%), Sinyal ({options.signalBars}/4), &amp; Progres ({options.progressPercent}%).
+          Status UI mengikuti kalibrasi Baterai ({options.batteryLevel}%), Sinyal ({options.signalLevel}/3), Wi-Fi ({options.wifiLevel}/3), &amp; Progres ({options.progressPercent}%).
         </span>
         <label className="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
           <input
