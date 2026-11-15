@@ -164,7 +164,7 @@ export default function App() {
     setIsExportingUiAction(true);
     try { await task(); } finally { setIsExportingUiAction(false); }
   };
-  const handleExportStaticOne = (id: UiAssetId) => runUiExport(() => exportSingleStaticUiAssetZip(id, selectedUiStyleId, uiOptions, customUiMap));
+  const handleExportStaticOne = (id: UiAssetId) => runUiExport(() => downloadSingleStaticUiAssetPng(id, selectedUiStyleId, uiOptions, customUiMap));
   const handleExportDynamicOne = (id: UiAssetId) => runUiExport(() => exportSingleDynamicUiAssetZip(id, selectedUiStyleId, uiOptions, customUiMap));
   const handleExportAllStatic = () => runUiExport(() => exportAllStaticUiAssetsZip(selectedUiStyleId, uiOptions, customUiMap));
   const handleExportAllDynamic = () => runUiExport(() => exportAllDynamicUiAssetsZip(selectedUiStyleId, uiOptions, customUiMap));
