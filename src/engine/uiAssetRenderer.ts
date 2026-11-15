@@ -14,6 +14,7 @@ export const DEFAULT_UI_RENDER_OPTIONS: UiRenderOptions = {
   batteryLevel: 80,
   signalBars: 4,
   progressPercent: 72,
+  progressBarPercent: 65,
 };
 
 interface UiBox {
@@ -743,6 +744,51 @@ function renderAssetCore(
       } else {
         ctx.fillRect(cx - 3.5, cy - 0.8, 7, 1.6);
         ctx.fillRect(cx - 0.8, cy - 3.5, 1.6, 7);
+      }
+      break;
+    }
+
+    case 'progress-bar': {
+      const barH = Math.max(4, Math.min(10, bh * 0.58));
+      const barY = cy - barH / 2;
+      const pct = Math.max(0, Math.min(1, options.progressBarPercent / 100));
+      const radius = Math.min(3, barH / 2);
+
+      if (isSolid) {
+        if (isChamfer) {
+          drawChamferRectPath(ctx, l, barY, bw, barH, radius);
+        } else {
+          ctx.beginPath();
+          ctx.roundRect(l, barY, bw, barH, radius);
+        }
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(l + 1.5, barY + 1.5, Math.max(0, bw - 3), Math.max(1, barH - 3));
+      } else {
+        ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+        ctx.lineWidth = 1;
+        if (isChamfer) {
+          drawChamferRectPath(ctx, l + 0.5, barY + 0.5, bw - 1, barH - 1, radius);
+        } else {
+          ctx.beginPath();
+          ctx.roundRect(l + 0.5, barY + 0.5, bw - 1, barH - 1, radius);
+        }
+        ctx.stroke();
+      }
+
+      const innerX = l + (isSolid ? 1.5 : 1.5);
+      const innerY = barY + 1.5;
+      const innerW = Math.max(0, (bw - 3) * pct);
+      const innerH = Math.max(1, barH - 3);
+      if (innerW > 0) {
+        ctx.fillStyle = '#FFFFFF';
+        if (isChamfer && innerW >= 4) {
+          drawChamferRectPath(ctx, innerX, innerY, innerW, innerH, Math.min(2, innerH / 2));
+          ctx.fill();
+        } else {
+          ctx.fillRect(innerX, innerY, innerW, innerH);
+        }
       }
       break;
     }
