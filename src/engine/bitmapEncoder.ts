@@ -233,7 +233,7 @@ export function buildC1BitHeader(
 }
 
 /**
- * Generates 16-bit RGB565 C header (1250 uint16_t words/glyph, big-endian/little-endian compatible).
+ * Generates 16-bit RGB565 C header (1250 uint16_t words/glyph, native-endian uint16_t values).
  */
 export function buildCRgb565Header(
   styleId: StyleId,
@@ -310,7 +310,7 @@ export function buildBmFontDescriptor(styleId: StyleId): string {
   const lines: string[] = [
     `info face="${meta.name}" size=50 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=1 aa=1 padding=0,0,0,0 spacing=0,0 outline=0`,
     `common lineHeight=50 base=44 scaleW=${atlasWidth} scaleH=${GLYPH_HEIGHT} pages=1 packed=0 alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4`,
-    `page id=0 file="spritesheet_275x50.bmp"`,
+    `page id=0 file="../bmp_24bit_25x50/spritesheet_275x50.bmp"`,
     `chars count=${GLYPH_CHARS.length}`,
   ];
 
