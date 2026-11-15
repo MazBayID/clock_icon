@@ -41,3 +41,25 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #353B4B;
 }
+
+/* Brief entrance motion when a displayed numeral changes. */
+@keyframes glyph-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-glyph-enter {
+  animation: glyph-enter 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-glyph-enter {
+    animation: none;
+  }
+}
