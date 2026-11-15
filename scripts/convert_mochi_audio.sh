@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Converts the ten checked-in Mochi ADPCM WAV files in place to PCM 16-bit WAV.
 set -euo pipefail
 
 animations=(
