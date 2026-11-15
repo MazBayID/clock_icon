@@ -96,35 +96,28 @@
     position: relative;
     isolation: isolate;
     min-width: 320px;
-    background: #070b16;
+    background-color: #070b16;
+    background-image:
+      radial-gradient(ellipse at 12% 17%, rgba(28, 214, 224, .14), transparent 34rem),
+      radial-gradient(ellipse at 88% 24%, rgba(198, 74, 255, .16), transparent 33rem),
+      radial-gradient(ellipse at 52% 76%, rgba(54, 117, 255, .12), transparent 38rem),
+      linear-gradient(180deg, rgba(5, 9, 20, .10) 0%, rgba(5, 9, 20, .16) 48%, rgba(5, 9, 20, .28) 100%),
+      linear-gradient(105deg, rgba(5, 17, 35, .08), rgba(30, 10, 44, .06) 55%, rgba(5, 17, 35, .08)),
+      url("/clock_icon/background_clock.jpg");
+    background-position: center, center, center, center, center, center 42%;
+    background-size: auto, auto, auto, auto, auto, cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--maz-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
+  /* The background is painted directly on body so it cannot be hidden
+     behind the body's own opaque background layer. */
   body::before,
   body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  body::before {
-    background:
-      linear-gradient(180deg, rgba(5, 9, 20, .10) 0%, rgba(5, 9, 20, .16) 48%, rgba(5, 9, 20, .28) 100%),
-      linear-gradient(105deg, rgba(5, 17, 35, .08), rgba(30, 10, 44, .06) 55%, rgba(5, 17, 35, .08)),
-      url("/clock_icon/background_clock.jpg") center 42% / cover no-repeat;
-    transform: scale(1.015);
-  }
-
-  body::after {
-    background:
-      radial-gradient(ellipse at 12% 17%, rgba(28, 214, 224, .14), transparent 34rem),
-      radial-gradient(ellipse at 88% 24%, rgba(198, 74, 255, .16), transparent 33rem),
-      radial-gradient(ellipse at 52% 76%, rgba(54, 117, 255, .12), transparent 38rem);
-    mix-blend-mode: screen;
+    content: none;
   }
 
   h1, h2, h3, h4,
@@ -241,8 +234,8 @@ header.sticky a[href="#top"]::after {
 }
 
 @media (max-width: 720px) {
-  body::before {
-    background-position: 52% center;
+  body {
+    background-position: center, center, center, center, center, 52% center;
   }
 }
 
