@@ -28,7 +28,7 @@ describe('sprite sheet layout', () => {
       assets: [
         { id: 'small', x: 8, y: 5, width: 24, height: 20 },
         { id: 'large', x: 42, y: 0, width: 40, height: 30 },
-        { id: 'wide', x: 5, y: 32, width: 30, height: 10 },
+        { id: 'wide', x: 5, y: 42, width: 30, height: 10 },
       ],
     });
   });
