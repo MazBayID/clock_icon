@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { downloadBlob } from '../export/download';
 import JSZip from 'jszip';
 import { Activity, Package, Shapes } from 'lucide-react';
 import { IconGeneratorWorkbench } from './IconGeneratorWorkbench';
