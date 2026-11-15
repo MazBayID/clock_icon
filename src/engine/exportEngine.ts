@@ -153,12 +153,13 @@ export async function exportAllStylesZip(
 type UiFrame = { value: number; options: UiRenderOptions; suffix: string };
 function uiFrames(assetId: UiAssetId, options: UiRenderOptions): UiFrame[] {
   const values = assetId === 'battery' ? Array.from({ length: 11 }, (_, i) => i * 10)
-    : assetId === 'signal' || assetId === 'wifi-meter' ? [0, 1, 2, 3, 4]
+    : assetId === 'signal' || assetId === 'wifi-meter' ? [0, 1, 2, 3]
     : assetId === 'progress-arc' || assetId === 'progress-bar' ? Array.from({ length: 21 }, (_, i) => i * 5) : [0];
   return values.map((value) => {
     const next = { ...options };
     if (assetId === 'battery') next.batteryLevel = value;
-    if (assetId === 'signal' || assetId === 'wifi-meter') next.signalBars = value;
+    if (assetId === 'signal') next.signalLevel = value;
+    if (assetId === 'wifi-meter') next.wifiLevel = value;
     if (assetId === 'progress-arc') next.progressPercent = value;
     if (assetId === 'progress-bar') next.progressBarPercent = value;
     const suffix = assetId === 'battery' || assetId === 'progress-arc' || assetId === 'progress-bar' ? String(value) + 'pct'
