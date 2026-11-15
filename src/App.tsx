@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileArchive, Hash, LayoutGrid } from 'lucide-react';
+import { FileArchive, Hash, LayoutGrid, Menu, X } from 'lucide-react';
 import {
   CustomPixelMap,
   GlyphChar,
@@ -52,6 +52,7 @@ const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
 
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // === Numeral Generator State ===
   const [selectedCategory, setSelectedCategory] = useState<StyleCategory>('all');
@@ -185,6 +186,16 @@ export default function App() {
         </nav>
 
         <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-white/[0.12] text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+            aria-label={isMobileNavOpen ? 'Tutup navigasi' : 'Buka navigasi'}
+            aria-expanded={isMobileNavOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsMobileNavOpen((open) => !open)}
+          >
+            {isMobileNavOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
           {generatorMode === 'numerals' ? (
             <button
               type="button"
@@ -208,6 +219,31 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {isMobileNavOpen && (
+        <nav
+          id="mobile-navigation"
+          aria-label="Navigasi utama"
+          className="md:hidden sticky top-14 z-20 border-b border-white/[0.08] bg-[#090A0D]/[0.98] backdrop-blur px-5 py-3 grid grid-cols-2 gap-2"
+        >
+          {[
+            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : 'Aset UI' },
+            { href: '#simulasi', label: 'Simulasi Jam' },
+            { href: '#inspektor', label: 'Inspektor Piksel' },
+            { href: '#bitmap', label: 'Generator Bitmap' },
+            { href: '#komparasi', label: 'Komparasi Gaya' },
+          ].map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={() => setIsMobileNavOpen(false)}
+              className="rounded-md px-3 py-2.5 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      )}
 
       {/* Dedicated Generator Mode Switcher Bar (Separated: Generating Angka vs Generating Asset UI) */}
       <div className="bg-[#0B0D12] border-b border-white/[0.08] px-6 py-2.5 flex flex-wrap items-center justify-between gap-4">
