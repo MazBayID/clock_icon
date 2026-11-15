@@ -99,7 +99,6 @@ export const AssetSheetGrid: React.FC<AssetSheetGridProps> = ({
         <div className="mt-5 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-11 gap-2.5">
           {GLYPH_CHARS.map((ch) => {
             const isSelected = ch === selectedChar;
-            const hasCustom = Boolean(customMap[styleId]?.[ch]);
             const fileName = ch === ':' ? 'colon.png' : `${ch}.png`;
 
             return (
@@ -124,11 +123,7 @@ export const AssetSheetGrid: React.FC<AssetSheetGridProps> = ({
                   <span className={isSelected ? 'text-sky-300 font-semibold' : 'text-slate-400'}>
                     {ch}
                   </span>
-                  {hasCustom ? (
-                    <span className="text-[10px] text-amber-300">Edit</span>
-                  ) : (
-                    <span className="text-[10px] text-slate-500">25×50</span>
-                  )}
+                  <span className="text-[10px] text-slate-500">25×50</span>
                 </div>
 
                 {/* Actual 25x50 canvas rendered at clean 2x (50x100px) */}
