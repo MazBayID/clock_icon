@@ -8,27 +8,15 @@ import {
   StyleCategory,
   StyleId,
 } from './types/glyph';
-import {
-  CustomUiPixelMap,
-  UiAssetId,
-  UiRenderOptions,
-  UiStyleCategory,
-  UiStyleId,
-} from './types/uiAsset';
 import { DEFAULT_RENDER_OPTIONS } from './engine/glyphRenderer';
 import { GLYPH_STYLES, getStyleMeta } from './engine/glyphStyles';
-import { DEFAULT_UI_RENDER_OPTIONS } from './engine/uiAssetRenderer';
-import { UI_ASSET_CATALOG, UI_STYLES, getUiStyleMeta } from './engine/uiAssetStyles';
+import { PROGRESS_ASSET_CATALOG } from './generator-v2/model/progress';
 import {
   downloadSingleGlyphPng,
-  downloadSingleUiAssetPng,
   downloadSpriteSheetPng,
-  downloadUiSpriteSheetPng,
   exportAllStylesZip,
-  exportAllUiStylesZip,
   exportCategoryZip,
   exportStyleZip,
-  exportUiStyleZip,
 } from './engine/exportEngine';
 import { StyleSidebar } from './components/StyleSidebar';
 import { TuningControls } from './components/TuningControls';
@@ -36,19 +24,12 @@ import { AssetSheetGrid } from './components/AssetSheetGrid';
 import { WatchPreview } from './components/WatchPreview';
 import { PixelInspector } from './components/PixelInspector';
 import { ComparisonMatrix } from './components/ComparisonMatrix';
-import { UiStyleSidebar } from './components/UiStyleSidebar';
-import { UiTuningControls } from './components/UiTuningControls';
-import { UiAssetSheetGrid } from './components/UiAssetSheetGrid';
-import { UiWatchPreview } from './components/UiWatchPreview';
-import { UiPixelInspector } from './components/UiPixelInspector';
-import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 import { AnimationStudio } from './components/AnimationStudio';
-import { ProgressGeneratorWorkbench } from './generator-v2/components/ProgressGeneratorWorkbench';
+import { UiGeneratorV2Workbench } from './generator-v2/components/UiGeneratorV2Workbench';
 
 type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 
 const EMPTY_CUSTOM_MAP: CustomPixelMap = {};
-const EMPTY_CUSTOM_UI_MAP: CustomUiPixelMap = {};
 
 export default function App() {
   const [generatorMode, setGeneratorMode] = useState<GeneratorMode>('numerals');
@@ -88,17 +69,7 @@ export default function App() {
   const [isExportingCyberpunk, setIsExportingCyberpunk] = useState(false);
   const [isExportingAll, setIsExportingAll] = useState(false);
 
-  // === UI Asset Generator State ===
-  const [selectedUiCategory, setSelectedUiCategory] = useState<UiStyleCategory>('all');
-  const [selectedUiStyleId, setSelectedUiStyleId] = useState<UiStyleId>('swiss-precision-ui');
-  const [selectedUiAssetId, setSelectedUiAssetId] = useState<UiAssetId>('battery');
-  const [uiOptions, setUiOptions] = useState<UiRenderOptions>(DEFAULT_UI_RENDER_OPTIONS);
-  const customUiMap = EMPTY_CUSTOM_UI_MAP;
-  const [isExportingUi, setIsExportingUi] = useState(false);
-  const [isExportingAllUi, setIsExportingAllUi] = useState(false);
-
   const activeStyleMeta = getStyleMeta(selectedStyleId);
-  const activeUiStyleMeta = getUiStyleMeta(selectedUiStyleId);
 
   // === Numeral Handlers ===
   const handleSelectStyle = (id: StyleId) => {
@@ -134,34 +105,6 @@ export default function App() {
       await exportAllStylesZip(options, customMap);
     } finally {
       setIsExportingAll(false);
-    }
-  };
-
-  // === UI Asset Handlers ===
-  const handleSelectUiStyle = (id: UiStyleId) => {
-    setSelectedUiStyleId(id);
-    const meta = getUiStyleMeta(id);
-    setUiOptions((prev) => ({
-      ...prev,
-      pixelSnap: meta.recommendedMode === 'pixel-snap',
-    }));
-  };
-
-  const handleDownloadUiStyleZip = async () => {
-    setIsExportingUi(true);
-    try {
-      await exportUiStyleZip(selectedUiStyleId, uiOptions, customUiMap);
-    } finally {
-      setIsExportingUi(false);
-    }
-  };
-
-  const handleDownloadAllUiZip = async () => {
-    setIsExportingAllUi(true);
-    try {
-      await exportAllUiStylesZip(uiOptions, customUiMap);
-    } finally {
-      setIsExportingAllUi(false);
     }
   };
 
@@ -264,7 +207,7 @@ export default function App() {
           className="md:hidden sticky top-14 z-20 border-b border-white/[0.08] bg-[#090A0D]/[0.98] backdrop-blur px-5 py-3 grid grid-cols-2 gap-2"
         >
           {[
-            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'Aset UI' : 'Animation Studio' },
+            { href: '#aset-grid', label: generatorMode === 'numerals' ? 'Aset 25×50' : generatorMode === 'ui-assets' ? 'UI Generator V2' : 'Animation Studio' },
             { href: '#simulasi', label: 'Simulasi Jam' },
             { href: '#inspektor', label: 'Inspektor Piksel' },
             { href: '#komparasi', label: 'Komparasi Gaya' },
@@ -318,7 +261,7 @@ export default function App() {
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              Generator Asset UI ({UI_STYLES.length} Gaya)
+              Generator Asset UI ({UI V2)
             </button>
             <button
               type="button"
@@ -346,7 +289,7 @@ export default function App() {
             </>
           ) : generatorMode === 'ui-assets' ? (
             <>
-              <span>Set: {UI_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
+              <span>Set: {PROGRESS_ASSET_CATALOG.length} Ikon &amp; Widget UI</span>
               <span aria-hidden="true">·</span>
               <span>Palet: #FFFFFF / #000000</span>
             </>
@@ -479,7 +422,7 @@ export default function App() {
           </main>
         </div>
       ) : generatorMode === 'ui-assets' ? (
-        <ProgressGeneratorWorkbench />
+        <UiGeneratorV2Workbench />
       ) : (
         <AnimationStudio />
       )}
