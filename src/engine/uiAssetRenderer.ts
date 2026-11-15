@@ -834,6 +834,85 @@ function renderAssetCore(
   }
 }
 
+/**
+ * Fits the rendered glyph to the available canvas area without distorting
+ * its aspect ratio. This is applied to generated vector assets only;
+ * imported/custom pixel maps retain their exact pixel placement.
+ */
+function fitRenderedContentToCanvas(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  padding: number,
+  pixelSnap: boolean
+) {
+  const { width, height } = canvas;
+  const image = ctx.getImageData(0, 0, width, height);
+  const data = image.data;
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const index = (y * width + x) * 4;
+      if (data[index] > 0 || data[index + 1] > 0 || data[index + 2] > 0) {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+
+  // Empty canvases need no fitting.
+  if (maxX < minX || maxY < minY) return;
+
+  const contentWidth = maxX - minX + 1;
+  const contentHeight = maxY - minY + 1;
+  const safePadding = Math.max(
+    0,
+    Math.min(Math.round(padding), Math.floor((Math.min(width, height) - 1) / 2))
+  );
+  const availableWidth = Math.max(1, width - safePadding * 2);
+  const availableHeight = Math.max(1, height - safePadding * 2);
+  const scale = Math.min(
+    availableWidth / contentWidth,
+    availableHeight / contentHeight
+  );
+
+  // Avoid resampling when the content already fits at native resolution.
+  if (Math.abs(scale - 1) < 0.001) return;
+
+  const fittedWidth = contentWidth * scale;
+  const fittedHeight = contentHeight * scale;
+  const destinationX = (width - fittedWidth) / 2;
+  const destinationY = (height - fittedHeight) / 2;
+
+  const source = document.createElement('canvas');
+  source.width = width;
+  source.height = height;
+  source.getContext('2d')!.putImageData(image, 0, 0);
+
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, width, height);
+  ctx.save();
+  ctx.imageSmoothingEnabled = !pixelSnap;
+  ctx.drawImage(
+    source,
+    minX,
+    minY,
+    contentWidth,
+    contentHeight,
+    destinationX,
+    destinationY,
+    fittedWidth,
+    fittedHeight
+  );
+  ctx.restore();
+}
+
 export function renderUiAssetToCanvas(
   assetId: UiAssetId,
   styleId: UiStyleId,
@@ -945,6 +1024,10 @@ export function renderUiAssetToCanvas(
     ctx.fillRect(box.cx - 0.5, 0, 1, 1.5);
     ctx.fillRect(box.cx - 0.5, h - 1.5, 1, 1.5);
   }
+
+  // Fit the complete generated icon inside the target canvas before final
+  // luminance quantization, keeping its aspect ratio and configured padding.
+  fitRenderedContentToCanvas(canvas, ctx, options.padding, options.pixelSnap);
 
   // Enforce strict neutral grayscale luminance & optional 1-bit pixel snap
   const imgData = ctx.getImageData(0, 0, w, h);
