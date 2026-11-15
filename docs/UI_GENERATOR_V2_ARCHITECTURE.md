@@ -28,7 +28,7 @@ Replace the tightly coupled UI-asset controls with a modular generator workspace
 - **Progress & status:** battery, signal, linear progress, segmented progress, progress ring, storage, volume.
 - **Icon library:** Bluetooth, Wi-Fi, heart, steps, notification, sun, moon, alarm, ECG divider.
 - **Style presets:** ten shared visual styles are now modeled inside V2 and consumed by the icon workbench and renderer.
-- **Exports:** individual PNG, family ZIP with JSON manifest, and family sprite-sheet PNG. Sprite sheets use a deterministic grid layout with centered cells and a black background.
+- **Exports:** individual PNG, family ZIP with JSON manifest, family sprite-sheet PNG, and one full-library ZIP containing all 16 default assets, both family sprite sheets, and a root manifest. Sprite sheets use a deterministic grid layout with centered cells and a black background.
 - **Validation:** pure model/catalog/layout logic is covered by Bun tests; every pushed change is checked by type-check, tests, and production build in GitHub Actions.
 
 ## First implementation slice
