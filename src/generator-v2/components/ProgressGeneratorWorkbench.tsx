@@ -103,24 +103,7 @@ export const ProgressGeneratorWorkbench: React.FC = () => {
   const reset = () => setConfig(createDefaultProgressConfig(assetId));
 
   return (
-    <div id="top" className="flex-1 min-w-0 bg-[#090A0D] text-[#F2F4F8]">
-      <header className="px-5 sm:px-7 py-6 border-b border-white/[0.08] bg-[#0B0D12]">
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-          <div>
-            <div className="text-xs font-semibold tracking-[0.18em] uppercase text-sky-400 mb-2">Generator V2 · Progress & Status</div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">UI Asset Workbench</h1>
-            <p className="text-sm text-slate-400 mt-2 max-w-2xl">Generator semantik dengan konfigurasi khusus untuk setiap jenis indikator. Setiap aset memiliki renderer dan geometri sendiri.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={downloadCurrent} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white/[0.06] border border-white/[0.12] text-sm text-white hover:bg-white/[0.1]">
-              <Download className="w-4 h-4" /> Unduh PNG
-            </button>
-            <button type="button" disabled={isPackaging} onClick={downloadPackage} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-sky-400 text-slate-950 text-sm font-semibold hover:bg-sky-300 disabled:opacity-50">
-              <Package className="w-4 h-4" /> {isPackaging ? 'Mengemas…' : 'Ekspor Paket'}
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="flex-1 min-w-0 bg-[#090A0D] text-[#F2F4F8]">
 
       <div className="grid grid-cols-1 xl:grid-cols-[260px_minmax(0,1fr)] min-h-[calc(100vh-15rem)]">
         <aside className="border-b xl:border-b-0 xl:border-r border-white/[0.08] bg-[#0C0E13] p-4">
