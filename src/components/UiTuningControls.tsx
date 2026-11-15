@@ -60,6 +60,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
   };
   return (
     <div className="bg-[#0C0E13] border-b border-white/[0.08] px-5 py-3.5 flex flex-wrap items-center gap-x-6 gap-y-3">
+      {options.pixelSnap && (
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
@@ -74,6 +75,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
         </button>
         {sizeError && <span role="alert" className="w-full text-[10px] text-rose-400">{sizeError}</span>}
       </div>
+      )}
 
       {/* Render Precision Toggle */}
       <div className="flex items-center gap-2">
@@ -131,12 +133,14 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
             <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.progressBarPercent}%</span>
           </>
         )}
+        {options.pixelSnap && (
         {selectedAssetId !== 'battery' && selectedAssetId !== 'signal' && selectedAssetId !== 'wifi-meter' && selectedAssetId !== 'progress-arc' && selectedAssetId !== 'progress-bar' && (
           <>
             <span className="text-xs text-slate-400 whitespace-nowrap">Ketebalan ikon</span>
             <input aria-label="Ketebalan ikon preview" type="range" min={0.75} max={1.3} step={0.05} value={options.strokeScale} onChange={(e) => onChange({ ...options, strokeScale: parseFloat(e.target.value) })} className="flex-1 min-w-[120px] accent-sky-400 h-1.5 bg-white/10 rounded-lg cursor-pointer" />
             <span className="text-xs font-mono-tabular text-white w-10 text-right">{options.strokeScale.toFixed(2)}×</span>
           </>
+        )}
         )}
       </div>
 
