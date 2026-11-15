@@ -154,13 +154,14 @@ type UiFrame = { value: number; options: UiRenderOptions; suffix: string };
 function uiFrames(assetId: UiAssetId, options: UiRenderOptions): UiFrame[] {
   const values = assetId === 'battery' ? Array.from({ length: 11 }, (_, i) => i * 10)
     : assetId === 'signal' || assetId === 'wifi-meter' ? [0, 1, 2, 3, 4]
-    : assetId === 'progress-arc' ? Array.from({ length: 21 }, (_, i) => i * 5) : [0];
+    : assetId === 'progress-arc' || assetId === 'progress-bar' ? Array.from({ length: 21 }, (_, i) => i * 5) : [0];
   return values.map((value) => {
     const next = { ...options };
     if (assetId === 'battery') next.batteryLevel = value;
     if (assetId === 'signal' || assetId === 'wifi-meter') next.signalBars = value;
     if (assetId === 'progress-arc') next.progressPercent = value;
-    const suffix = assetId === 'battery' || assetId === 'progress-arc' ? String(value) + 'pct'
+    if (assetId === 'progress-bar') next.progressBarPercent = value;
+    const suffix = assetId === 'battery' || assetId === 'progress-arc' || assetId === 'progress-bar' ? String(value) + 'pct'
       : assetId === 'signal' || assetId === 'wifi-meter' ? String(value) + 'bars' : 'base';
     return { value, options: next, suffix };
   });
