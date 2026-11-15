@@ -69,28 +69,35 @@ export function createDefaultProgressConfig(id: ProgressAssetId): ProgressAssetC
 }
 
 export function normalizeProgressConfig(config: ProgressAssetConfig): ProgressAssetConfig {
-  const width = Math.max(8, Math.min(512, Math.round(config.width)));
-  const height = Math.max(8, Math.min(512, Math.round(config.height)));
+  const clamp = (value: number, fallback: number, min: number, max: number) =>
+    Math.max(min, Math.min(max, Number.isFinite(value) ? value : fallback));
+  const width = Math.round(clamp(config.width, 96, 8, 512));
+  const height = Math.round(clamp(config.height, 16, 8, 512));
   const min = Number.isFinite(config.min) ? config.min : 0;
   const max = Number.isFinite(config.max) && config.max > min ? config.max : min + 1;
   const paddingLimit = Math.max(0, Math.floor((Math.min(width, height) - 2) / 2));
-  const padding = Math.min(paddingLimit, Math.max(0, Math.min(24, config.padding)));
-  const segmentAxis = config.id === 'signal' || config.id === 'volume' || config.id === 'segmented-progress'
-    ? (config.orientation === 'vertical' && config.id === 'segmented-progress' ? height : width)
-    : width;
-  const segmentLimit = Math.max(2, Math.floor((segmentAxis - padding * 2 + Math.max(0, config.gap)) / (1 + Math.max(0, config.gap))));
+  const padding = Math.round(clamp(config.padding, 2, 0, Math.min(24, paddingLimit)));
+  const gap = clamp(config.gap, 2, 0, 12);
+  const orientation: ProgressOrientation = config.orientation === 'vertical' ? 'vertical' : 'horizontal';
+  const segmentAxis = orientation === 'vertical' && config.id === 'segmented-progress' ? height : width;
+  const segmentLimit = Math.max(2, Math.floor((segmentAxis - padding * 2 + gap) / (1 + gap)));
+  const segments = Math.round(clamp(config.segments, 5, 2, Math.min(32, segmentLimit)));
+  const strokeWidth = Math.round(clamp(config.strokeWidth, 2, 1, Math.min(8, Math.floor(Math.min(width, height) / 2))));
+  const cornerRadius = Math.round(clamp(config.cornerRadius, 3, 0, Math.min(16, Math.floor(Math.min(width, height) / 2))));
   return {
     ...config,
     width,
     height,
     min,
     max,
-    value: Math.max(min, Math.min(max, Number.isFinite(config.value) ? config.value : min)),
-    segments: Math.max(2, Math.min(32, segmentLimit, Math.round(config.segments))),
-    gap: Math.max(0, Math.min(12, config.gap)),
-    strokeWidth: Math.max(1, Math.min(8, Math.floor(Math.min(width, height) / 2), config.strokeWidth)),
-    cornerRadius: Math.max(0, Math.min(16, Math.floor(Math.min(width, height) / 2), config.cornerRadius)),
+    value: clamp(config.value, min, min, max),
+    segments,
+    gap,
+    strokeWidth,
+    cornerRadius,
     padding,
+    orientation,
+    showTrack: Boolean(config.showTrack),
   };
 }
 
