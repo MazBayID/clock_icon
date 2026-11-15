@@ -173,15 +173,13 @@ export function applyLanguage(root: HTMLElement, language: Language): void {
     attributes.forEach((attribute) => {
       const current = element.getAttribute(attribute);
       if (current === null) return;
-      const key = attribute + ':' + current;
-      const translated = translateText(current, language);
+      const dataKey = 'i18nOriginal' + attribute;
+      if (element.dataset[dataKey] === undefined) {
+        element.dataset[dataKey] = current;
+      }
+      const original = element.dataset[dataKey] ?? current;
+      const translated = translateText(original, language);
       if (translated !== current) element.setAttribute(attribute, translated);
-      else if (language === 'id' && element.dataset['i18nOriginal' + attribute] !== undefined) {
-        element.setAttribute(attribute, element.dataset['i18nOriginal' + attribute] ?? current);
-      }
-      if (element.dataset['i18nOriginal' + attribute] === undefined) {
-        element.dataset['i18nOriginal' + attribute] = current;
-      }
     });
   });
 }
