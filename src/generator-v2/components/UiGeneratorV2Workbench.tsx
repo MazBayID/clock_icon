@@ -9,7 +9,7 @@ import { PROGRESS_ASSET_CATALOG, createDefaultProgressConfig } from '../model/pr
 import { UI_STYLES } from '../model/styles';
 import { renderIconAsset } from '../renderers/iconRenderer';
 import { renderProgressAsset } from '../renderers/progressRenderer';
-import { createSpriteSheetCanvas } from '../export/spriteSheet';
+import { createSpriteSheetCanvas, createSpriteSheetManifest } from '../export/spriteSheet';
 
 type Workspace = 'progress' | 'icons';
 
@@ -35,17 +35,55 @@ export const UiGeneratorV2Workbench: React.FC = () => {
       const iconItems = ICON_ASSET_CATALOG.map((asset) => ({ id: asset.id, canvas: renderIconAsset(asset.id, iconStyle, createDefaultIconRenderOptions(asset.id)) }));
       for (const item of progressItems) zip.file('progress/' + item.id + '.png', await canvasToBlob(item.canvas));
       for (const item of iconItems) zip.file('icons/' + item.id + '.png', await canvasToBlob(item.canvas));
-      zip.file('spritesheets/progress.png', await canvasToBlob(createSpriteSheetCanvas(progressItems, 3, 2)));
-      zip.file('spritesheets/icons.png', await canvasToBlob(createSpriteSheetCanvas(iconItems, 4, 2)));
+      const progressColumns = 3;
+      const iconColumns = 4;
+      const progressGap = 2;
+      const iconGap = 2;
+      const progressSheet = createSpriteSheetCanvas(progressItems, progressColumns, progressGap);
+      const iconSheet = createSpriteSheetCanvas(iconItems, iconColumns, iconGap);
+      zip.file('spritesheets/progress.png', await canvasToBlob(progressSheet));
+      zip.file('spritesheets/icons.png', await canvasToBlob(iconSheet));
+      zip.file('spritesheets/progress.json', JSON.stringify({
+        family: 'progress',
+        ...createSpriteSheetManifest(progressItems, progressColumns, progressGap),
+      }, null, 2));
+      zip.file('spritesheets/icons.json', JSON.stringify({
+        family: 'icons',
+        style: iconStyle,
+        ...createSpriteSheetManifest(iconItems, iconColumns, iconGap),
+      }, null, 2));
       zip.file('manifest.json', JSON.stringify({
         generator: 'Clock Icon UI Generator V2',
+        exportType: 'default-library',
         format: 'PNG',
+        background: '#000000',
         defaultIconStyle: iconStyle,
         families: {
-          progress: progressItems.map(({ id, canvas }) => ({ id, filename: 'progress/' + id + '.png', width: canvas.width, height: canvas.height })),
-          icons: iconItems.map(({ id, canvas }) => ({ id, filename: 'icons/' + id + '.png', width: canvas.width, height: canvas.height })),
+          progress: progressItems.map(({ id, canvas }) => {
+            const assetConfig = createDefaultProgressConfig(id as (typeof PROGRESS_ASSET_CATALOG)[number]['id']);
+            return {
+              id,
+              filename: 'progress/' + id + '.png',
+              width: canvas.width,
+              height: canvas.height,
+              config: assetConfig,
+            };
+          }),
+          icons: iconItems.map(({ id, canvas }) => {
+            const assetOptions = createDefaultIconRenderOptions(id as (typeof ICON_ASSET_CATALOG)[number]['id']);
+            return {
+              id,
+              filename: 'icons/' + id + '.png',
+              width: canvas.width,
+              height: canvas.height,
+              renderOptions: assetOptions,
+            };
+          }),
         },
-        spriteSheets: ['spritesheets/progress.png', 'spritesheets/icons.png'],
+        spriteSheets: [
+          { filename: 'spritesheets/progress.png', metadata: 'spritesheets/progress.json' },
+          { filename: 'spritesheets/icons.png', metadata: 'spritesheets/icons.json' },
+        ],
       }, null, 2));
       downloadBlob(await zip.generateAsync({ type: 'blob' }), 'clock-icon-ui-full-library.zip');
     } finally {
@@ -62,7 +100,7 @@ export const UiGeneratorV2Workbench: React.FC = () => {
               <button type="button" onClick={() => setWorkspace('progress')} aria-pressed={workspace === 'progress'} className={`inline-flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold ${workspace === 'progress' ? 'bg-sky-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}><Activity className="w-4 h-4" /> Progress & Status</button>
               <button type="button" onClick={() => setWorkspace('icons')} aria-pressed={workspace === 'icons'} className={`inline-flex items-center gap-2 px-3 py-2 rounded text-xs font-semibold ${workspace === 'icons' ? 'bg-sky-400 text-slate-950' : 'text-slate-400 hover:text-white'}`}><Shapes className="w-4 h-4" /> Icon Library</button>
             </div>
-            <button type="button" disabled={exportingLibrary} onClick={exportFullLibrary} className="inline-flex items-center gap-2 rounded-md bg-sky-400 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-sky-300 disabled:opacity-50"><Package className="w-4 h-4" /> {exportingLibrary ? 'Mengemas…' : 'Ekspor Semua UI'}</button>
+            <button type="button" disabled={exportingLibrary} onClick={exportFullLibrary} className="inline-flex items-center gap-2 rounded-md bg-sky-400 px-3 py-2 text-xs font-semibold text-slate-950 hover:bg-sky-300 disabled:opacity-50"><Package className="w-4 h-4" /> {exportingLibrary ? 'Mengemas…' : 'Ekspor Semua UI (Default)'}</button>
           </div>
         </div>
       </header>
