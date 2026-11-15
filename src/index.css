@@ -10,7 +10,7 @@
     font-family: var(--font-sans);
     background-color: #090A0D;
     background-image:
-      linear-gradient(rgba(9, 10, 13, 0.76), rgba(9, 10, 13, 0.86)),
+      linear-gradient(rgba(9, 10, 13, 0.24), rgba(9, 10, 13, 0.32)),
       url('/clock_icon/background_clock.jpg');
     background-position: center;
     background-size: cover;
@@ -68,5 +68,29 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-glyph-enter {
     animation: none;
+  }
+}
+
+
+/* Neo Clock translucent studio surfaces: 75% opaque. */
+@layer utilities {
+  :where([class~="bg-[#0B0D12]"]) {
+    background-color: rgb(11 13 18 / 75%) !important;
+  }
+
+  :where([class~="bg-[#0C0E13]"]) {
+    background-color: rgb(12 14 19 / 75%) !important;
+  }
+
+  :where([class~="bg-[#0E1016]"]) {
+    background-color: rgb(14 16 22 / 75%) !important;
+  }
+
+  :where([class~="bg-[#090A0D]"]) {
+    background-color: rgb(9 10 13 / 75%) !important;
+  }
+
+  :where([class~="bg-[#07080A]"]) {
+    background-color: rgb(7 8 10 / 75%) !important;
   }
 }
