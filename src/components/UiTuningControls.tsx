@@ -1,28 +1,37 @@
 import React from 'react';
 import { RotateCcw } from 'lucide-react';
-import { UiRenderOptions } from '../types/uiAsset';
+import { UiAssetId, UiRenderOptions } from '../types/uiAsset';
+import { getUiAssetMeta } from '../engine/uiAssetStyles';
 
 interface UiTuningControlsProps {
+  selectedAssetId: UiAssetId;
   options: UiRenderOptions;
   onChange: (next: UiRenderOptions) => void;
   onReset: () => void;
 }
 
 export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
+  selectedAssetId,
   options,
   onChange,
   onReset,
 }) => {
+  const nativeSize = getUiAssetMeta(selectedAssetId);
+  const selectedSize = options.assetSizes?.[selectedAssetId] ?? {};
+  const updateSize = (key: 'width' | 'height', value: string) => onChange({
+    ...options,
+    assetSizes: { ...options.assetSizes, [selectedAssetId]: { ...selectedSize, [key]: value === '' ? undefined : Math.max(8, Math.min(256, Number(value))) } },
+  });
   return (
     <div className="bg-[#0C0E13] border-b border-white/[0.08] px-5 py-3.5 flex flex-wrap items-center gap-x-6 gap-y-3">
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
-        <input id="ui-width" type="number" min={8} max={256} placeholder="Auto" value={options.width ?? ''} onChange={(e) => onChange({ ...options, width: e.target.value === '' ? undefined : Math.max(8, Math.min(256, Number(e.target.value))) })} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={selectedSize.width ?? nativeSize.width} onChange={(e) => updateSize('width', e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[11px] text-slate-500">×</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-height">H</label>
-        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={options.height ?? ''} onChange={(e) => onChange({ ...options, height: e.target.value === '' ? undefined : Math.max(8, Math.min(256, Number(e.target.value))) })} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
-        <span className="text-[10px] text-slate-500">8–256 px · kosong = ukuran asli</span>
+        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={selectedSize.height ?? nativeSize.height} onChange={(e) => updateSize('height', e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <span className="text-[10px] text-slate-500">Ukuran ikon terpilih · 8–256 px</span>
       </div>
 
       {/* Render Precision Toggle */}
