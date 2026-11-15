@@ -143,7 +143,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090A0D] text-[#F2F4F8]">
+    <div className="min-h-screen flex flex-col bg-transparent text-[#F2F4F8]">
       {/* Strict 3-Zone Top Bar */}
       <header className="sticky top-0 z-30 bg-[#090A0D]/95 backdrop-blur border-b border-white/[0.08] px-3 sm:px-6 h-14 flex items-center justify-between gap-3 md:gap-8">
         <a
