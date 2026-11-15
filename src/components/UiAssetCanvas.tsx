@@ -22,6 +22,8 @@ export const UiAssetCanvas: React.FC<UiAssetCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const meta = getUiAssetMeta(assetId);
+  const width = options.width || meta.width;
+  const height = options.height || meta.height;
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -32,11 +34,11 @@ export const UiAssetCanvas: React.FC<UiAssetCanvasProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      width={meta.width}
-      height={meta.height}
+      width={width}
+      height={height}
       style={{
-        width: `${Math.round(meta.width * scale)}px`,
-        height: `${Math.round(meta.height * scale)}px`,
+        width: `${Math.round(width * scale)}px`,
+        height: `${Math.round(height * scale)}px`,
       }}
       className={`pixelated-canvas block shrink-0 bg-black ${className}`}
     />
