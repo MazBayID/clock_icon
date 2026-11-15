@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import JSZip from 'jszip';
-import { Activity, Download, Package, Shapes } from 'lucide-react';
+import { Activity, Package, Shapes } from 'lucide-react';
 import { IconGeneratorWorkbench } from './IconGeneratorWorkbench';
 import { ProgressGeneratorWorkbench } from './ProgressGeneratorWorkbench';
 import { ICON_ASSET_CATALOG, createDefaultIconRenderOptions } from '../model/icons';
