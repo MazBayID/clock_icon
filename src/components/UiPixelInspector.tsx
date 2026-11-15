@@ -18,7 +18,7 @@ interface UiPixelInspectorProps {
   assetId: UiAssetId;
   styleId: UiStyleId;
   options: UiRenderOptions;
-  customPixels: Uint8ClampedArray | null;
+  customPixels: Int16Array | null;
   onChangeCustomPixels: (pixels: Uint8ClampedArray) => void;
   onDownloadAsset: (assetId: UiAssetId) => void;
 }
