@@ -28,6 +28,24 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
     setSizeError('');
   }, [selectedAssetId, selectedSize.width, selectedSize.height, nativeSize.width, nativeSize.height]);
 
+  const updateWidth = (value: string) => {
+    setPendingWidth(value);
+    const width = Number(value);
+    if (value.trim() !== '' && Number.isFinite(width) && width > 0) {
+      setPendingHeight(String(Math.round(width * nativeSize.height / nativeSize.width)));
+    }
+    setSizeError('');
+  };
+
+  const updateHeight = (value: string) => {
+    setPendingHeight(value);
+    const height = Number(value);
+    if (value.trim() !== '' && Number.isFinite(height) && height > 0) {
+      setPendingWidth(String(Math.round(height * nativeSize.width / nativeSize.height)));
+    }
+    setSizeError('');
+  };
+
   const resetCustomSize = () => {
     const nextSizes = { ...options.assetSizes };
     delete nextSizes[selectedAssetId];
@@ -64,11 +82,11 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Ukuran kustom:</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-width">W</label>
-        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={pendingWidth} onChange={(e) => setPendingWidth(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <input id="ui-width" type="number" min={8} max={256} placeholder="px" value={pendingWidth} onChange={(e) => updateWidth(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
         <span className="text-[11px] text-slate-500">×</span>
         <label className="text-[11px] text-slate-500" htmlFor="ui-height">H</label>
-        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={pendingHeight} onChange={(e) => setPendingHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
-        <span className="text-[10px] text-slate-500">Ukuran ikon terpilih · 8–256 px</span>
+        <input id="ui-height" type="number" min={8} max={256} placeholder="Auto" value={pendingHeight} onChange={(e) => updateHeight(e.target.value)} className="w-16 px-2 py-1 text-xs font-mono-tabular text-white bg-black border border-white/10 rounded" />
+        <span className="text-[10px] text-slate-500">Rasio {nativeSize.width}:{nativeSize.height} · sisi lain otomatis · 8–256 px</span>
         <button type="button" onClick={applyCustomSize} className="px-2.5 py-1 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded transition-colors cursor-pointer">OK</button>
         <button type="button" onClick={resetCustomSize} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white bg-white/[0.04] border border-white/[0.08] rounded transition-colors cursor-pointer">
           <RotateCcw className="w-3 h-3" /> Reset Pixel
