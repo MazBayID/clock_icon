@@ -774,10 +774,28 @@ function renderAssetCore(
     }
 
     case 'progress-bar': {
-      const barH = Math.max(4, Math.min(10, bh * 0.58));
-      const barY = cy - barH / 2;
       const pct = Math.max(0, Math.min(1, options.progressBarPercent / 100));
+      // Use the real canvas height here; the shared icon box has a minimum
+      // geometry size that is unsuitable for a 2px-tall pixel progress bar.
+      const availableBarH = Math.max(1, box.h - options.padding * 2);
+      const barH = options.pixelSnap
+        ? Math.max(1, Math.min(10, availableBarH))
+        : Math.max(4, Math.min(10, bh * 0.58));
+      const barY = Math.round((box.h - barH) / 2);
       const radius = Math.min(3, barH / 2);
+
+      if (options.pixelSnap && barH <= 2) {
+        // At 1–2px height, render a crisp filled track without an impossible
+        // inner outline. The fill remains proportional and pixel-aligned.
+        const trackY = Math.round((box.h - 1) / 2);
+        ctx.fillStyle = '#FFFFFF';
+        for (let x = Math.round(l); x < Math.round(r); x += 2) {
+          ctx.fillRect(x, trackY, 1, 1);
+        }
+        const fillWidth = Math.round(Math.max(0, r - l) * pct);
+        if (fillWidth > 0) ctx.fillRect(Math.round(l), trackY, fillWidth, 1);
+        break;
+      }
 
       if (isSolid) {
         if (isChamfer) {
@@ -802,7 +820,7 @@ function renderAssetCore(
         ctx.stroke();
       }
 
-      const innerX = l + (isSolid ? 1.5 : 1.5);
+      const innerX = l + 1.5;
       const innerY = barY + 1.5;
       const innerW = Math.max(0, (bw - 3) * pct);
       const innerH = Math.max(1, barH - 3);
@@ -948,7 +966,8 @@ export function renderUiAssetToCanvas(
   const meta = getUiAssetMeta(assetId);
   const customSize = options.assetSizes?.[assetId];
   const w = Math.max(8, Math.min(256, Math.round(customSize?.width || meta.width)));
-  const h = Math.max(8, Math.min(256, Math.round(customSize?.height || meta.height)));
+  const minHeight = assetId === 'progress-bar' ? 2 : 8;
+  const h = Math.max(minHeight, Math.min(256, Math.round(customSize?.height || meta.height)));
 
   const canvas = targetCanvas ?? document.createElement('canvas');
   if (canvas.width !== w) canvas.width = w;
@@ -1052,7 +1071,11 @@ export function renderUiAssetToCanvas(
 
   // Fit the complete generated icon inside the target canvas before final
   // luminance quantization, keeping its aspect ratio and configured padding.
-  fitRenderedContentToCanvas(canvas, ctx, options.padding, options.pixelSnap);
+  // Dynamic Wi-Fi levels intentionally change the occupied bounds as arcs
+  // disappear. Fitting each frame independently would enlarge the dot.
+  if (assetId !== 'wifi-meter') {
+    fitRenderedContentToCanvas(canvas, ctx, options.padding, options.pixelSnap);
+  }
 
   // Enforce strict neutral grayscale luminance & optional 1-bit pixel snap
   const imgData = ctx.getImageData(0, 0, w, h);
