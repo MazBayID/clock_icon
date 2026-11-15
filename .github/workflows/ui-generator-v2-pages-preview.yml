@@ -1,0 +1,67 @@
+name: Deploy UI Generator V2 Preview
+
+on:
+  push:
+    branches:
+      - rebuild/ui-generator-v2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout production site
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+
+      - name: Checkout V2 preview
+        uses: actions/checkout@v4
+        with:
+          ref: rebuild/ui-generator-v2
+          path: preview
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Build production site from main
+        working-directory: production
+        run: |
+          bun install --frozen-lockfile
+          bun run build
+
+      - name: Assemble production site
+        run: |
+          mkdir -p site
+          cp -R production/dist/. site/
+
+      - name: Build isolated V2 preview
+        working-directory: preview
+        run: |
+          bun install --frozen-lockfile
+          bun run build -- --base=/clock_icon/preview/ --outDir=../site/preview
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload combined Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
