@@ -193,7 +193,7 @@ export default function App() {
               className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-950 bg-sky-400 hover:bg-sky-300 rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
             >
               <FileArchive className="w-3.5 h-3.5" />
-              {isExporting ? 'Mengemas...' : 'Unduh ZIP (25×50)'}
+              {isExporting ? 'Mengemas...' : 'Unduh Paket Lengkap (ZIP)'}
             </button>
           ) : (
             <button
