@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/clock_icon/',
+  base: '/clock_icon/',\n  publicDir: 'mochi_assets',
   plugins: [react(), tailwindcss()],
 });
