@@ -108,7 +108,7 @@ export const UiTuningControls: React.FC<UiTuningControlsProps> = ({
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-400 whitespace-nowrap">Sinyal:</span>
         <div className="flex items-center gap-1">
-          {[1, 2, 3, 4].map((lvl) => (
+          {[0, 1, 2, 3, 4].map((lvl) => (
             <button
               key={lvl}
               type="button"
