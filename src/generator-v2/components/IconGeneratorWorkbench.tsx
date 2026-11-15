@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { Download, Grid3X3, Package, RotateCcw } from 'lucide-react';
 import { UiStyleId, UI_STYLES } from '../model/styles';
-import { DEFAULT_ICON_RENDER_OPTIONS, ICON_ASSET_CATALOG, IconAssetId, IconRenderOptions, normalizeIconRenderOptions } from '../model/icons';
+import { createDefaultIconRenderOptions, DEFAULT_ICON_RENDER_OPTIONS, ICON_ASSET_CATALOG, IconAssetId, IconRenderOptions, normalizeIconRenderOptions } from '../model/icons';
 import { renderIconAsset } from '../renderers/iconRenderer';
 import { createSpriteSheetCanvas } from '../export/spriteSheet';
 
@@ -25,7 +25,7 @@ function downloadBlob(blob: Blob, filename: string) {
 export const IconGeneratorWorkbench: React.FC = () => {
   const [assetId, setAssetId] = useState<IconAssetId>('heart');
   const [styleId, setStyleId] = useState<UiStyleId>('swiss-precision-ui');
-  const [options, setOptions] = useState<IconRenderOptions>(DEFAULT_ICON_RENDER_OPTIONS);
+  const [options, setOptions] = useState<IconRenderOptions>(() => createDefaultIconRenderOptions('heart'));
   const [packaging, setPackaging] = useState(false);
   const [exportingSheet, setExportingSheet] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -35,6 +35,11 @@ export const IconGeneratorWorkbench: React.FC = () => {
   useEffect(() => {
     if (canvasRef.current) renderIconAsset(assetId, styleId, normalizeIconRenderOptions(options), canvasRef.current);
   }, [assetId, styleId, options]);
+
+  const selectAsset = (next: IconAssetId) => {
+    setAssetId(next);
+    setOptions((current) => ({ ...current, width: createDefaultIconRenderOptions(next).width, height: createDefaultIconRenderOptions(next).height }));
+  };
 
   const selectStyle = (next: UiStyleId) => {
     setStyleId(next);
@@ -50,7 +55,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
   const downloadSpriteSheet = async () => {
     setExportingSheet(true);
     try {
-      const items = ICON_ASSET_CATALOG.map((asset) => ({ id: asset.id, canvas: renderIconAsset(asset.id, styleId, normalizeIconRenderOptions(options)) }));
+      const items = ICON_ASSET_CATALOG.map((asset) => ({ id: asset.id, canvas: renderIconAsset(asset.id, styleId, normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height })) }));
       const sheet = createSpriteSheetCanvas(items, 4, 2);
       downloadBlob(await canvasBlob(sheet), 'clock-icon-ui-icons-' + styleId + '-spritesheet.png');
     } finally { setExportingSheet(false); }
@@ -62,7 +67,8 @@ export const IconGeneratorWorkbench: React.FC = () => {
       const zip = new JSZip();
       const manifest: { id: string; filename: string; width: number; height: number }[] = [];
       for (const asset of ICON_ASSET_CATALOG) {
-        const canvas = renderIconAsset(asset.id, styleId, normalizeIconRenderOptions(options));
+        const assetOptions = normalizeIconRenderOptions({ ...options, width: asset.width, height: asset.height });
+        const canvas = renderIconAsset(asset.id, styleId, assetOptions);
         zip.file(`icons/${asset.id}.png`, await canvasBlob(canvas));
         manifest.push({ id: asset.id, filename: `${asset.id}.png`, width: asset.width, height: asset.height });
       }
@@ -79,7 +85,7 @@ export const IconGeneratorWorkbench: React.FC = () => {
         <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Icon Catalog · {ICON_ASSET_CATALOG.length}</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-1 gap-2">
           {ICON_ASSET_CATALOG.map((asset) => (
-            <button key={asset.id} type="button" onClick={() => setAssetId(asset.id)} aria-pressed={assetId === asset.id}
+            <button key={asset.id} type="button" onClick={() => selectAsset(asset.id)} aria-pressed={assetId === asset.id}
               className={`text-left rounded-md border p-3 ${assetId === asset.id ? 'border-sky-400/60 bg-sky-400/10' : 'border-white/[0.08] bg-black/20 hover:bg-white/[0.04]'}`}>
               <span className="block text-sm font-semibold text-slate-200">{asset.name}</span>
               <span className="block text-[11px] text-slate-500 mt-1">{asset.description}</span>
@@ -93,18 +99,22 @@ export const IconGeneratorWorkbench: React.FC = () => {
         <section className="rounded-lg border border-white/[0.08] bg-[#0C0E13] p-4 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
             <div><div className="text-xs text-sky-400 font-medium">ICON / {activeStyle.categoryLabel}</div><h2 className="text-lg font-semibold text-white mt-1">{activeAsset.name}</h2><p className="text-xs text-slate-500 mt-1">{activeStyle.tagline}</p></div>
-            <span className="text-xs font-mono text-slate-500">{activeAsset.width}×{activeAsset.height}px</span>
+            <span className="text-xs font-mono text-slate-500">{options.width}×{options.height}px</span>
           </div>
           <div className="min-h-[250px] rounded-md border border-white/[0.08] bg-black flex items-center justify-center overflow-auto p-8">
-            <canvas ref={canvasRef} width={activeAsset.width} height={activeAsset.height} className="pixelated-canvas block" style={{ width: `${Math.min(activeAsset.width * 5, 480)}px`, height: 'auto', imageRendering: 'pixelated' }} />
+            <canvas ref={canvasRef} width={options.width} height={options.height} className="pixelated-canvas block" style={{ width: `${Math.min(activeAsset.width * 5, 480)}px`, height: 'auto', imageRendering: 'pixelated' }} />
           </div>
           <div className="flex flex-wrap justify-between gap-2 mt-4 text-[11px] font-mono text-slate-500"><span>{activeAsset.id}.png</span><span>{styleId}</span><span>#FFFFFF / #000000</span></div>
         </section>
 
         <aside className="rounded-lg border border-white/[0.08] bg-[#0C0E13] p-4 h-fit">
-          <div className="flex items-center justify-between mb-4"><h2 className="text-sm font-semibold text-white">Icon Controls</h2><button type="button" onClick={() => setOptions(DEFAULT_ICON_RENDER_OPTIONS)} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"><RotateCcw className="w-3 h-3" /> Reset</button></div>
+          <div className="flex items-center justify-between mb-4"><h2 className="text-sm font-semibold text-white">Icon Controls</h2><button type="button" onClick={() => setOptions(createDefaultIconRenderOptions(assetId))} className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"><RotateCcw className="w-3 h-3" /> Reset</button></div>
           <div className="space-y-4">
             <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Visual Style</span><select value={styleId} onChange={(e) => selectStyle(e.target.value as UiStyleId)} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white">{UI_STYLES.map((style) => <option key={style.id} value={style.id}>{style.name}</option>)}</select></label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Width (px)</span><input type="number" min="8" max="512" value={options.width} onChange={(e) => setOptions((current) => ({ ...current, width: Number(e.target.value) }))} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
+              <label className="block"><span className="block text-xs text-slate-400 mb-1.5">Height (px)</span><input type="number" min="8" max="512" value={options.height} onChange={(e) => setOptions((current) => ({ ...current, height: Number(e.target.value) }))} className="w-full bg-black border border-white/[0.12] rounded px-2.5 py-2 text-sm text-white" /></label>
+            </div>
             <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Stroke Weight</span><strong className="text-white">{options.strokeScale.toFixed(2)}×</strong></span><input type="range" min="0.75" max="1.3" step="0.05" value={options.strokeScale} onChange={(e) => setOptions((current) => ({ ...current, strokeScale: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>
             <label className="block"><span className="flex justify-between text-xs text-slate-400 mb-2"><span>Padding</span><strong className="text-white">{options.padding}px</strong></span><input type="range" min="0" max="3" step="1" value={options.padding} onChange={(e) => setOptions((current) => ({ ...current, padding: Number(e.target.value) }))} className="w-full accent-sky-400" /></label>
             <label className="flex items-center justify-between text-xs text-slate-300"><span>Pixel snap (1-bit)</span><input type="checkbox" checked={options.pixelSnap} onChange={(e) => setOptions((current) => ({ ...current, pixelSnap: e.target.checked }))} className="accent-sky-400" /></label>
