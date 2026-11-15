@@ -142,9 +142,9 @@ export const WatchPreview: React.FC<WatchPreviewProps> = ({
               <div className="flex items-center justify-center gap-[3px]">
                 {chars.map((ch, idx) => (
                   <div
-                    key={idx}
+                    key={`${idx}-${ch}`}
                     style={{ opacity: ch === ':' && !colonVisible ? 0.1 : 1 }}
-                    className="transition-opacity duration-100"
+                    className="animate-glyph-enter transition-opacity duration-200"
                   >
                     <GlyphCanvas
                       char={ch}
@@ -182,9 +182,9 @@ export const WatchPreview: React.FC<WatchPreviewProps> = ({
               <div className="flex items-center justify-center gap-[3px]">
                 {chars.map((ch, idx) => (
                   <div
-                    key={idx}
+                    key={`${idx}-${ch}`}
                     style={{ opacity: ch === ':' && !colonVisible ? 0.1 : 1 }}
-                    className="transition-opacity duration-100"
+                    className="animate-glyph-enter transition-opacity duration-200"
                   >
                     <GlyphCanvas
                       char={ch}
@@ -210,8 +210,9 @@ export const WatchPreview: React.FC<WatchPreviewProps> = ({
             <div className="p-4 bg-black border border-dashed border-white/20 flex items-center justify-center gap-[2px]">
               {chars.map((ch, idx) => (
                 <div
-                  key={idx}
+                  key={`${idx}-${ch}`}
                   style={{ opacity: ch === ':' && !colonVisible ? 0.1 : 1 }}
+                  className="animate-glyph-enter transition-opacity duration-200"
                 >
                   <GlyphCanvas
                     char={ch}
