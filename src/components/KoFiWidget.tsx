@@ -7,11 +7,13 @@ function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
 export function KoFiWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ left: number; top: number } | null>(null);
   const dragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null);
   const draggedRef = useRef(false);
   const widgetRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -35,7 +37,37 @@ export function KoFiWidget() {
   }, []);
 
   useEffect(() => {
-    if (isOpen) closeRef.current?.focus();
+    if (!isOpen || !triggerRef.current || !popupRef.current) return;
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const popupRect = popupRef.current.getBoundingClientRect();
+    const popupWidth = Math.min(popupRect.width, window.innerWidth - 36);
+    const popupHeight = popupRect.height;
+    const gap = 12;
+    const left = Math.max(18, Math.min(window.innerWidth - popupWidth - 18, triggerRect.right - popupWidth));
+    const top = triggerRect.top >= popupHeight + gap + 18
+      ? triggerRect.top - popupHeight - gap
+      : Math.max(18, Math.min(window.innerHeight - popupHeight - 18, triggerRect.bottom + gap));
+    setPopupPosition({ left, top });
+    closeRef.current?.focus();
+  }, [isOpen, position]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const reposition = () => {
+      if (!triggerRef.current || !popupRef.current) return;
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const popupRect = popupRef.current.getBoundingClientRect();
+      const popupWidth = Math.min(popupRect.width, window.innerWidth - 36);
+      const popupHeight = popupRect.height;
+      const gap = 12;
+      const left = Math.max(18, Math.min(window.innerWidth - popupWidth - 18, triggerRect.right - popupWidth));
+      const top = triggerRect.top >= popupHeight + gap + 18
+        ? triggerRect.top - popupHeight - gap
+        : Math.max(18, Math.min(window.innerHeight - popupHeight - 18, triggerRect.bottom + gap));
+      setPopupPosition({ left, top });
+    };
+    window.addEventListener('resize', reposition);
+    return () => window.removeEventListener('resize', reposition);
   }, [isOpen]);
 
   useEffect(() => {
@@ -87,8 +119,10 @@ export function KoFiWidget() {
     >
       {isOpen && (
         <section
+          ref={popupRef}
           id="kofi-popup"
           aria-labelledby="kofi-popup-title"
+          style={popupPosition ? { position: 'fixed', left: popupPosition.left, top: popupPosition.top } : { position: 'fixed', left: 18, top: 18 }}
           className="w-[min(310px,calc(100vw-36px))] rounded-2xl border border-[#ff5e5b]/50 bg-gradient-to-br from-[#111422]/[.98] to-[#23121f]/[.98] p-5 shadow-[0_18px_60px_rgba(0,0,0,.5),0_0_30px_rgba(255,94,91,.12)] backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200"
         >
           <div className="flex items-center justify-between gap-3">
@@ -142,9 +176,9 @@ export function KoFiWidget() {
         aria-label={isOpen ? 'Close Ko-fi support popup' : 'Open Ko-fi support popup'}
         aria-expanded={isOpen}
         aria-controls="kofi-popup"
-        className="grid h-14 w-14 cursor-grab touch-none select-none place-items-center rounded-full border border-white/70 bg-[#ff5e5b] text-white shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(255,94,91,.16)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(255,94,91,.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
+        className="grid h-14 w-14 cursor-grab touch-none select-none place-items-center rounded-full border border-white/70 bg-[#51f3e5] p-1 text-[#071b20] shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(81,243,229,.18)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(81,243,229,.24)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
       >
-        <KoFiMark className="h-7 w-7" />
+        <KoFiMark className="h-11 w-11 max-h-full max-w-full object-contain object-center" />
       </button>
     </aside>
   );
