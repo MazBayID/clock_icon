@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
-  return <img className={className} src="https://i.postimg.cc/svLwzFqf/ko-fi-logo.png" alt="" aria-hidden="true" />;
+  return <img className={className} src="https://cdn.simpleicons.org/kofi/FF6433" alt="" aria-hidden="true" />;
 }
 
 export function KoFiWidget() {
