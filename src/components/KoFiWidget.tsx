@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M4 8h13v7.2A4.8 4.8 0 0 1 12.2 20H8.8A4.8 4.8 0 0 1 4 15.2V8Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M17 10h1.2a2.8 2.8 0 1 1 0 5.6H17M8 4.5c1.2 1 1.2 2 0 3M12 4.5c1.2 1 1.2 2 0 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M10.5 11.2c-.8-1.1-2.5-.5-2.5.8 0 1.1 1.5 2.1 2.5 2.8 1-.7 2.5-1.7 2.5-2.8 0-1.3-1.7-1.9-2.5-.8Z" fill="currentColor" />
-    </svg>
-  );
+  return <img className={className} src="https://i.postimg.cc/svLwzFqf/ko-fi-logo.png" alt="" aria-hidden="true" />;
 }
 
 export function KoFiWidget() {
