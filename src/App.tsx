@@ -48,6 +48,7 @@ import { UiWatchPreview } from './components/UiWatchPreview';
 import { UiPixelInspector } from './components/UiPixelInspector';
 import { UiComparisonMatrix } from './components/UiComparisonMatrix';
 import { AnimationStudio } from './components/AnimationStudio';
+import { KoFiWidget } from './components/KoFiWidget';
 
 type GeneratorMode = 'numerals' | 'ui-assets' | 'animation';
 
@@ -657,6 +658,7 @@ export default function App() {
           Format Ekspor: PNG · ZIP
         </span>
       </footer>
+      <KoFiWidget />
     </div>
   );
 }
