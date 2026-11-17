@@ -123,11 +123,11 @@ export function KoFiWidget() {
           id="kofi-popup"
           aria-labelledby="kofi-popup-title"
           style={popupPosition ? { position: 'fixed', left: popupPosition.left, top: popupPosition.top } : { position: 'fixed', left: 18, top: 18 }}
-          className="w-[min(310px,calc(100vw-36px))] rounded-2xl border border-[#ff5e5b]/50 bg-gradient-to-br from-[#111422]/[.98] to-[#23121f]/[.98] p-5 shadow-[0_18px_60px_rgba(0,0,0,.5),0_0_30px_rgba(255,94,91,.12)] backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="w-[min(310px,calc(100vw-36px))] rounded-2xl border border-[#071b20]/20 bg-[#43d8cf] p-5 text-[#071b20] shadow-[0_18px_60px_rgba(0,0,0,.38),0_0_30px_rgba(67,216,207,.22)] animate-in fade-in slide-in-from-bottom-2 duration-200"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 text-base font-bold tracking-tight text-white">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#ff5e5b] text-white">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#071b20]/10 text-[#071b20]">
                 <KoFiMark className="h-5 w-5" />
               </span>
               <span id="kofi-popup-title">Ko-fi</span>
@@ -140,19 +140,19 @@ export function KoFiWidget() {
                 triggerRef.current?.focus();
               }}
               aria-label="Close Ko-fi popup"
-              className="grid h-8 w-8 place-items-center rounded-lg bg-white/[0.07] text-xl leading-none text-slate-300 transition-colors hover:bg-white/[0.13] hover:text-white"
+              className="grid h-8 w-8 place-items-center rounded-lg bg-[#071b20]/[0.09] text-xl leading-none text-[#071b20] transition-colors hover:bg-[#071b20]/[0.16]"
             >
               ×
             </button>
           </div>
-          <p className="my-4 text-sm leading-relaxed text-slate-300">
+          <p className="my-4 text-sm leading-relaxed text-[#12383b]">
             Enjoying Neo Clock Studio? Your support helps MazBayID keep building useful tools and exploring new ideas.
           </p>
           <a
             href="https://ko-fi.com/mazbayid"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#ff5e5b] px-4 text-sm font-bold text-white transition-colors hover:bg-[#ff7471] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5]"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#071b20] px-4 text-sm font-bold text-[#43d8cf] transition-colors hover:bg-[#12383b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5]"
           >
             Support on Ko-fi <span aria-hidden="true">↗</span>
           </a>
