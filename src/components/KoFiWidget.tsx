@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
 function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
   return (
@@ -12,6 +12,9 @@ function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
 
 export function KoFiWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null);
+  const draggedRef = useRef(false);
   const widgetRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -41,11 +44,52 @@ export function KoFiWidget() {
     if (isOpen) closeRef.current?.focus();
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (!position || !triggerRef.current) return;
+      const maxLeft = window.innerWidth - triggerRef.current.offsetWidth - 8;
+      const maxTop = window.innerHeight - triggerRef.current.offsetHeight - 8;
+      setPosition(current => current ? {
+        left: Math.max(8, Math.min(maxLeft, current.left)),
+        top: Math.max(8, Math.min(maxTop, current.top)),
+      } : null);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [position]);
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 7) return;
+    drag.moved = true;
+    setPosition({
+      left: Math.max(8, Math.min(window.innerWidth - event.currentTarget.offsetWidth - 8, drag.left + dx)),
+      top: Math.max(8, Math.min(window.innerHeight - event.currentTarget.offsetHeight - 8, drag.top + dy)),
+    });
+  };
+
+  const finishDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current || dragRef.current.pointerId !== event.pointerId) return;
+    draggedRef.current = dragRef.current.moved;
+    dragRef.current = null;
+  };
+
   return (
     <aside
       ref={widgetRef}
       aria-label="Support MazBayID"
-      className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6"
+      className={`fixed z-[60] flex flex-col items-end gap-3 touch-none ${position ? '' : 'bottom-5 right-5 sm:bottom-6 sm:right-6'}`}
+      style={position ? { left: position.left, top: position.top } : undefined}
     >
       {isOpen && (
         <section
@@ -90,11 +134,21 @@ export function KoFiWidget() {
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((open) => !open)}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        onClick={() => {
+          if (draggedRef.current) {
+            draggedRef.current = false;
+            return;
+          }
+          setIsOpen(open => !open);
+        }}
         aria-label={isOpen ? 'Close Ko-fi support popup' : 'Open Ko-fi support popup'}
         aria-expanded={isOpen}
         aria-controls="kofi-popup"
-        className="grid h-14 w-14 place-items-center rounded-full border border-white/70 bg-[#ff5e5b] text-white shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(255,94,91,.16)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(255,94,91,.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
+        className="grid h-14 w-14 cursor-grab touch-none select-none place-items-center rounded-full border border-white/70 bg-[#ff5e5b] text-white shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(255,94,91,.16)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(255,94,91,.2)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
       >
         <KoFiMark className="h-7 w-7" />
       </button>
