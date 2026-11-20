@@ -7,74 +7,34 @@ function KoFiMark({ className = 'h-6 w-6' }: { className?: string }) {
 export function KoFiWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{ left: number; top: number } | null>(null);
   const dragRef = useRef<{ pointerId: number; startX: number; startY: number; left: number; top: number; moved: boolean } | null>(null);
   const draggedRef = useRef(false);
-  const widgetRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const popupRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const handlePointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !widgetRef.current?.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsOpen(false);
         triggerRef.current?.focus();
       }
     };
-
-    document.addEventListener('pointerdown', handlePointerDown);
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen || !triggerRef.current || !popupRef.current) return;
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const popupRect = popupRef.current.getBoundingClientRect();
-    const popupWidth = Math.min(popupRect.width, window.innerWidth - 36);
-    const popupHeight = popupRect.height;
-    const gap = 12;
-    const left = Math.max(18, Math.min(window.innerWidth - popupWidth - 18, triggerRect.right - popupWidth));
-    const top = triggerRect.top >= popupHeight + gap + 18
-      ? triggerRect.top - popupHeight - gap
-      : Math.max(18, Math.min(window.innerHeight - popupHeight - 18, triggerRect.bottom + gap));
-    setPopupPosition({ left, top });
-    closeRef.current?.focus();
-  }, [isOpen, position]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const reposition = () => {
-      if (!triggerRef.current || !popupRef.current) return;
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const popupRect = popupRef.current.getBoundingClientRect();
-      const popupWidth = Math.min(popupRect.width, window.innerWidth - 36);
-      const popupHeight = popupRect.height;
-      const gap = 12;
-      const left = Math.max(18, Math.min(window.innerWidth - popupWidth - 18, triggerRect.right - popupWidth));
-      const top = triggerRect.top >= popupHeight + gap + 18
-        ? triggerRect.top - popupHeight - gap
-        : Math.max(18, Math.min(window.innerHeight - popupHeight - 18, triggerRect.bottom + gap));
-      setPopupPosition({ left, top });
-    };
-    window.addEventListener('resize', reposition);
-    return () => window.removeEventListener('resize', reposition);
   }, [isOpen]);
 
   useEffect(() => {
     const handleResize = () => {
       if (!position || !triggerRef.current) return;
-      const maxLeft = window.innerWidth - triggerRef.current.offsetWidth - 8;
-      const maxTop = window.innerHeight - triggerRef.current.offsetHeight - 8;
+      const maxLeft = Math.max(8, window.innerWidth - triggerRef.current.offsetWidth - 8);
+      const maxTop = Math.max(8, window.innerHeight - triggerRef.current.offsetHeight - 8);
       setPosition(current => current ? {
         left: Math.max(8, Math.min(maxLeft, current.left)),
         top: Math.max(8, Math.min(maxTop, current.top)),
@@ -110,76 +70,74 @@ export function KoFiWidget() {
     dragRef.current = null;
   };
 
-  return (
-    <aside
-      ref={widgetRef}
-      aria-label="Support MazBayID"
-      className={`fixed z-[60] flex flex-col items-end gap-3 touch-none ${position ? '' : 'bottom-5 right-5 sm:bottom-6 sm:right-6'}`}
-      style={position ? { left: position.left, top: position.top } : undefined}
-    >
-      {isOpen && (
-        <section
-          ref={popupRef}
-          id="kofi-popup"
-          aria-labelledby="kofi-popup-title"
-          style={popupPosition ? { position: 'fixed', left: popupPosition.left, top: popupPosition.top } : { position: 'fixed', left: 18, top: 18 }}
-          className="w-[min(310px,calc(100vw-36px))] rounded-2xl border border-[#071b20]/20 bg-[#43d8cf] p-5 text-[#071b20] shadow-[0_18px_60px_rgba(0,0,0,.38),0_0_30px_rgba(67,216,207,.22)] animate-in fade-in slide-in-from-bottom-2 duration-200"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 text-base font-bold tracking-tight text-white">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#071b20]/10 text-[#071b20]">
-                <KoFiMark className="h-5 w-5" />
-              </span>
-              <span id="kofi-popup-title">Ko-fi</span>
-            </div>
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                triggerRef.current?.focus();
-              }}
-              aria-label="Close Ko-fi popup"
-              className="grid h-8 w-8 place-items-center rounded-lg bg-[#071b20]/[0.09] text-xl leading-none text-[#071b20] transition-colors hover:bg-[#071b20]/[0.16]"
-            >
-              ×
-            </button>
-          </div>
-          <p className="my-4 text-sm leading-relaxed text-[#12383b]">
-            Enjoying Neo Clock Studio? Your support helps MazBayID keep building useful tools and exploring new ideas.
-          </p>
-          <a
-            href="https://ko-fi.com/mazbayid"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#071b20] px-4 text-sm font-bold text-[#43d8cf] transition-colors hover:bg-[#12383b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5]"
-          >
-            Support on Ko-fi <span aria-hidden="true">↗</span>
-          </a>
-        </section>
-      )}
+  const closeModal = () => {
+    setIsOpen(false);
+    triggerRef.current?.focus();
+  };
 
-      <button
-        ref={triggerRef}
-        type="button"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={finishDrag}
-        onPointerCancel={finishDrag}
-        onClick={() => {
-          if (draggedRef.current) {
-            draggedRef.current = false;
-            return;
-          }
-          setIsOpen(open => !open);
-        }}
-        aria-label={isOpen ? 'Close Ko-fi support popup' : 'Open Ko-fi support popup'}
-        aria-expanded={isOpen}
-        aria-controls="kofi-popup"
-        className="grid h-14 w-14 cursor-grab touch-none select-none place-items-center rounded-full border border-white/70 bg-[#43d8cf] p-1 text-[#071b20] shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(67,216,207,.18)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(67,216,207,.24)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
+  return (
+    <>
+      <aside
+        aria-label="Support MazBayID"
+        className={`fixed z-[60] touch-none ${position ? '' : 'bottom-5 right-5 sm:bottom-6 sm:right-6'}`}
+        style={position ? { left: position.left, top: position.top } : undefined}
       >
-        <KoFiMark className="h-11 w-11 max-h-full max-w-full object-contain object-center" />
-      </button>
-    </aside>
+        <button
+          ref={triggerRef}
+          type="button"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={finishDrag}
+          onPointerCancel={finishDrag}
+          onClick={() => {
+            if (draggedRef.current) {
+              draggedRef.current = false;
+              return;
+            }
+            setIsOpen(true);
+          }}
+          aria-label="Open Ko-fi donation panel"
+          aria-expanded={isOpen}
+          aria-controls="kofi-modal"
+          className="grid h-14 w-14 cursor-grab touch-none select-none place-items-center rounded-full border border-white/70 bg-[#43d8cf] p-1 text-[#071b20] shadow-[0_8px_28px_rgba(0,0,0,.4),0_0_0_5px_rgba(67,216,207,.18)] transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_12px_34px_rgba(0,0,0,.45),0_0_0_7px_rgba(67,216,207,.24)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#51f3e5] motion-reduce:transform-none motion-reduce:transition-none"
+        >
+          <KoFiMark className="h-11 w-11 max-h-full max-w-full object-contain object-center" />
+        </button>
+      </aside>
+
+      {isOpen && (
+        <div
+          id="kofi-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Support MazBayID on Ko-fi"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeModal();
+          }}
+          className="fixed inset-0 z-[100] grid place-items-center bg-black/75 p-2 backdrop-blur-sm sm:p-3"
+        >
+          <section className="flex h-[min(760px,calc(100dvh-16px))] w-full max-w-[480px] flex-col overflow-hidden rounded-xl border border-[#43d8cf]/40 bg-[#f9f9f9] shadow-2xl sm:h-[min(760px,calc(100dvh-24px))] sm:rounded-2xl">
+            <div className="flex h-[42px] shrink-0 items-center justify-end bg-[#f9f9f9] px-2">
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={closeModal}
+                aria-label="Close donation panel"
+                className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#e9eeed] text-[21px] leading-none text-[#263b39] hover:bg-[#dce5e3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#263b39]"
+              >
+                ×
+              </button>
+            </div>
+            <iframe
+              className="min-h-0 w-full flex-1 border-0 bg-[#f9f9f9] px-1 pb-1"
+              src="https://ko-fi.com/mazbayid/?hidefeed=true&widget=true&embed=true&preview=true"
+              title="MazBayID Ko-fi donation panel"
+              loading="eager"
+              allow="payment"
+            />
+          </section>
+        </div>
+      )}
+    </>
   );
 }
